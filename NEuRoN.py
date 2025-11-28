@@ -851,8 +851,8 @@ class AdvancedVisualizationSystem:
             rows=2, cols=2,
             subplot_titles=['Consciousness Evolution', 'Emergence Metrics', 
                           'Quantum Coherence', 'Architectural Complexity'],
-            specs=[[{'type': 'polar'}],
-                   [{'type': 'indicator'}, {'type': 'bar'}]]
+            specs=[[{'type': 'xy'}, {'type': 'polar'}],
+                   [{'type': 'domain'}, {'type': 'xy'}]]
         )
         
         # Consciousness evolution (simulated)
@@ -884,7 +884,7 @@ class AdvancedVisualizationSystem:
         fig.add_trace(go.Indicator(
             mode = "gauge+number+delta",
             value = ai_system.performance_metrics['quantum_coherence'],
-            domain = {'x': [0, 1], 'y': [0, 1]},
+            # domain is handled by subplot
             title = {'text': "Quantum Coherence"},
             delta = {'reference': 0.5},
             gauge = {
