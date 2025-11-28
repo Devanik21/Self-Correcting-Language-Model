@@ -851,7 +851,7 @@ class AdvancedVisualizationSystem:
             rows=2, cols=2,
             subplot_titles=['Consciousness Evolution', 'Emergence Metrics', 
                           'Quantum Coherence', 'Architectural Complexity'],
-            specs=[[{'type': 'scatter'}, {'type': 'radar'}],
+            specs=[[{'type': 'polar'}],
                    [{'type': 'indicator'}, {'type': 'bar'}]]
         )
         
