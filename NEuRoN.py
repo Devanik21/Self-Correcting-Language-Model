@@ -938,8 +938,8 @@ def main():
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
     
     # Session State Initialization
-    if 'evolver' not in st.session_state:
-        st.session_state.evolver = CortexEvolver()
+    if 'evolver' not in st.session_state or not st.session_state.evolver.population:
+        st.session_state.evolver = CortexEvolver() # Ensure evolver exists
         st.session_state.history = []
         st.session_state.generation = 0
         
