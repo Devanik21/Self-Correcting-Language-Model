@@ -217,15 +217,24 @@ class LossLandscapePhysics:
         # Loss = Base / (Capacity * Efficiency) + Noise
         
         capacity = (arch.parameter_count / 1_000_000) ** 0.6
-        efficiency = diversity_score * 1.5 + (1.0 / (depth * 0.1 + 1))
+        efficiency = (diversity_score * 1.5) + (1.0 / (depth * 0.1 + 1))
         
-        # Overfitting penalty: If capacity >> difficulty
-        overfit_penalty = max(0, (capacity - self.difficulty * 10) ** 2) * 0.01
+        # --- REFINED PENALTIES for more realistic evolution ---
+        
+        # 1. Overfitting Penalty: More sensitive to difficulty.
+        #    If capacity greatly exceeds the task's complexity, it gets penalized.
+        overfit_penalty = max(0, capacity - (self.difficulty * 5))**1.5 * 0.005
+        
+        # 2. Complexity Tax: A small, ever-present cost for just having parameters.
+        complexity_tax = (arch.parameter_count / 1_000_000) * 0.0001
+        
+        # 3. Dimensionality Curse: Penalty for excessive depth, simulating optimization challenges.
+        dimensionality_curse = (depth**2) * 0.001
         
         base_loss = 10.0 / (capacity * efficiency + 0.01)
-        simulated_loss = base_loss + overfit_penalty + random.normalvariate(0, self.noise)
+        simulated_loss = base_loss + overfit_penalty + complexity_tax + dimensionality_curse + random.normalvariate(0, self.noise)
         
-        return max(0.01, simulated_loss)
+        return max(0.0001, simulated_loss) # Keep a very small floor to prevent negative values
 
 class CortexEvolver:
     """
