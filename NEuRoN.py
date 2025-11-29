@@ -1081,8 +1081,9 @@ def main():
 
     # --- UI UPDATE LOGIC (runs after simulation step or on first load) ---
     if st.session_state.evolver.population:
-        # Sort population to find the current best
-        st.session_state.evolver.population.sort(key=lambda x: x.loss)
+        # Sort population to find the current best, if it's not empty
+        if len(st.session_state.evolver.population) > 0:
+            st.session_state.evolver.population.sort(key=lambda x: x.loss)
         best_arch = st.session_state.evolver.population[0]
 
         # --- CALCULATE & DISPLAY ADVANCED METRICS ---
