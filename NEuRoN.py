@@ -387,8 +387,16 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         node_z.append(z)
         
         n_data = arch.nodes[node]
+        props = n_data.properties
+        hover_text = (
+            f"<b>ID: {node}</b><br>"
+            f"Type: {n_data.type_name}<br>"
+            f"Complexity: {props.get('complexity', 0):.2f} | Compute: {props.get('compute_cost', 0):.2f}<br>"
+            f"Memory: {props.get('memory_cost', 0):.2f} | Params: {props.get('param_density', 0):.2f}<br>"
+            f"Inputs: {len(n_data.inputs)}"
+        )
         node_color.append(n_data.properties.get('color', '#FFFFFF'))
-        node_text.append(f"{node}<br>{n_data.type_name}")
+        node_text.append(hover_text)
         node_size.append(10 + n_data.properties.get('complexity', 1.0) * 5)
         
     node_trace = go.Scatter3d(
