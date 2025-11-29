@@ -1308,11 +1308,29 @@ def main():
         with topo_plot.container():
             plot_tabs = st.tabs(["🧬 Neural Topology", "🎨 Bio-Mechanical Abstract"])
             with plot_tabs[0]:
+                # The primary topology view loads by default
                 fig_3d = plot_neural_topology_3d(best_arch)
                 st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{best_arch.id}")
             with plot_tabs[1]:
-                fig_abs = plot_architectural_abstract_3d(best_arch)
-                st.plotly_chart(fig_abs, use_container_width=True, key=f"abstract_{best_arch.id}")
+                # Lazy load the abstract plot on click
+                if 'abstract_loaded' not in st.session_state:
+                    st.session_state.abstract_loaded = False
+
+                # Reset if the architecture we are looking at has changed
+                if st.session_state.get('abstract_arch_id') != best_arch.id:
+                    st.session_state.abstract_loaded = False
+                    st.session_state.abstract_arch_id = best_arch.id
+
+                if st.session_state.abstract_loaded:
+                    if st.button("Hide Abstract View", key="hide_abstract"):
+                        st.session_state.abstract_loaded = False
+                        st.rerun()
+                    fig_abs = plot_architectural_abstract_3d(best_arch)
+                    st.plotly_chart(fig_abs, use_container_width=True, key=f"abstract_{best_arch.id}")
+                else:
+                    if st.button("Generate Abstract View", key="load_abstract"):
+                        st.session_state.abstract_loaded = True
+                        st.rerun()
 
 
         with log_area.container():
