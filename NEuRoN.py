@@ -452,12 +452,22 @@ def main():
     with st.sidebar.expander("🌍 Simulation Physics", expanded=True):
         difficulty = st.slider("Task Complexity (Entropy)", 0.1, 5.0, 1.5)
         noise = st.slider("Stochastic Noise Level", 0.0, 1.0, 0.1)
+        st.slider("Time Dilation Factor", 0.1, 10.0, 1.0)
+        st.slider("Spacetime Metric Curvature", -1.0, 1.0, 0.0)
+        st.slider("Quantum Tunneling Probability", 0.0, 0.1, 0.0)
+        st.slider("Heisenberg Uncertainty Factor", 0.0, 0.5, 0.01)
+        st.slider("Entanglement Correlation Strength", 0.0, 1.0, 0.0)
         
     with st.sidebar.expander("🧬 Evolutionary Dynamics", expanded=True):
         pop_size = st.slider("Population Size", 10, 500, 50)
         generations_to_run = st.number_input("Generations to Run per Click", 1, 1000, 10)
         mutation_rate = st.slider("Mutation Rate (Alpha)", 0.01, 1.0, 0.2)
         meta_learning = st.checkbox("Enable Meta-Cognitive Self-Correction", True)
+        st.slider("Horizontal Gene Transfer Rate", 0.0, 0.1, 0.0)
+        st.slider("Epigenetic Inheritance Factor", 0.0, 1.0, 0.1)
+        st.slider("Pleiotropy Effect Strength", 0.0, 1.0, 0.2)
+        st.slider("Antagonistic Coevolution Rate", 0.0, 0.5, 0.0)
+        st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
         
     with st.sidebar.expander("🧠 Cognitive Constraints"):
         max_params = st.number_input("Max Parameters (M)", 1, 1000, 100)
@@ -465,6 +475,7 @@ def main():
         latency_penalty = st.slider("Latency Penalty Weight", 0.0, 1.0, 0.3)
 
     with st.sidebar.expander("🔬 Cellular & Molecular Biology", expanded=False):
+        st.subheader("Core Processes")
         st.caption("Controls for the fundamental biological processes of the digital lifeforms.")
         st.slider("Protein Folding Stability", 0.1, 2.0, 1.0)
         st.slider("Enzyme Catalysis Rate", 0.1, 5.0, 1.0)
@@ -476,6 +487,13 @@ def main():
         st.slider("Cell Membrane Permeability", 0.1, 1.0, 0.3)
         st.slider("Mitochondrial Density", 10, 1000, 200)
         st.slider("Ribosomal Translation Speed", 1, 100, 20)
+        st.subheader("Signaling & Regulation")
+        st.slider("Signal Transduction Amplification", 1, 100, 10)
+        st.slider("Receptor Downregulation Rate", 0.0, 0.5, 0.1)
+        st.slider("Autophagy Rate", 0.0, 0.2, 0.05)
+        st.slider("Chaperone Protein Efficacy", 0.5, 1.5, 1.0)
+        st.slider("Glycolysis/OxPhos Bias", 0.0, 1.0, 0.5)
+        st.slider("Second Messenger Diffusion", 0.1, 1.0, 0.5)
 
     with st.sidebar.expander("🌿 Population & Speciation Dynamics", expanded=False):
         st.caption("Parameters governing evolution at the macro scale.")
@@ -489,6 +507,11 @@ def main():
         st.slider("Extinction Event Probability", 0.0, 0.1, 0.001)
         st.slider("Resource Competition Factor", 0.1, 2.0, 1.0)
         st.slider("Niche Partitioning Strength", 0.1, 1.0, 0.5)
+        st.slider("Founder Effect Strength", 0.0, 1.0, 0.1)
+        st.slider("Bottleneck Severity", 0.01, 1.0, 1.0)
+        st.slider("Sympatric Speciation Barrier", 0.1, 1.0, 0.8)
+        st.slider("Allopatric Speciation Distance", 0.1, 10.0, 1.0)
+        st.slider("Hybridization Viability", 0.0, 1.0, 0.05)
 
     with st.sidebar.expander("🧪 Biochemistry & Chemical Kinetics", expanded=False):
         st.caption("The chemical foundation of the simulated environment.")
@@ -500,6 +523,11 @@ def main():
         st.slider("Osmotic Pressure Gradient", 0.0, 5.0, 1.0)
         st.slider("Redox Potential (Eh)", -1.0, 1.0, 0.0)
         st.slider("Allosteric Regulation Factor", 0.1, 2.0, 1.0)
+        st.slider("Solvent Viscosity", 0.1, 5.0, 1.0)
+        st.slider("Chirality Bias", -1.0, 1.0, 0.0)
+        st.slider("Photoreaction Quantum Yield", 0.0, 1.0, 0.1)
+        st.slider("Surface Tension", 0.1, 2.0, 1.0)
+        st.slider("Electronegativity Scale", 0.5, 2.0, 1.0)
 
     with st.sidebar.expander("🧮 Mathematical & Topological Principles", expanded=False):
         st.caption("Abstract mathematical laws governing the simulation space.")
@@ -510,6 +538,54 @@ def main():
         st.slider("Eigenvalue Spectral Gap", 0.01, 1.0, 0.1)
         st.slider("Information Entropy (Shannon)", 0.1, 8.0, 4.0)
         st.slider("Graph Connectivity (Cheeger)", 0.01, 1.0, 0.2)
+        st.slider("Zeta Function Zero (Real Part)", 0.4, 0.6, 0.5)
+        st.slider("Kolmogorov Complexity Approx.", 0.1, 2.0, 1.0)
+        st.slider("Calabi-Yau Manifold Compactification", 1, 10, 6)
+        st.slider("Non-Commutative Geometry Factor", 0.0, 1.0, 0.0)
+
+    with st.sidebar.expander("⚡ Neurodynamics & Cognition", expanded=False):
+        st.caption("Low-level neural activity and learning rules.")
+        st.subheader("Neural Firing")
+        st.slider("Action Potential Threshold", -70, -40, -55)
+        st.slider("Refractory Period (ms)", 1, 10, 2)
+        st.slider("Spike-Frequency Adaptation", 0.0, 1.0, 0.1)
+        st.slider("Neural Oscillation Frequency (Hz)", 1, 100, 40)
+        st.slider("Phase-Amplitude Coupling", 0.0, 1.0, 0.2)
+        st.subheader("Plasticity & Learning")
+        st.slider("Long-Term Potentiation (LTP) Rate", 0.01, 1.0, 0.1)
+        st.slider("Long-Term Depression (LTD) Rate", 0.01, 1.0, 0.05)
+        st.slider("Synaptic Pruning Threshold", 0.01, 0.5, 0.1)
+        st.slider("Homeostatic Plasticity Drive", 0.1, 1.0, 0.5)
+        st.slider("Hebbian Learning Strength", 0.0, 0.2, 0.01)
+        st.subheader("Cognitive Factors")
+        st.slider("Working Memory Capacity (Chunks)", 2, 20, 7)
+        st.slider("Dopaminergic Reward Signal", 0.1, 2.0, 1.0)
+        st.slider("Serotonergic Modulation (Risk)", -1.0, 1.0, 0.0)
+        st.slider("Noradrenergic Arousal", 0.1, 2.0, 1.0)
+        st.slider("Cognitive Dissonance Penalty", 0.0, 1.0, 0.3)
+
+    with st.sidebar.expander("🖥️ Computational Substrate", expanded=False):
+        st.caption("Properties of the underlying simulated hardware.")
+        st.slider("Floating Point Precision (Bits)", 8, 64, 32)
+        st.slider("Memory Bus Bandwidth (GB/s)", 100, 4000, 900)
+        st.slider("L2 Cache Hit Rate", 0.5, 1.0, 0.95)
+        st.slider("Inter-node Network Latency (ms)", 0.01, 1.0, 0.1)
+        st.slider("Core Clock Speed (GHz)", 1.0, 5.0, 3.0)
+        st.slider("Tensor Core Utilization", 0.1, 1.0, 0.9)
+        st.slider("Power Draw Limit (Watts)", 100, 1000, 700)
+        st.slider("Thermal Throttling Threshold (°C)", 70, 100, 90)
+        st.slider("Bit-Flip Error Rate (Cosmic Rays)", 0.0, 1e-9, 0.0, format="%.2e")
+
+    with st.sidebar.expander("📚 Information & Learning Theory", expanded=False):
+        st.caption("Theoretical limits and measures of learning.")
+        st.slider("Fisher Information Regularization", 0.0, 1.0, 0.0)
+        st.slider("Cramér–Rao Lower Bound", 0.01, 1.0, 0.1)
+        st.slider("PAC Learnability Bound (ε)", 0.01, 0.5, 0.1)
+        st.slider("Vapnik–Chervonenkis (VC) Dimension", 10, 1000, 100)
+        st.slider("Algorithmic Mutual Information", 0.1, 2.0, 1.0)
+        st.slider("Minimum Description Length (MDL) Bias", 0.1, 2.0, 1.0)
+        st.slider("Kullback–Leibler (KL) Divergence Rate", 0.01, 1.0, 0.1)
+        st.slider("No-Free-Lunch Theorem Bias", 0.0, 1.0, 0.5)
 
     # --- MAIN PAGE ---
     st.title("🌌 CORTEX GENESIS")
