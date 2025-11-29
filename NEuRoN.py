@@ -344,71 +344,107 @@ class CortexEvolver:
 
 # ==================== VISUALIZATION ENGINE (PLOTLY) ====================
 
+def get_cone_trace(pos, u, v, color='#444444'):
+    """Helper function to create a 3D cone for a directed edge."""
+    vec = np.array(pos[v]) - np.array(pos[u])
+    length = np.linalg.norm(vec)
+    if length == 0: return None
+    vec = vec / length
+    
+    return go.Cone(
+        x=[pos[u][0] + vec[0] * length / 2],
+        y=[pos[u][1] + vec[1] * length / 2],
+        z=[pos[u][2] + vec[2] * length / 2],
+        u=[vec[0]],
+        v=[vec[1]],
+        w=[vec[2]],
+        sizemode="absolute",
+        sizeref=length,
+        anchor="tail",
+        showscale=False,
+        colorscale=[[0, color], [1, color]],
+        opacity=0.6,
+        hoverinfo='none'
+    )
+
 def plot_neural_topology_3d(arch: CognitiveArchitecture):
     """
     Renders the neural network as a 3D Cyberpunk holograph.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
-        G.add_node(nid, type=node.type_name, color=node.properties.get('color', '#FFFFFF'))
+        G.add_node(nid, type=node.type_name, color=node.properties.get('color', '#FFFFFF'), complexity=node.properties.get('complexity', 1.0))
         for parent in node.inputs:
-            G.add_edge(parent, nid)
+            if parent in arch.nodes: # Ensure parent exists
+                G.add_edge(parent, nid)
             
     # Layout
     pos = nx.spring_layout(G, dim=3, seed=42)
     
-    # Edges
-    edge_x, edge_y, edge_z = [], [], []
+    # --- Create Traces ---
+    traces = []
+
+    # Edges as Cones for directionality
     for u, v in G.edges():
-        x0, y0, z0 = pos[u]
-        x1, y1, z1 = pos[v]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
-        edge_z.extend([z0, z1, None])
-        
-    edge_trace = go.Scatter3d(
-        x=edge_x, y=edge_y, z=edge_z,
-        mode='lines',
-        line=dict(color='#444444', width=2),
-        hoverinfo='none'
-    )
+        cone_trace = get_cone_trace(pos, u, v)
+        if cone_trace:
+            traces.append(cone_trace)
     
     # Nodes
     node_x, node_y, node_z = [], [], []
     node_color = []
     node_text = []
     node_size = []
+    glow_size = []
     
     for node in G.nodes():
         x, y, z = pos[node]
         node_x.append(x)
         node_y.append(y)
         node_z.append(z)
-        
         n_data = arch.nodes[node]
         node_color.append(n_data.properties.get('color', '#FFFFFF'))
         node_text.append(f"{node}<br>{n_data.type_name}")
-        node_size.append(10 + n_data.properties.get('complexity', 1.0) * 5)
-        
+        size = 10 + n_data.properties.get('complexity', 1.0) * 5
+        node_size.append(size)
+        glow_size.append(size * 2.5)
+
+    # Glow effect trace (larger, semi-transparent markers)
+    glow_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        marker=dict(
+            size=glow_size,
+            color=node_color,
+            opacity=0.2,
+            line=dict(width=0)
+        ),
+        hoverinfo='none'
+    )
+    traces.append(glow_trace)
+
+    # Main node trace
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
         mode='markers',
         marker=dict(
             size=node_size,
             color=node_color,
-            line=dict(color='white', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.8)', width=1),
             opacity=0.9
         ),
         text=node_text,
         hoverinfo='text'
     )
+    traces.append(node_trace)
     
     layout = go.Layout(
-        title=f"Neural Topology: {arch.id}",
+        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#DDDDDD')),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(
+            camera=dict(eye=dict(x=1.5, y=1.5, z=0.5)),
             xaxis=dict(showbackground=False, showticklabels=False, title=''),
             yaxis=dict(showbackground=False, showticklabels=False, title=''),
             zaxis=dict(showbackground=False, showticklabels=False, title=''),
@@ -417,7 +453,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         margin=dict(l=0, r=0, b=0, t=40)
     )
     
-    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+    return go.Figure(data=traces, layout=layout)
 
 def plot_loss_landscape_surface(history):
     """
