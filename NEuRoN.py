@@ -1200,6 +1200,10 @@ def main():
         st.info("Simulation Paused. Detailed Analysis Mode Active.")
         
         if st.session_state.history:
+            # Initialize session state for archive pagination
+            if 'archive_page' not in st.session_state:
+                st.session_state.archive_page = 0
+
             tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool", "🗄️ Gene Archive"])
             
             with tabs[0]:
@@ -1252,14 +1256,35 @@ def main():
                     st.info("Archive is empty. Run the simulation to populate it.")
                 else:
                     # Display archived architectures in reverse chronological order
+                    items_per_page = 25
                     sorted_generations = sorted(archive.keys(), reverse=True)
-                    for gen_num in sorted_generations:
+                    start_index = st.session_state.archive_page * items_per_page
+                    end_index = start_index + items_per_page
+                    page_items = sorted_generations[start_index:end_index]
+
+                    for gen_num in page_items:
                         arch = archive[gen_num]
                         with st.expander(f"Generation {gen_num} - ID: {arch.id} - Loss: {arch.loss:.4f}"):
                             c1, c2 = st.columns([1, 2])
                             c1.metric("Parameters (M)", f"{arch.parameter_count/1e6:.2f}")
                             c1.metric("Component Count", f"{len(arch.nodes)}")
                             c2.json(asdict(arch), expanded=False)
+                    
+                    # --- Pagination Controls ---
+                    total_pages = (len(sorted_generations) + items_per_page - 1) // items_per_page
+                    
+                    st.write("---")
+                    p_col1, p_col2, p_col3 = st.columns([1, 2, 1])
+
+                    if p_col1.button("⬅️ Previous Page", disabled=(st.session_state.archive_page == 0)):
+                        st.session_state.archive_page -= 1
+                        st.rerun()
+
+                    p_col2.markdown(f"<p style='text-align: center;'>Page {st.session_state.archive_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
+
+                    if p_col3.button("Next Page ➡️", disabled=(st.session_state.archive_page >= total_pages - 1)):
+                        st.session_state.archive_page += 1
+                        st.rerun()
 
 if __name__ == "__main__":
     main()
