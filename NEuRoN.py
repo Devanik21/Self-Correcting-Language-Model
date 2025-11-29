@@ -397,7 +397,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         )
         node_color.append(n_data.properties.get('color', '#FFFFFF'))
         node_text.append(hover_text)
-        node_size.append(10 + n_data.properties.get('complexity', 1.0) * 5)
+        node_size.append(8 + n_data.properties.get('complexity', 1.0) * 4)
         
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
@@ -979,34 +979,9 @@ def main():
         st.rerun()
 
     # --- DASHBOARD LAYOUT ---
-    
-    # --- ADVANCED METRICS GRID ---
-    st.markdown("---")
-    # Create a grid for all the new metrics
-    metric_placeholders = {}
-    cols = st.columns(6)
-    metric_names = [
-        "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
-        "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
-        "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
-        "Attention %", "SSM %", "MLP %", "Memory %",
-        "Meta %", "Control %", "Dominant Component", "Mutation Count",
-        "Self-Confidence", "Curiosity", "Parent ID", "Architecture ID"
-    ]
-
-    for i, name in enumerate(metric_names):
-        metric_placeholders[name] = cols[i % 6].empty()
-
-    st.markdown("---")
-
-    # Original placeholders for backward compatibility in logic, though now unused for display
-    best_loss_ph = metric_placeholders["Lowest Loss"]
-    avg_iq_ph = metric_placeholders["Best System IQ"]
-    arch_depth_ph = metric_placeholders["Network Depth"]
-    gen_ph = metric_placeholders["Current Generation"]
 
     # Visualization Columns
-    viz_col1, viz_col2 = st.columns([2, 1])
+    viz_col1, viz_col2 = st.columns([3, 1])
     
     topo_plot = viz_col1.empty()
     log_area = viz_col2.empty()
@@ -1015,6 +990,31 @@ def main():
 
     # --- SIMULATION LOGIC ---
     if run_btn:
+        # This block is now inside the run_btn logic to avoid errors on reset
+        metric_placeholders = {}
+        with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
+            cols = st.columns(6)
+            metric_names = [
+                "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
+                "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
+                "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
+                "Attention %", "SSM %", "MLP %", "Memory %",
+                "Meta %", "Control %", "Dominant Component", "Mutation Count",
+                "Self-Confidence", "Curiosity", "Parent ID", "Architecture ID"
+            ]
+
+            for i, name in enumerate(metric_names):
+                metric_placeholders[name] = cols[i % 6].empty()
+
+        # Original placeholders for backward compatibility in logic, though now unused for display
+        if metric_placeholders:
+            best_loss_ph = metric_placeholders["Lowest Loss"]
+            avg_iq_ph = metric_placeholders["Best System IQ"]
+            arch_depth_ph = metric_placeholders["Network Depth"]
+            gen_ph = metric_placeholders["Current Generation"]
+        else: # Dummy placeholders if not running
+            best_loss_ph, avg_iq_ph, arch_depth_ph, gen_ph = st.empty(), st.empty(), st.empty(), st.empty()
+
         progress_bar = st.progress(0, text="Running simulation...")
 
         evolver = st.session_state.evolver
@@ -1081,6 +1081,29 @@ def main():
 
     # --- UI UPDATE LOGIC (runs after simulation step or on first load) ---
     if st.session_state.evolver.population:
+        # This block runs on every interaction, so we need the placeholders defined
+        metric_placeholders = {}
+        with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
+            cols = st.columns(6)
+            metric_names = [
+                "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
+                "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
+                "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
+                "Attention %", "SSM %", "MLP %", "Memory %",
+                "Meta %", "Control %", "Dominant Component", "Mutation Count",
+                "Self-Confidence", "Curiosity", "Parent ID", "Architecture ID"
+            ]
+
+            for i, name in enumerate(metric_names):
+                metric_placeholders[name] = cols[i % 6].empty()
+
+        # Original placeholders for backward compatibility in logic, though now unused for display
+        if not metric_placeholders: # Should not happen, but for safety
+            best_loss_ph, avg_iq_ph, arch_depth_ph, gen_ph = st.empty(), st.empty(), st.empty(), st.empty()
+        else:
+            best_loss_ph = metric_placeholders["Lowest Loss"]
+            avg_iq_ph = metric_placeholders["Best System IQ"]
+
         # Sort population to find the current best, if it's not empty
         if len(st.session_state.evolver.population) > 0:
             st.session_state.evolver.population.sort(key=lambda x: x.loss)
