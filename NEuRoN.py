@@ -590,11 +590,11 @@ def main():
     with st.sidebar.expander("🌍 Planetary & Environmental Science", expanded=False):
         st.caption("The physical world in which the simulation exists.")
         st.slider("Tectonic Plate Drift Speed", 0.0, 10.0, 2.5)
-        st.slider("Volcanic Activity Index", 0, 8, 2) # This was ok, but for consistency with others I'll check. No, this is fine.
-        st.slider("Atmospheric Pressure (kPa)", 50, 200, 101.3)
+        st.slider("Volcanic Activity Index", 0, 8, 2)
+        st.slider("Atmospheric Pressure (kPa)", 50.0, 200.0, 101.3)
         st.slider("Oxygen-Nitrogen Ratio", 0.1, 4.0, 0.26)
         st.slider("Greenhouse Gas Concentration (ppm)", 100, 2000, 420)
-        st.slider("Axial Tilt (Degrees)", 0, 90, 23.5)
+        st.slider("Axial Tilt (Degrees)", 0.0, 90.0, 23.5)
         st.slider("Orbital Eccentricity", 0.0, 0.5, 0.0167)
         st.slider("Planetary Magnetic Field Strength (μT)", 1, 100, 50)
         st.slider("Solar Irradiance (W/m^2)", 500, 2000, 1361)
@@ -616,7 +616,7 @@ def main():
         st.slider("Day-Night Cycle Length (Hours)", 4, 96, 24)
         st.slider("Seasonal Variation Amplitude", 0.0, 2.0, 1.0)
         st.slider("Planetary Albedo", 0.1, 0.9, 0.3)
-        st.slider("Soil pH Level", 3, 10, 6.5)
+        st.slider("Soil pH Level", 3.0, 10.0, 6.5)
         st.slider("Nutrient Availability (N, P, K)", 0.1, 2.0, 1.0)
         st.slider("Catastrophic Event Frequency", 0.0, 0.01, 0.0001, format="%.4f")
 
@@ -628,7 +628,7 @@ def main():
         st.slider("Dark Matter Density", 0.0, 1.0, 0.25)
         st.slider("Dark Energy Equation of State (w)", -2.0, 0.0, -1.0)
         st.slider("Baryon-to-Photon Ratio", 1e-10, 1e-8, 6e-10, format="%.2e")
-        st.slider("Cosmic Microwave Background Temp (K)", 1, 10, 2.725)
+        st.slider("Cosmic Microwave Background Temp (K)", 1.0, 10.0, 2.725)
         st.slider("Primordial Fluctuation Amplitude", 1e-6, 1e-4, 1e-5, format="%.1e")
         st.slider("Fine-Structure Constant (α)", 0.007, 0.008, 0.00729)
         st.slider("Strong Nuclear Force Coupling", 0.1, 10.0, 1.0)
@@ -821,7 +821,7 @@ def main():
     with st.sidebar.expander("🧩 Logic & Formal Systems", expanded=False):
         st.caption("The underlying logical rules of the AI's reasoning.")
         st.slider("Logical Consistency (Law of Non-Contradiction)", 0.9, 1.0, 0.99)
-        st.slider("Principle of Explosion Tolerance", 0.0, 0.1, 0.01) # This is fine.
+        st.slider("Principle of Explosion Tolerance", 0.0, 0.1, 0.01)
         st.slider("Modal Logic System (K, T, S4, S5)", 0, 4, 2)
         st.slider("Fuzzy Logic Membership Function", 0.1, 2.0, 1.0)
         st.slider("Bayesian Prior Strength", 0.1, 2.0, 1.0)
@@ -830,7 +830,7 @@ def main():
         st.slider("Deductive Reasoning Soundness", 0.9, 1.0, 0.99)
         st.slider("Abductive Reasoning (Inference to Best Explanation)", 0.1, 1.0, 0.7)
         st.slider("Temporal Logic Tense Structure", 0, 3, 1)
-        st.slider("Deontic Logic (Obligation/Permission)", 0.1, 1.0, 0.5) # This is fine.
+        st.slider("Deontic Logic (Obligation/Permission)", 0.1, 1.0, 0.5)
         st.slider("Epistemic Logic (Knowledge/Belief)", 0.1, 1.0, 0.8)
         st.slider("Paraconsistent Logic Tolerance", 0.0, 1.0, 0.1)
         st.slider("Counterfactual Reasoning Depth", 1, 10, 3)
@@ -860,7 +860,7 @@ def main():
         st.slider("Wabi-Sabi (Imperfect Beauty) Appreciation", 0.0, 1.0, 0.3)
         st.slider("Sublime (Awe/Terror) Response", 0.0, 1.0, 0.4)
         st.slider("Harmonic Dissonance Tolerance", 0.1, 1.0, 0.5)
-        st.slider("Color Theory Model (RYB, RGB, CMYK)", 0, 2, 1) # This is fine.
+        st.slider("Color Theory Model (RYB, RGB, CMYK)", 0, 2, 1)
         st.slider("Narrative Catharsis Strength", 0.1, 2.0, 1.0)
         st.slider("Stendhal Syndrome Threshold", 0.0, 1.0, 0.05)
         st.slider("Kitsch Detection Sensitivity", 0.1, 1.0, 0.7)
@@ -893,11 +893,11 @@ def main():
         st.slider("Coefficient of Thermal Expansion", 1, 30, 12)
         st.slider("Fracture Toughness", 1, 100, 50)
         st.slider("Hardness (Mohs Scale)", 1, 10, 7)
-        st.slider("Doping Concentration (Semiconductors)", 1e13, 1e18, 1e15)
-        st.slider("Dielectric Constant (k)", 1, 20, 3.9)
+        st.slider("Doping Concentration (Semiconductors)", 1e13, 1e18, 1e15, format="%.0e")
+        st.slider("Dielectric Constant (k)", 1.0, 20.0, 3.9)
         st.slider("Piezoelectric Coefficient", 1, 500, 100)
         st.slider("Seebeck Coefficient (Thermoelectric)", -100, 100, 10)
-        st.slider("Magnetic Permeability", 0.1, 10.0, 1.0) # This is fine.
+        st.slider("Magnetic Permeability", 0.1, 10.0, 1.0)
         st.slider("Corrosion Resistance", 0.9, 1.0, 0.99)
         st.slider("Creep Deformation Rate", 0.0, 1e-6, 0.0, format="%.1e")
         st.slider("Fatigue Limit (Stress Cycles)", 1e6, 1e10, 1e8)
