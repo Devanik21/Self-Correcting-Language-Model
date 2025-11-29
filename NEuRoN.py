@@ -181,30 +181,6 @@ class InfiniteArchitectureGenerator:
         return {pathway: {'flux': np.random.rand(), 'efficiency': np.random.rand()} 
                 for pathway in pathways}
 
-    def _generate_lorenz_attractor(self, n, s=10, r=28, b=2.667):
-        """Helper to generate points for a Lorenz attractor."""
-        pts = np.empty((n + 1, 3))
-        pts[0] = (0., 1., 1.05)
-        dt = 0.01
-        for i in range(n):
-            x_dot = s * (pts[i, 1] - pts[i, 0])
-            y_dot = r * pts[i, 0] - pts[i, 1] - pts[i, 0] * pts[i, 2]
-            z_dot = pts[i, 0] * pts[i, 1] - b * pts[i, 2]
-            pts[i + 1] = pts[i] + (x_dot, y_dot, z_dot) * dt
-        return pts
-
-    def _generate_torus_knot(self, n, p=2, q=3, R=2, r=1):
-        """Helper to generate points for a torus knot."""
-        pts = np.empty((n, 3))
-        phi = np.linspace(0, 2 * np.pi * q, n)
-        for i in range(n):
-            x = R * np.cos(phi[i]) + r * np.cos(p * phi[i] / q) * np.cos(phi[i])
-            y = R * np.sin(phi[i]) + r * np.cos(p * phi[i] / q) * np.sin(phi[i])
-            z = r * np.sin(p * phi[i] / q)
-            pts[i] = (x, y, z)
-        return pts
-
-
     def generate_fractal_neural_network(self, depth=7, complexity=0.8):
         """Generate infinite fractal neural architecture"""
         nodes = []
@@ -456,241 +432,6 @@ class InfiniteArchitectureGenerator:
             morphogenesis_rules={'dimensions': dimensions, 'projection_method': 'nonlinear'}
         )
 
-    def generate_chaotic_attractor_network(self, points=512):
-        """Generate a network based on a chaotic attractor (Lorenz)."""
-        nodes = []
-        connections = []
-        attractor_points = self._generate_lorenz_attractor(points)
-
-        for i, pos in enumerate(attractor_points):
-            node = NeuralNode(
-                id=f"chaos_{i}",
-                position=tuple(pos),
-                activation=random.random(),
-                node_type="chaotic_unit",
-                energy_level=np.linalg.norm(pos) / 30.0,
-                resonance=random.random(),
-                quantum_state=complex(random.random(), random.random()),
-                connections=[],
-                metadata={'attractor_type': 'lorenz', 'timestep': i},
-                creation_time=time.time(),
-                last_activated=time.time() - random.random() * 10,
-                fractal_depth=0
-            )
-            nodes.append(node)
-
-        # Connect sequential points in the attractor
-        for i in range(points):
-            connections.append((f"chaos_{i}", f"chaos_{i+1}", random.random() * 0.5))
-
-        return ArchitectureLayer(
-            name="Chaotic_Attractor_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="lorenz_attractor",
-            dimensionality=2.06,  # Approx. fractal dimension of Lorenz
-            evolution_phase=EvolutionPhase.TRANSFORMATION,
-            energy_field=np.random.rand(40, 40),
-            morphogenesis_rules={'s': 10, 'r': 28, 'b': 2.667}
-        )
-
-    def generate_topological_network(self, points=300, p=3, q=4):
-        """Generate a network based on a topological knot."""
-        nodes = []
-        connections = []
-        knot_points = self._generate_torus_knot(points, p, q)
-
-        for i, pos in enumerate(knot_points):
-            node = NeuralNode(
-                id=f"topo_{i}",
-                position=tuple(pos),
-                activation=i / points,
-                node_type="topological_node",
-                energy_level=random.random(),
-                resonance=random.random(),
-                quantum_state=complex(random.random(), random.random()),
-                connections=[],
-                metadata={'knot_type': f'torus({p},{q})', 'index': i},
-                creation_time=time.time(),
-                last_activated=time.time() - random.random() * 20,
-                fractal_depth=0
-            )
-            nodes.append(node)
-
-        # Connect adjacent nodes along the knot
-        for i in range(points):
-            connections.append((f"topo_{i}", f"topo_{(i + 1) % points}", 0.9))
-            # Add some long-range connections
-            if random.random() < 0.05:
-                target = random.randint(0, points - 1)
-                connections.append((f"topo_{i}", f"topo_{target}", random.random() * 0.3))
-
-        return ArchitectureLayer(
-            name="Topological_Knot_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="torus_knot",
-            dimensionality=3,
-            evolution_phase=EvolutionPhase.MATURATION,
-            energy_field=np.random.rand(50, 50),
-            morphogenesis_rules={'p': p, 'q': q}
-        )
-
-    def generate_crystal_growth_network(self, size=5):
-        """Generate a network simulating crystal growth."""
-        nodes = []
-        connections = []
-        grid = np.zeros((size, size, size), dtype=bool)
-        
-        # Seed crystal
-        seed_pos = (size // 2, size // 2, size // 2)
-        grid[seed_pos] = True
-        nodes.append(NeuralNode(id=f"crystal_{seed_pos[0]}_{seed_pos[1]}_{seed_pos[2]}", position=seed_pos, activation=1.0, node_type="crystal_core", energy_level=1.0, resonance=1.0, quantum_state=complex(1,0), connections=[], metadata={}, creation_time=time.time(), last_activated=time.time(), fractal_depth=0))
-
-        for _ in range(size**3 // 4): # Grow for a number of steps
-            x, y, z = np.where(grid)
-            for i in range(len(x)):
-                # Check neighbors
-                for dx, dy, dz in [(-1,0,0), (1,0,0), (0,-1,0), (0,1,0), (0,0,-1), (0,0,1)]:
-                    nx, ny, nz = x[i]+dx, y[i]+dy, z[i]+dz
-                    if 0 <= nx < size and 0 <= ny < size and 0 <= nz < size and not grid[nx,ny,nz]:
-                        if random.random() < 0.2: # Growth probability
-                            grid[nx,ny,nz] = True
-                            pos = (nx, ny, nz)
-                            parent_id = f"crystal_{x[i]}_{y[i]}_{z[i]}"
-                            child_id = f"crystal_{nx}_{ny}_{nz}"
-                            nodes.append(NeuralNode(id=child_id, position=pos, activation=random.random(), node_type="crystal_lattice", energy_level=random.random(), resonance=random.random(), quantum_state=complex(random.random(), random.random()), connections=[], metadata={}, creation_time=time.time(), last_activated=time.time(), fractal_depth=0))
-                            connections.append((parent_id, child_id, 0.8))
-
-        return ArchitectureLayer(
-            name="Crystal_Growth_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="cubic_lattice",
-            dimensionality=3,
-            evolution_phase=EvolutionPhase.GROWTH,
-            energy_field=np.random.rand(30, 30),
-            morphogenesis_rules={'grid_size': size, 'growth_prob': 0.2}
-        )
-
-    def generate_fluid_dynamic_network(self, particles=200):
-        """Generate a network based on fluid dynamics (vortex)."""
-        nodes = []
-        connections = []
-        for i in range(particles):
-            r = random.uniform(0.1, 2.0)
-            theta = random.uniform(0, 2 * np.pi * 3) # Multiple spirals
-            z = random.uniform(-1, 1)
-            x = r * np.cos(theta)
-            y = r * np.sin(theta)
-            pos = (x, y, z)
-            
-            node = NeuralNode(
-                id=f"fluid_{i}",
-                position=pos,
-                activation=1.0 - (r / 2.0),
-                node_type="fluid_particle",
-                energy_level=random.random(),
-                resonance=random.random(),
-                quantum_state=complex(random.random(), random.random()),
-                connections=[],
-                metadata={'radius': r, 'angle': theta},
-                creation_time=time.time(),
-                last_activated=time.time(),
-                fractal_depth=0
-            )
-            nodes.append(node)
-
-        # Connect nearby particles
-        kd_tree = spatial.KDTree([n.position for n in nodes])
-        for i, node in enumerate(nodes):
-            distances, indices = kd_tree.query(node.position, k=4)
-            for j in indices[1:]:
-                connections.append((node.id, nodes[j].id, random.random() * 0.6))
-
-        return ArchitectureLayer(
-            name="Fluid_Dynamic_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="vortex",
-            dimensionality=3,
-            evolution_phase=EvolutionPhase.METAMORPHOSIS,
-            energy_field=np.random.rand(50, 50),
-            morphogenesis_rules={'particles': particles}
-        )
-
-    def generate_multiverse_network(self, num_universes=5, nodes_per_universe=50):
-        """Generate a network of interconnected parallel universes."""
-        nodes = []
-        connections = []
-        for i in range(num_universes):
-            # Each universe is a small cluster
-            center = np.random.randn(3) * 5
-            for j in range(nodes_per_universe):
-                pos = center + np.random.randn(3) * 0.8
-                node_id = f"uni{i}_node{j}"
-                node = NeuralNode(id=node_id, position=tuple(pos), activation=random.random(), node_type=f"universe_{i}", energy_level=random.random(), resonance=random.random(), quantum_state=complex(random.random(), random.random()), connections=[], metadata={'universe_id': i}, creation_time=time.time(), last_activated=time.time(), fractal_depth=0)
-                nodes.append(node)
-                # Intra-universe connections
-                if j > 0:
-                    connections.append((node_id, f"uni{i}_node{random.randint(0, j-1)}", 0.7))
-
-        # Inter-universe connections (wormholes)
-        for _ in range(num_universes * 2):
-            uni1, uni2 = random.sample(range(num_universes), 2)
-            node1 = f"uni{uni1}_node{random.randint(0, nodes_per_universe-1)}"
-            node2 = f"uni{uni2}_node{random.randint(0, nodes_per_universe-1)}"
-            connections.append((node1, node2, 0.2)) # Weaker wormhole links
-
-        return ArchitectureLayer(
-            name="Multiverse_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="multi_cluster",
-            dimensionality=4, # 3 space + 1 universe dimension
-            evolution_phase=EvolutionPhase.TRANSCENDENCE,
-            energy_field=np.random.rand(70, 70),
-            morphogenesis_rules={'universes': num_universes}
-        )
-
-    def generate_neuromorphic_network(self, num_cores=8, neurons_per_core=32):
-        """Generate a neuromorphic hardware-inspired network."""
-        nodes = []
-        connections = []
-        core_positions = [ ( (i % 4) * 4, (i // 4) * 4, 0 ) for i in range(num_cores) ]
-
-        for i in range(num_cores):
-            core_center = core_positions[i]
-            for j in range(neurons_per_core):
-                pos = (core_center[0] + random.uniform(-1.5, 1.5),
-                       core_center[1] + random.uniform(-1.5, 1.5),
-                       core_center[2] + random.uniform(-0.5, 0.5))
-                node_id = f"core{i}_neuron{j}"
-                node = NeuralNode(id=node_id, position=pos, activation=random.random(), node_type="spiking_neuron", energy_level=random.random(), resonance=random.random(), quantum_state=complex(random.random(), random.random()), connections=[], metadata={'core_id': i}, creation_time=time.time(), last_activated=time.time(), fractal_depth=0)
-                nodes.append(node)
-                # Intra-core connections
-                if j > 0:
-                    connections.append((node_id, f"core{i}_neuron{random.randint(0, j-1)}", 0.9))
-
-        # Inter-core connections (crossbar array)
-        for i in range(num_cores):
-            for j in range(i + 1, num_cores):
-                if random.random() < 0.5:
-                    n1 = f"core{i}_neuron{random.randint(0, neurons_per_core-1)}"
-                    n2 = f"core{j}_neuron{random.randint(0, neurons_per_core-1)}"
-                    connections.append((n1, n2, 0.5))
-
-        return ArchitectureLayer(
-            name="Neuromorphic_Network",
-            nodes=nodes,
-            connections=connections,
-            topology="neuromorphic_grid",
-            dimensionality=3,
-            evolution_phase=EvolutionPhase.MATURATION,
-            energy_field=np.random.rand(40, 40),
-            morphogenesis_rules={'cores': num_cores}
-        )
-
 # =============================================================================
 # META-COGNITIVE AI SYSTEM (EXPANDED)
 # =============================================================================
@@ -799,24 +540,6 @@ class MetaCognitiveAI:
                 dimensions=random.randint(4, 12),
                 points=random.randint(128, 512)
             )
-        elif architecture_type == ArchitectureType.CHAOTIC_ATTRACTOR:
-            new_arch = self.architecture_generator.generate_chaotic_attractor_network(
-                points=random.randint(256, 1024))
-        elif architecture_type == ArchitectureType.TOPOLOGICAL:
-            new_arch = self.architecture_generator.generate_topological_network(
-                points=random.randint(200, 500), p=random.randint(2,5), q=random.randint(2,5))
-        elif architecture_type == ArchitectureType.CRYSTAL_GROWTH:
-            new_arch = self.architecture_generator.generate_crystal_growth_network(
-                size=random.randint(4, 8))
-        elif architecture_type == ArchitectureType.FLUID_DYNAMIC:
-            new_arch = self.architecture_generator.generate_fluid_dynamic_network(
-                particles=random.randint(150, 400))
-        elif architecture_type == ArchitectureType.MULTIVERSE:
-            new_arch = self.architecture_generator.generate_multiverse_network(
-                num_universes=random.randint(3, 8))
-        elif architecture_type == ArchitectureType.NEUROMORPHIC:
-            new_arch = self.architecture_generator.generate_neuromorphic_network(
-                num_cores=random.randint(4, 12))
         else:
             # Default to fractal for other types
             new_arch = self.architecture_generator.generate_fractal_neural_network()
@@ -855,6 +578,400 @@ class MetaCognitiveAI:
         return process
 
 # =============================================================================
+# ADVANCED VISUALIZATION SYSTEM
+# =============================================================================
+
+class AdvancedVisualizationSystem:
+    def __init__(self):
+        self.color_palettes = {
+            'quantum': ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3'],
+            'biological': ['#00B894', '#00CEC9', '#0984E3', '#6C5CE7', '#FDCB6E', '#E17055'],
+            'fractal': ['#FFEAA7', '#D63031', '#E17055', '#FDCB6E', '#00B894', '#0984E3'],
+            'hyperdimensional': ['#6C5CE7', '#A29BFE', '#FD79A8', '#E84393', '#FF7675', '#74B9FF']
+        }
+        self.animation_frames = 60
+        self.current_frame = 0
+        
+    def create_quantum_field_visualization(self, ai_system):
+        """Create quantum field visualization"""
+        fig = go.Figure()
+        
+        # Generate quantum probability field
+        x = np.linspace(-3, 3, 50)
+        y = np.linspace(-3, 3, 50)
+        X, Y = np.meshgrid(x, y)
+        
+        # Complex quantum wavefunction
+        Z = np.exp(-(X**2 + Y**2)) * np.exp(1j * 2 * np.pi * self.current_frame / self.animation_frames)
+        probability_density = np.abs(Z)**2
+        phase = np.angle(Z)
+        
+        # Probability density surface
+        fig.add_trace(go.Surface(
+            x=X, y=Y, z=probability_density,
+            colorscale='Viridis',
+            opacity=0.8,
+            name='Probability Density'
+        ))
+        
+        # Phase field as contour
+        fig.add_trace(go.Contour(
+            x=x, y=y, z=phase,
+            colorscale='RdBu',
+            contours=dict(
+                showlabels=True,
+                labelfont=dict(size=12, color='white')
+            ),
+            name='Quantum Phase'
+        ))
+        
+        fig.update_layout(
+            title="Quantum Field Dynamics",
+            scene=dict(
+                xaxis_title='X',
+                yaxis_title='Y', 
+                zaxis_title='Probability Density',
+                bgcolor='rgba(0,0,0,0)'
+            ),
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=600
+        )
+        
+        self.current_frame = (self.current_frame + 1) % self.animation_frames
+        return fig
+
+    def create_fractal_dimension_plot(self, architecture):
+        """Create fractal dimension visualization"""
+        fig = go.Figure()
+        
+        if not architecture.nodes:
+            return fig
+            
+        # Extract node positions
+        x = [node.position[0] for node in architecture.nodes]
+        y = [node.position[1] for node in architecture.nodes] 
+        z = [node.position[2] for node in architecture.nodes]
+        colors = [node.activation for node in architecture.nodes]
+        sizes = [10 + node.energy_level * 20 for node in architecture.nodes]
+        
+        # 3D scatter of fractal structure
+        fig.add_trace(go.Scatter3d(
+            x=x, y=y, z=z,
+            mode='markers',
+            marker=dict(
+                size=sizes,
+                color=colors,
+                colorscale='Rainbow',
+                opacity=0.8,
+                line=dict(width=2, color='white')
+            ),
+            name='Fractal Nodes'
+        ))
+        
+        # Add connections
+        for connection in architecture.connections[:100]:  # Limit for performance
+            source_node = next((node for node in architecture.nodes if node.id == connection[0]), None)
+            target_node = next((node for node in architecture.nodes if node.id == connection[1]), None)
+            
+            if source_node and target_node:
+                fig.add_trace(go.Scatter3d(
+                    x=[source_node.position[0], target_node.position[0]],
+                    y=[source_node.position[1], target_node.position[1]],
+                    z=[source_node.position[2], target_node.position[2]],
+                    mode='lines',
+                    line=dict(
+                        color=f'rgba(255, 255, 255, {connection[2] * 0.5})',
+                        width=connection[2] * 3
+                    ),
+                    showlegend=False
+                ))
+        
+        fig.update_layout(
+            title=f"Fractal Neural Architecture - {architecture.name}",
+            scene=dict(
+                bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                zaxis=dict(visible=False)
+            ),
+            paper_bgcolor='rgba(0,0,0,0)',
+            height=600,
+            showlegend=True
+        )
+        
+        return fig
+
+    def create_biological_growth_visualization(self, architecture):
+        """Create biological growth pattern visualization"""
+        fig = go.Figure()
+        
+        # Generate morphogen gradient field
+        x = np.linspace(-2, 2, 40)
+        y = np.linspace(-2, 2, 40)
+        X, Y = np.meshgrid(x, y)
+        
+        # Multiple morphogen gradients
+        morphogen_a = np.exp(-(X**2 + Y**2) / 2)
+        morphogen_b = np.sin(2 * np.pi * X) * np.cos(2 * np.pi * Y)
+        morphogen_c = np.tanh(X * Y)
+        
+        # Combined morphogen field
+        Z = morphogen_a + 0.5 * morphogen_b + 0.3 * morphogen_c
+        
+        fig.add_trace(go.Contour(
+            x=x, y=y, z=Z,
+            colorscale='Greens',
+            contours=dict(
+                coloring='heatmap',
+                showlabels=True,
+            ),
+            name='Morphogen Gradient'
+        ))
+        
+        # Add cell positions
+        if architecture.nodes:
+            cell_x = [node.position[0] for node in architecture.nodes]
+            cell_y = [node.position[1] for node in architecture.nodes]
+            cell_types = [node.node_type for node in architecture.nodes]
+            
+            color_map = {'neuron': 'red', 'glia': 'blue', 'stem_cell': 'purple', 'specialized': 'orange'}
+            colors = [color_map.get(node_type, 'gray') for node_type in cell_types]
+            
+            fig.add_trace(go.Scatter(
+                x=cell_x, y=cell_y,
+                mode='markers',
+                marker=dict(
+                    size=8,
+                    color=colors,
+                    line=dict(width=2, color='white')
+                ),
+                name='Biological Cells'
+            ))
+        
+        fig.update_layout(
+            title="Biological Morphogenesis Pattern",
+            xaxis_title='X Position',
+            yaxis_title='Y Position',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=500
+        )
+        
+        return fig
+
+    def create_hyperdimensional_projection(self, architecture):
+        """Create hyperdimensional space projection"""
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=['3D Projection', 'Energy Distribution', 
+                          'Activation Pattern', 'Connectivity Graph'],
+            specs=[[{'type': 'scatter3d'}, {'type': 'heatmap'}],
+                   [{'type': 'contour'}, {'type': 'scatter'}]]
+        )
+        
+        if architecture.nodes:
+            # 3D Projection
+            x = [node.position[0] for node in architecture.nodes]
+            y = [node.position[1] for node in architecture.nodes]
+            z = [node.position[2] for node in architecture.nodes]
+            energies = [node.energy_level for node in architecture.nodes]
+            
+            fig.add_trace(go.Scatter3d(
+                x=x, y=y, z=z,
+                mode='markers',
+                marker=dict(
+                    size=6,
+                    color=energies,
+                    colorscale='Viridis',
+                    opacity=0.8
+                ),
+                name='HD Nodes'
+            ), row=1, col=1)
+            
+            # Energy distribution heatmap
+            energy_matrix = np.random.rand(20, 20)  # Simulated energy field
+            fig.add_trace(go.Heatmap(
+                z=energy_matrix,
+                colorscale='Hot',
+                name='Energy Field'
+            ), row=1, col=2)
+            
+            # Activation pattern
+            activation_field = np.random.rand(15, 15)
+            fig.add_trace(go.Contour(
+                z=activation_field,
+                colorscale='Electric',
+                name='Activation'
+            ), row=2, col=1)
+            
+            # Connectivity graph (2D projection)
+            fig.add_trace(go.Scatter(
+                x=x, y=y,
+                mode='markers',
+                marker=dict(
+                    size=8,
+                    color=energies,
+                    colorscale='Rainbow'
+                ),
+                name='Connectivity'
+            ), row=2, col=2)
+            
+            # Add some connections
+            for connection in architecture.connections[:50]:
+                source_idx = next((i for i, node in enumerate(architecture.nodes) 
+                                if node.id == connection[0]), None)
+                target_idx = next((i for i, node in enumerate(architecture.nodes) 
+                                if node.id == connection[1]), None)
+                
+                if source_idx is not None and target_idx is not None:
+                    fig.add_trace(go.Scatter(
+                        x=[x[source_idx], x[target_idx]],
+                        y=[y[source_idx], y[target_idx]],
+                        mode='lines',
+                        line=dict(width=connection[2] * 2, color='rgba(255,255,255,0.3)'),
+                        showlegend=False
+                    ), row=2, col=2)
+        
+        fig.update_layout(
+            title="Hyperdimensional Architecture Projections",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=700,
+            showlegend=False
+        )
+        
+        return fig
+
+    def create_consciousness_metrics_dashboard(self, ai_system):
+        """Create consciousness and emergence metrics dashboard"""
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=['Consciousness Evolution', 'Emergence Metrics', 
+                          'Quantum Coherence', 'Architectural Complexity'],
+            specs=[[{'type': 'xy'}, {'type': 'polar'}],
+                   [{'type': 'domain'}, {'type': 'xy'}]]
+        )
+        
+        # Consciousness evolution (simulated)
+        iterations = list(range(20))
+        consciousness_levels = [ai_system.consciousness_metric * (1 + 0.1 * i) for i in iterations]
+        
+        fig.add_trace(go.Scatter(
+            x=iterations, y=consciousness_levels,
+            mode='lines+markers',
+            line=dict(color='#FF6B6B', width=3),
+            name='Consciousness'
+        ), row=1, col=1)
+        
+        # Emergence metrics radar
+        metrics = ['Self-Awareness', 'Pattern Recognition', 'Abstract Thought', 
+                  'Meta-Cognition', 'Creative Generation']
+        values = [random.random() for _ in metrics]
+        
+        fig.add_trace(go.Scatterpolar(
+            r=values + [values[0]],
+            theta=metrics + [metrics[0]],
+            fill='toself',
+            fillcolor='rgba(78, 205, 196, 0.3)',
+            line=dict(color='#4ECDC4'),
+            name='Emergence'
+        ), row=1, col=2)
+        
+        # Quantum coherence indicator
+        fig.add_trace(go.Indicator(
+            mode = "gauge+number+delta",
+            value = ai_system.performance_metrics['quantum_coherence'],
+            # domain is handled by subplot
+            title = {'text': "Quantum Coherence"},
+            delta = {'reference': 0.5},
+            gauge = {
+                'axis': {'range': [0, 1]},
+                'bar': {'color': "#45B7D1"},
+                'steps': [
+                    {'range': [0, 0.3], 'color': "lightgray"},
+                    {'range': [0.3, 0.7], 'color': "gray"},
+                    {'range': [0.7, 1], 'color': "darkgray"}],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 0.9}}
+        ), row=2, col=1)
+        
+        # Architectural complexity bars
+        architectures = list(ArchitectureType)
+        complexities = [random.random() for _ in architectures]
+        
+        fig.add_trace(go.Bar(
+            x=[arch.value for arch in architectures],
+            y=complexities,
+            marker_color='#96CEB4',
+            name='Complexity'
+        ), row=2, col=2)
+        
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=600,
+            showlegend=True
+        )
+        
+        return fig
+
+# =============================================================================
+# LAZY LOADING SYSTEM
+# =============================================================================
+
+class LazyLoadingManager:
+    def __init__(self):
+        self.loaded_components = set()
+        self.component_dependencies = {
+            'quantum_visualization': ['numpy', 'plotly'],
+            'fractal_architecture': ['numpy', 'plotly', 'scipy'],
+            'biological_growth': ['numpy', 'plotly'],
+            'hyperdimensional': ['numpy', 'plotly', 'scipy.spatial'],
+            'consciousness_dashboard': ['numpy', 'plotly']
+        }
+        
+    def lazy_load_component(self, component_name, dependencies_met=True):
+        """Lazy load visualization components"""
+        if component_name in self.loaded_components and dependencies_met:
+            return True
+            
+        # Simulate loading process
+        with st.spinner(f"Loading {component_name.replace('_', ' ').title()}..."):
+            time.sleep(0.5)  # Simulate loading time
+            self.loaded_components.add(component_name)
+            
+        return True
+
+# =============================================================================
+# STREAMLIT APPLICATION
+# =============================================================================
+
+# Initialize session state
+if 'ai_system' not in st.session_state:
+    st.session_state.ai_system = MetaCognitiveAI()
+if 'visualization_system' not in st.session_state:
+    st.session_state.visualization_system = AdvancedVisualizationSystem()
+if 'lazy_loader' not in st.session_state:
+    st.session_state.lazy_loader = LazyLoadingManager()
+if 'auto_evolution' not in st.session_state:
+    st.session_state.auto_evolution = False
+
+ai_system = st.session_state.ai_system
+visualizer = st.session_state.visualization_system
+lazy_loader = st.session_state.lazy_loader
+
+# Custom CSS for enhanced styling
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 3.5rem;
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
@@ -1044,63 +1161,6 @@ with tab1:
             ai_system.architecture_generator.generate_hyperdimensional_network())
         )
         st.plotly_chart(fig_hd, use_container_width=True)
-    elif selected_architecture == "fractal_dimension":
-        # Default visualization for other architecture types
-        lazy_loader.lazy_load_component('fractal_architecture')
-        fig = visualizer.create_fractal_dimension_plot(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_fractal_neural_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif selected_architecture == "chaotic_attractor":
-        lazy_loader.lazy_load_component('chaotic_attractor')
-        fig = visualizer.create_chaotic_attractor_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_chaotic_attractor_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif selected_architecture == "topological":
-        lazy_loader.lazy_load_component('topological')
-        fig = visualizer.create_topological_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_topological_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif selected_architecture == "crystal_growth":
-        lazy_loader.lazy_load_component('crystal_growth')
-        fig = visualizer.create_crystal_growth_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_crystal_growth_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif selected_architecture == "fluid_dynamic":
-        lazy_loader.lazy_load_component('fluid_dynamic')
-        fig = visualizer.create_fluid_dynamic_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_fluid_dynamic_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    elif selected_architecture == "multiverse":
-        lazy_loader.lazy_load_component('multiverse')
-        fig = visualizer.create_multiverse_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_multiverse_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
-    else:
-        # Default visualization for other architecture types
-        lazy_loader.lazy_load_component('neuromorphic')
-        fig = visualizer.create_neuromorphic_visualization(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_neuromorphic_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
     
     # Architecture statistics
     if selected_architecture in ai_system.architectures:
