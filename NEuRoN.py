@@ -1038,6 +1038,10 @@ def main():
             
             # 2. SELECT & REPRODUCE
             evolver.population.sort(key=lambda x: x.loss)
+            
+            if not evolver.population: # Safety check
+                st.warning("Population is empty. Halting simulation.")
+                break
             num_elites = max(1, int(pop_size * 0.2)) # Ensure at least one elite survives
             elites = evolver.population[:num_elites]
             
