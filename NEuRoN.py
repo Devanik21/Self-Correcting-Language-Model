@@ -245,7 +245,7 @@ class CortexEvolver:
     """
     def __init__(self):
         self.population: List[CognitiveArchitecture] = []
-        self.archive: List[CognitiveArchitecture] = []
+        self.archive: Dict[int, CognitiveArchitecture] = {}
         self.physics = LossLandscapePhysics()
         
     def create_genesis_architecture(self) -> CognitiveArchitecture:
@@ -1041,8 +1041,11 @@ def main():
             num_elites = max(1, int(pop_size * 0.2)) # Ensure at least one elite survives
             elites = evolver.population[:num_elites]
             
-            # Record history for the best of this generation
+            # Add best of this generation to the archive
             best_arch_gen = elites[0]
+            evolver.archive[st.session_state.generation] = copy.deepcopy(best_arch_gen)
+
+            # Record history for the best of this generation
             st.session_state.history.append({
                 'generation': st.session_state.generation,
                 'loss': best_arch_gen.loss,
@@ -1169,7 +1172,7 @@ def main():
         st.info("Simulation Paused. Detailed Analysis Mode Active.")
         
         if st.session_state.history:
-            tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool"])
+            tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool", "🗄️ Gene Archive"])
             
             with tabs[0]:
                 best_now = st.session_state.evolver.population[0]
@@ -1211,6 +1214,24 @@ def main():
                                       title="Population Distribution (Fitness vs Size)",
                                       color_continuous_scale='Turbo_r')
                 st.plotly_chart(fig_dist, use_container_width=True)
+
+            with tabs[3]:
+                st.subheader("Complete Evolutionary Archive")
+                st.caption("Inspect the best architecture from every past generation.")
+                
+                archive = st.session_state.evolver.archive
+                if not archive:
+                    st.info("Archive is empty. Run the simulation to populate it.")
+                else:
+                    # Display archived architectures in reverse chronological order
+                    sorted_generations = sorted(archive.keys(), reverse=True)
+                    for gen_num in sorted_generations:
+                        arch = archive[gen_num]
+                        with st.expander(f"Generation {gen_num} - ID: {arch.id} - Loss: {arch.loss:.4f}"):
+                            c1, c2 = st.columns([1, 2])
+                            c1.metric("Parameters (M)", f"{arch.parameter_count/1e6:.2f}")
+                            c1.metric("Component Count", f"{len(arch.nodes)}")
+                            c2.json(asdict(arch), expanded=False)
 
 if __name__ == "__main__":
     main()
