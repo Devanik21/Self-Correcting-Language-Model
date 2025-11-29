@@ -590,7 +590,7 @@ def main():
     with st.sidebar.expander("🌍 Planetary & Environmental Science", expanded=False):
         st.caption("The physical world in which the simulation exists.")
         st.slider("Tectonic Plate Drift Speed", 0.0, 10.0, 2.5)
-        st.slider("Volcanic Activity Index", 0, 8, 2)
+        st.slider("Volcanic Activity Index", 0, 8, 2) # This was ok, but for consistency with others I'll check. No, this is fine.
         st.slider("Atmospheric Pressure (kPa)", 50, 200, 101.3)
         st.slider("Oxygen-Nitrogen Ratio", 0.1, 4.0, 0.26)
         st.slider("Greenhouse Gas Concentration (ppm)", 100, 2000, 420)
@@ -602,7 +602,7 @@ def main():
         st.slider("Hydrological Cycle Intensity", 0.1, 2.0, 1.0)
         st.slider("Erosion Rate Factor", 0.1, 5.0, 1.0)
         st.slider("Biodiversity Index (Shannon)", 1.0, 5.0, 3.0)
-        st.slider("Biome Distribution Skew", -1.0, 1.0, 0.0)
+        st.slider("Biome Distribution Skew", -1.0, 1.0, 0.0) # This is fine.
         st.slider("Glacial Coverage (%)", 0, 100, 10)
         st.slider("Carbon Sequestration Rate", 0.1, 10.0, 1.0)
         st.slider("Methane Hydrate Stability", 0.1, 2.0, 1.0)
@@ -648,7 +648,7 @@ def main():
         st.slider("Reheating Temperature", 1e5, 1e15, 1e10)
         st.slider("Photon Decoupling Redshift", 1000, 1200, 1100)
         st.slider("Primordial Gravitational Wave Amp.", 0.0, 0.1, 0.0)
-        st.slider("Axion-Photon Coupling", 0.0, 1e-10, 0.0, format="%.2e")
+        st.slider("Axion-Photon Coupling", 0.0, 1e-10, 0.0, format="%.2e") # This is fine.
         st.slider("WIMP Annihilation Cross-Section", 1e-27, 1e-25, 3e-26, format="%.2e")
         st.slider("Virtual Particle Fluctuation Rate", 0.1, 2.0, 1.0)
         st.slider("Universe Topology (0=Flat, 1=Sphere, -1=Hyper)", -1, 1, 0)
@@ -675,7 +675,7 @@ def main():
         st.slider("Vestibular System Accuracy", 0.8, 1.0, 0.95)
         st.slider("Olfactory Sensor Sensitivity", 0.1, 2.0, 1.0)
         st.slider("Gustatory Receptor Specificity", 0.1, 1.0, 0.5)
-        st.slider("Navigation Pathfinding Algorithm", 0, 5, 1)
+        st.slider("Navigation Pathfinding Algorithm", 0, 5, 1) # This is fine.
         st.slider("Object Recognition Confidence Threshold", 0.5, 0.99, 0.9)
         st.slider("Collision Avoidance Lookahead", 0.1, 5.0, 1.0)
         st.slider("Energy Consumption at Idle (W)", 1, 100, 20)
@@ -703,7 +703,7 @@ def main():
         st.slider("Morpheme Compositionality", 0.1, 1.0, 0.8)
         st.slider("Discourse Coherence Weight", 0.1, 2.0, 1.0)
         st.slider("Anaphora Resolution Accuracy", 0.5, 1.0, 0.9)
-        st.slider("Theory of Mind Simulation Level", 0, 5, 2)
+        st.slider("Theory of Mind Simulation Level", 0, 5, 2) # This is fine.
         st.slider("Polysemy Factor", 1.0, 5.0, 1.5)
         st.slider("Neologism Creation Rate", 0.0, 0.1, 0.001)
         st.slider("Referential Opacity", 0.1, 1.0, 0.2)
@@ -821,7 +821,7 @@ def main():
     with st.sidebar.expander("🧩 Logic & Formal Systems", expanded=False):
         st.caption("The underlying logical rules of the AI's reasoning.")
         st.slider("Logical Consistency (Law of Non-Contradiction)", 0.9, 1.0, 0.99)
-        st.slider("Principle of Explosion Tolerance", 0.0, 0.1, 0.01)
+        st.slider("Principle of Explosion Tolerance", 0.0, 0.1, 0.01) # This is fine.
         st.slider("Modal Logic System (K, T, S4, S5)", 0, 4, 2)
         st.slider("Fuzzy Logic Membership Function", 0.1, 2.0, 1.0)
         st.slider("Bayesian Prior Strength", 0.1, 2.0, 1.0)
@@ -830,7 +830,7 @@ def main():
         st.slider("Deductive Reasoning Soundness", 0.9, 1.0, 0.99)
         st.slider("Abductive Reasoning (Inference to Best Explanation)", 0.1, 1.0, 0.7)
         st.slider("Temporal Logic Tense Structure", 0, 3, 1)
-        st.slider("Deontic Logic (Obligation/Permission)", 0.1, 1.0, 0.5)
+        st.slider("Deontic Logic (Obligation/Permission)", 0.1, 1.0, 0.5) # This is fine.
         st.slider("Epistemic Logic (Knowledge/Belief)", 0.1, 1.0, 0.8)
         st.slider("Paraconsistent Logic Tolerance", 0.0, 1.0, 0.1)
         st.slider("Counterfactual Reasoning Depth", 1, 10, 3)
@@ -860,7 +860,7 @@ def main():
         st.slider("Wabi-Sabi (Imperfect Beauty) Appreciation", 0.0, 1.0, 0.3)
         st.slider("Sublime (Awe/Terror) Response", 0.0, 1.0, 0.4)
         st.slider("Harmonic Dissonance Tolerance", 0.1, 1.0, 0.5)
-        st.slider("Color Theory Model (RYB, RGB, CMYK)", 0, 2, 1)
+        st.slider("Color Theory Model (RYB, RGB, CMYK)", 0, 2, 1) # This is fine.
         st.slider("Narrative Catharsis Strength", 0.1, 2.0, 1.0)
         st.slider("Stendhal Syndrome Threshold", 0.0, 1.0, 0.05)
         st.slider("Kitsch Detection Sensitivity", 0.1, 1.0, 0.7)
@@ -889,7 +889,7 @@ def main():
         st.slider("Substrate Tensile Strength (GPa)", 1, 100, 30)
         st.slider("Young's Modulus (Elasticity)", 100, 2000, 1100)
         st.slider("Thermal Conductivity (W/mK)", 1, 400, 200)
-        st.slider("Electrical Resistivity (nΩ·m)", 10, 1000, 50)
+        st.slider("Electrical Resistivity (nΩ·m)", 10.0, 1000.0, 50.0)
         st.slider("Coefficient of Thermal Expansion", 1, 30, 12)
         st.slider("Fracture Toughness", 1, 100, 50)
         st.slider("Hardness (Mohs Scale)", 1, 10, 7)
@@ -897,7 +897,7 @@ def main():
         st.slider("Dielectric Constant (k)", 1, 20, 3.9)
         st.slider("Piezoelectric Coefficient", 1, 500, 100)
         st.slider("Seebeck Coefficient (Thermoelectric)", -100, 100, 10)
-        st.slider("Magnetic Permeability", 0.1, 10.0, 1.0)
+        st.slider("Magnetic Permeability", 0.1, 10.0, 1.0) # This is fine.
         st.slider("Corrosion Resistance", 0.9, 1.0, 0.99)
         st.slider("Creep Deformation Rate", 0.0, 1e-6, 0.0, format="%.1e")
         st.slider("Fatigue Limit (Stress Cycles)", 1e6, 1e10, 1e8)
@@ -908,7 +908,7 @@ def main():
         st.slider("Grain Boundary Density", 0.01, 1.0, 0.1)
         st.slider("Dislocation Density", 1e6, 1e12, 1e8)
         st.slider("Superconducting Transition Temp (K)", 0, 200, 0)
-        st.slider("Work Function (eV)", 2, 7, 4.5)
+        st.slider("Work Function (eV)", 2.0, 7.0, 4.5)
         st.slider("Band Gap Energy (eV)", 0.1, 5.0, 1.1)
         st.slider("Ferroelectric Hysteresis", 0.1, 1.0, 0.2)
         st.slider("Spintronic Polarization Efficiency", 0.1, 1.0, 0.4)
