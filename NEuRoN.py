@@ -464,6 +464,11 @@ def main():
         vram_limit = st.slider("VRAM Limit (GB)", 1, 80, 24)
         latency_penalty = st.slider("Latency Penalty Weight", 0.0, 1.0, 0.3)
 
+    with st.sidebar.expander("🌌 Quantum Foam & Metaphysical Knobs", expanded=False):
+        st.caption("Warning: Adjusting these may destabilize digital reality.")
+        for i in range(200):
+            st.slider(f"Metaphysical Knob #{i+1}", 0.0, 1.0, 0.5, key=f"meta_knob_{i}")
+
     # --- MAIN PAGE ---
     st.title("🌌 CORTEX GENESIS")
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
