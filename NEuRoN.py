@@ -53,9 +53,9 @@ import colorsys
 
 # Set wide layout for the dashboard feel
 st.set_page_config(
-    page_title="CORTEX GENESIS",
+    page_title="Autonomous Architecture Evolution",
     layout="wide",
-    page_icon="🧠",
+    page_icon="♾️",
     initial_sidebar_state="expanded"
 )
 
@@ -955,7 +955,7 @@ def main():
         st.slider("Wetting Angle (Hydrophobicity)", 0, 180, 90)
 
     # --- MAIN PAGE ---
-    st.title("🌌 CORTEX GENESIS")
+    st.title("Autonomous Architecture Evolution")
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
     
     # Session State Initialization
