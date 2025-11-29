@@ -483,7 +483,7 @@ def main():
         st.slider("Antagonistic Coevolution Rate", 0.0, 0.5, 0.0)
         st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
         st.session_state.max_depth = st.slider("Max Network Depth", 10, 10000, 100)
-        st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 5, 1)
+        st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 100, 1)
         
     with st.sidebar.expander("🧠 Cognitive Constraints"):
         max_params = st.number_input("Max Parameters (M)", 1, 1000, 100)
@@ -1001,7 +1001,8 @@ def main():
             
             # 2. SELECT & REPRODUCE
             evolver.population.sort(key=lambda x: x.loss)
-            elites = evolver.population[:int(pop_size * 0.2)] # Top 20%
+            num_elites = max(1, int(pop_size * 0.2)) # Ensure at least one elite survives
+            elites = evolver.population[:num_elites]
             
             # Record history for the best of this generation
             best_arch_gen = elites[0]
