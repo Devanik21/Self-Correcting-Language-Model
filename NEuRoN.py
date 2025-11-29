@@ -1181,14 +1181,17 @@ def main():
             if 'archive_loaded' not in st.session_state:
                 st.session_state.archive_loaded = False
 
-            if not st.session_state.archive_loaded:
-                if st.button("Load Gene Archive", key="load_archive"):
-                    st.session_state.archive_loaded = True
+            if st.session_state.archive_loaded:
+                # If loaded, show the content and a hide button
+                if st.button("Hide Gene Archive", key="hide_archive"):
+                    st.session_state.archive_loaded = False
                     st.rerun()
-            else: # Archive is loaded, show the content
+
                 archive = st.session_state.evolver.archive
                 if not archive:
                     st.info("Archive is empty. Run the simulation to populate it.")
+                    # Still offer to hide if it was loaded but is now empty
+                    st.stop()
                 else:
                     # Initialize session state for archive pagination
                     if 'archive_page' not in st.session_state:
@@ -1221,6 +1224,11 @@ def main():
                     if p_col3.button("Next Page ➡️", disabled=(st.session_state.archive_page >= total_pages - 1), key="archive_next"):
                         st.session_state.archive_page += 1
                         st.rerun()
+            else:
+                # If not loaded, only show the load button
+                if st.button("Load Gene Archive", key="load_archive"):
+                    st.session_state.archive_loaded = True
+                    st.rerun()
 
         metric_placeholders = {}
         with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
