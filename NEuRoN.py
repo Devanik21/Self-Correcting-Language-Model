@@ -464,10 +464,52 @@ def main():
         vram_limit = st.slider("VRAM Limit (GB)", 1, 80, 24)
         latency_penalty = st.slider("Latency Penalty Weight", 0.0, 1.0, 0.3)
 
-    with st.sidebar.expander("🌌 Quantum Foam & Metaphysical Knobs", expanded=False):
-        st.caption("Warning: Adjusting these may destabilize digital reality.")
-        for i in range(200):
-            st.slider(f"Metaphysical Knob #{i+1}", 0.0, 1.0, 0.5, key=f"meta_knob_{i}")
+    with st.sidebar.expander("🔬 Cellular & Molecular Biology", expanded=False):
+        st.caption("Controls for the fundamental biological processes of the digital lifeforms.")
+        st.slider("Protein Folding Stability", 0.1, 2.0, 1.0)
+        st.slider("Enzyme Catalysis Rate", 0.1, 5.0, 1.0)
+        st.slider("ATP Synthesis Efficiency", 0.5, 1.0, 0.9)
+        st.slider("DNA Repair Fidelity", 0.9, 1.0, 0.99)
+        st.slider("Telomere Shortening Rate", 0.0, 0.1, 0.01)
+        st.slider("Gene Expression Noise", 0.0, 0.5, 0.05)
+        st.slider("Apoptosis Threshold", 0.1, 1.0, 0.5)
+        st.slider("Cell Membrane Permeability", 0.1, 1.0, 0.3)
+        st.slider("Mitochondrial Density", 10, 1000, 200)
+        st.slider("Ribosomal Translation Speed", 1, 100, 20)
+
+    with st.sidebar.expander("🌿 Population & Speciation Dynamics", expanded=False):
+        st.caption("Parameters governing evolution at the macro scale.")
+        st.slider("Genetic Drift Strength", 0.0, 0.2, 0.01)
+        st.slider("Gene Flow (Migration) Rate", 0.0, 0.5, 0.05)
+        st.slider("Assortative Mating Bias", -1.0, 1.0, 0.0)
+        st.slider("Sexual Selection Intensity", 0.0, 2.0, 0.1)
+        st.slider("Inbreeding Depression Factor", 0.0, 1.0, 0.2)
+        st.slider("Punctuated Equilibrium Trigger", 0.9, 1.0, 0.99)
+        st.slider("Adaptive Radiation Potential", 0.1, 2.0, 1.0)
+        st.slider("Extinction Event Probability", 0.0, 0.1, 0.001)
+        st.slider("Resource Competition Factor", 0.1, 2.0, 1.0)
+        st.slider("Niche Partitioning Strength", 0.1, 1.0, 0.5)
+
+    with st.sidebar.expander("🧪 Biochemistry & Chemical Kinetics", expanded=False):
+        st.caption("The chemical foundation of the simulated environment.")
+        st.slider("Activation Energy Barrier", 0.1, 5.0, 1.0)
+        st.slider("Reaction Rate Constant (k)", 0.01, 10.0, 1.0)
+        st.slider("Gibbs Free Energy (ΔG)", -10.0, 10.0, -2.0)
+        st.slider("Enthalpy Change (ΔH)", -10.0, 10.0, -3.0)
+        st.slider("pH Buffer Capacity", 0.1, 2.0, 1.0)
+        st.slider("Osmotic Pressure Gradient", 0.0, 5.0, 1.0)
+        st.slider("Redox Potential (Eh)", -1.0, 1.0, 0.0)
+        st.slider("Allosteric Regulation Factor", 0.1, 2.0, 1.0)
+
+    with st.sidebar.expander("🧮 Mathematical & Topological Principles", expanded=False):
+        st.caption("Abstract mathematical laws governing the simulation space.")
+        st.slider("Manifold Curvature", -1.0, 1.0, 0.0)
+        st.slider("Fractal Dimension (Hausdorff)", 1.0, 3.0, 2.1)
+        st.slider("Topological Invariant (Betti Number)", 0, 10, 1)
+        st.slider("Lyapunov Exponent (Chaos)", 0.0, 2.0, 0.1)
+        st.slider("Eigenvalue Spectral Gap", 0.01, 1.0, 0.1)
+        st.slider("Information Entropy (Shannon)", 0.1, 8.0, 4.0)
+        st.slider("Graph Connectivity (Cheeger)", 0.01, 1.0, 0.2)
 
     # --- MAIN PAGE ---
     st.title("🌌 CORTEX GENESIS")
