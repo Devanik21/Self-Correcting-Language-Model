@@ -301,13 +301,20 @@ class CortexEvolver:
         # 2. Add Skip Connection (Residual)
         if random.random() < mutation_rate:
             if len(node_ids) > 2:
-                source = random.choice(node_ids)
-                target = random.choice(node_ids)
-                # Ensure no cycles (simple check: if source created before target in list)
-                # For simulation, we just allow it and assume the physics engine handles depth
-                if target != "input" and source != target and source not in child.nodes[target].inputs:
-                    child.nodes[target].inputs.append(source)
-                    child.mutations_log.append(f"Added Skip Connection {source} -> {target}")
+                source_id = random.choice(node_ids)
+                target_id = random.choice(node_ids)
+                
+                # --- Robust Cycle Prevention ---
+                # Build a temporary graph to check for path existence
+                G_temp = nx.DiGraph()
+                for nid, node in child.nodes.items():
+                    for parent in node.inputs:
+                        G_temp.add_edge(parent, nid)
+
+                # A cycle would be created if a path already exists from target to source
+                if target_id != "input" and source_id != target_id and source_id not in child.nodes[target_id].inputs and not nx.has_path(G_temp, target_id, source_id):
+                    child.nodes[target_id].inputs.append(source_id)
+                    child.mutations_log.append(f"Added Skip Connection {source_id} -> {target_id}")
 
         # 3. Change Component Type (Mutation)
         if random.random() < mutation_rate:
