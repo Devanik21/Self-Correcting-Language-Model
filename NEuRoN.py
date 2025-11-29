@@ -1318,17 +1318,6 @@ class LazyLoadingManager:
 
 # =============================================================================
 # STREAMLIT APPLICATION
-# =============================================================================
-
-# Initialize session state
-if 'ai_system' not in st.session_state:
-    st.session_state.ai_system = MetaCognitiveAI()
-if 'visualization_system' not in st.session_state:
-    st.session_state.visualization_system = AdvancedVisualizationSystem()
-if 'lazy_loader' not in st.session_state:
-    st.session_state.lazy_loader = LazyLoadingManager()
-if 'auto_evolution' not in st.session_state:
-    st.session_state.auto_evolution = False
 
 ai_system = st.session_state.ai_system
 visualizer = st.session_state.visualization_system
