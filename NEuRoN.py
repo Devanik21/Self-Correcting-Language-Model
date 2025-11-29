@@ -959,15 +959,31 @@ def main():
 
     # --- DASHBOARD LAYOUT ---
     
-    # Top Metrics Row
-    m1, m2, m3, m4 = st.columns(4)
-    
-    # Placeholders for real-time updates
-    best_loss_ph = m1.empty()
-    avg_iq_ph = m2.empty()
-    arch_depth_ph = m3.empty()
-    gen_ph = m4.empty()
-    
+    # --- ADVANCED METRICS GRID ---
+    st.markdown("---")
+    # Create a grid for all the new metrics
+    metric_placeholders = {}
+    cols = st.columns(6)
+    metric_names = [
+        "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
+        "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
+        "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
+        "Attention %", "SSM %", "MLP %", "Memory %",
+        "Meta %", "Control %", "Dominant Component", "Mutation Count",
+        "Self-Confidence", "Curiosity", "Parent ID", "Architecture ID"
+    ]
+
+    for i, name in enumerate(metric_names):
+        metric_placeholders[name] = cols[i % 6].empty()
+
+    st.markdown("---")
+
+    # Original placeholders for backward compatibility in logic, though now unused for display
+    best_loss_ph = metric_placeholders["Lowest Loss"]
+    avg_iq_ph = metric_placeholders["Best System IQ"]
+    arch_depth_ph = metric_placeholders["Network Depth"]
+    gen_ph = metric_placeholders["Current Generation"]
+
     # Visualization Columns
     viz_col1, viz_col2 = st.columns([2, 1])
     
@@ -1045,10 +1061,53 @@ def main():
         st.session_state.evolver.population.sort(key=lambda x: x.loss)
         best_arch = st.session_state.evolver.population[0]
 
-        best_loss_ph.metric("Lowest Loss", f"{best_arch.loss:.4f}")
-        avg_iq_ph.metric("Best System IQ", f"{best_arch.accuracy:.1f}")
-        arch_depth_ph.metric("Best Network Depth", f"{len(best_arch.nodes)} Layers")
-        gen_ph.metric("Current Generation", f"{st.session_state.generation}")
+        # --- CALCULATE & DISPLAY ADVANCED METRICS ---
+        metric_placeholders["Lowest Loss"].metric("Lowest Loss", f"{best_arch.loss:.4f}")
+        metric_placeholders["Best System IQ"].metric("Best System IQ", f"{best_arch.accuracy:.1f}")
+        metric_placeholders["Current Generation"].metric("Current Generation", f"{st.session_state.generation}")
+
+        # Topology Metrics
+        G = nx.DiGraph()
+        for nid, node in best_arch.nodes.items():
+            G.add_node(nid)
+            for parent in node.inputs:
+                G.add_edge(parent, nid)
+        
+        try:
+            depth = nx.dag_longest_path_length(G)
+        except:
+            depth = -1 # Indicates a cycle or error
+
+        metric_placeholders["Network Depth"].metric("Network Depth", f"{depth} Layers")
+        metric_placeholders["Component Count"].metric("Component Count", f"{len(best_arch.nodes)}")
+        metric_placeholders["Parameter Count (M)"].metric("Parameter Count (M)", f"{best_arch.parameter_count/1e6:.2f}")
+        metric_placeholders["Inference Speed (T/s)"].metric("Inference Speed (T/s)", f"{best_arch.inference_speed:.1f}")
+        metric_placeholders["VRAM Usage (GB)"].metric("VRAM Usage (GB)", f"{best_arch.vram_usage:.2f}")
+
+        # Diversity & Composition Metrics
+        types = [n.properties['type'] for n in best_arch.nodes.values()]
+        type_counts = Counter(types)
+        shannon_diversity = entropy(list(type_counts.values()))
+        
+        metric_placeholders["Component Diversity"].metric("Component Diversity", len(type_counts))
+        metric_placeholders["Shannon Diversity"].metric("Shannon Diversity", f"{shannon_diversity:.2f}")
+        metric_placeholders["Connectivity Density"].metric("Connectivity Density", f"{nx.density(G):.3f}")
+        avg_fan_in = np.mean([G.in_degree(n) for n in G.nodes()])
+        metric_placeholders["Avg. Fan-in"].metric("Avg. Fan-in", f"{avg_fan_in:.2f}")
+
+        total_nodes = len(best_arch.nodes)
+        metric_placeholders["Attention %"].metric("Attention %", f"{100*type_counts.get('Attention', 0)/total_nodes:.1f}%")
+        metric_placeholders["SSM %"].metric("SSM %", f"{100*type_counts.get('SSM', 0)/total_nodes:.1f}%")
+        metric_placeholders["MLP %"].metric("MLP %", f"{100*type_counts.get('MLP', 0)/total_nodes:.1f}%")
+        metric_placeholders["Memory %"].metric("Memory %", f"{100*type_counts.get('Memory', 0)/total_nodes:.1f}%")
+        metric_placeholders["Meta %"].metric("Meta %", f"{100*type_counts.get('Meta', 0)/total_nodes:.1f}%")
+        metric_placeholders["Control %"].metric("Control %", f"{100*type_counts.get('Control', 0)/total_nodes:.1f}%")
+        metric_placeholders["Dominant Component"].metric("Dominant Component", type_counts.most_common(1)[0][0] if type_counts else "N/A")
+        metric_placeholders["Mutation Count"].metric("Mutation Count", len(best_arch.mutations_log))
+        metric_placeholders["Self-Confidence"].metric("Self-Confidence", f"{best_arch.self_confidence:.2f}")
+        metric_placeholders["Curiosity"].metric("Curiosity", f"{best_arch.curiosity:.2f}")
+        metric_placeholders["Parent ID"].metric("Parent ID", best_arch.parent_id)
+        metric_placeholders["Architecture ID"].metric("Architecture ID", best_arch.id)
 
         with topo_plot:
             fig_3d = plot_neural_topology_3d(best_arch)
