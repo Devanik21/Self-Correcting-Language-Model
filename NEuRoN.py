@@ -482,7 +482,7 @@ def main():
         st.slider("Pleiotropy Effect Strength", 0.0, 1.0, 0.2)
         st.slider("Antagonistic Coevolution Rate", 0.0, 0.5, 0.0)
         st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
-        st.session_state.max_depth = st.slider("Max Network Depth", 10, 500, 100)
+        st.session_state.max_depth = st.slider("Max Network Depth", 10, 10000, 100)
         st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 5, 1)
         
     with st.sidebar.expander("🧠 Cognitive Constraints"):
