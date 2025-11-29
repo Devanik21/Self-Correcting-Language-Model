@@ -1086,6 +1086,46 @@ def main():
     # --- UI UPDATE LOGIC (runs after simulation step or on first load) ---
     if st.session_state.evolver.population:
         # This block runs on every interaction, so we need the placeholders defined
+
+        with st.expander("🗄️ Gene Archive (Lazy Loaded)", expanded=False):
+            st.caption("Inspect the best architecture from every past generation.")
+            
+            archive = st.session_state.evolver.archive
+            if not archive:
+                st.info("Archive is empty. Run the simulation to populate it.")
+            else:
+                # Initialize session state for archive pagination
+                if 'archive_page' not in st.session_state:
+                    st.session_state.archive_page = 0
+                
+                items_per_page = 25
+                sorted_generations = sorted(archive.keys(), reverse=True)
+                start_index = st.session_state.archive_page * items_per_page
+                end_index = start_index + items_per_page
+                page_items = sorted_generations[start_index:end_index]
+
+                for gen_num in page_items:
+                    arch = archive[gen_num]
+                    with st.expander(f"Generation {gen_num} - ID: {arch.id} - Loss: {arch.loss:.4f}"):
+                        c1, c2 = st.columns([1, 2])
+                        c1.metric("Parameters (M)", f"{arch.parameter_count/1e6:.2f}")
+                        c1.metric("Component Count", f"{len(arch.nodes)}")
+                        c2.json(asdict(arch), expanded=False)
+                
+                # --- Pagination Controls ---
+                total_pages = (len(sorted_generations) + items_per_page - 1) // items_per_page
+                
+                st.write("---")
+                p_col1, p_col2, p_col3 = st.columns([1, 2, 1])
+
+                if p_col1.button("⬅️ Previous Page", disabled=(st.session_state.archive_page == 0), key="archive_prev"):
+                    st.session_state.archive_page -= 1
+                    st.rerun()
+                p_col2.markdown(f"<p style='text-align: center;'>Page {st.session_state.archive_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
+                if p_col3.button("Next Page ➡️", disabled=(st.session_state.archive_page >= total_pages - 1), key="archive_next"):
+                    st.session_state.archive_page += 1
+                    st.rerun()
+
         metric_placeholders = {}
         with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
             cols = st.columns(6)
@@ -1204,7 +1244,7 @@ def main():
             if 'archive_page' not in st.session_state:
                 st.session_state.archive_page = 0
 
-            tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool", "🗄️ Gene Archive"])
+            tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool"])
             
             with tabs[0]:
                 best_now = st.session_state.evolver.population[0]
@@ -1246,45 +1286,6 @@ def main():
                                       title="Population Distribution (Fitness vs Size)",
                                       color_continuous_scale='Turbo_r')
                 st.plotly_chart(fig_dist, use_container_width=True)
-
-            with tabs[3]:
-                st.subheader("Complete Evolutionary Archive")
-                st.caption("Inspect the best architecture from every past generation.")
-                
-                archive = st.session_state.evolver.archive
-                if not archive:
-                    st.info("Archive is empty. Run the simulation to populate it.")
-                else:
-                    # Display archived architectures in reverse chronological order
-                    items_per_page = 25
-                    sorted_generations = sorted(archive.keys(), reverse=True)
-                    start_index = st.session_state.archive_page * items_per_page
-                    end_index = start_index + items_per_page
-                    page_items = sorted_generations[start_index:end_index]
-
-                    for gen_num in page_items:
-                        arch = archive[gen_num]
-                        with st.expander(f"Generation {gen_num} - ID: {arch.id} - Loss: {arch.loss:.4f}"):
-                            c1, c2 = st.columns([1, 2])
-                            c1.metric("Parameters (M)", f"{arch.parameter_count/1e6:.2f}")
-                            c1.metric("Component Count", f"{len(arch.nodes)}")
-                            c2.json(asdict(arch), expanded=False)
-                    
-                    # --- Pagination Controls ---
-                    total_pages = (len(sorted_generations) + items_per_page - 1) // items_per_page
-                    
-                    st.write("---")
-                    p_col1, p_col2, p_col3 = st.columns([1, 2, 1])
-
-                    if p_col1.button("⬅️ Previous Page", disabled=(st.session_state.archive_page == 0)):
-                        st.session_state.archive_page -= 1
-                        st.rerun()
-
-                    p_col2.markdown(f"<p style='text-align: center;'>Page {st.session_state.archive_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
-
-                    if p_col3.button("Next Page ➡️", disabled=(st.session_state.archive_page >= total_pages - 1)):
-                        st.session_state.archive_page += 1
-                        st.rerun()
 
 if __name__ == "__main__":
     main()
