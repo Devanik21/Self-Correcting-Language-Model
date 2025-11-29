@@ -416,6 +416,10 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#DDDDDD')),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
+        hoverlabel=dict(
+            font_size=16,
+            bgcolor="rgba(10, 10, 10, 0.8)"
+        ),
         showlegend=False,
         scene=dict(
             camera=dict(eye=dict(x=1.5, y=1.5, z=0.5)),
