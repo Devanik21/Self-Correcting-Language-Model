@@ -1529,6 +1529,14 @@ with tab1:
             ai_system.architecture_generator.generate_hyperdimensional_network())
         )
         st.plotly_chart(fig_hd, use_container_width=True)
+    elif selected_architecture == "fractal_dimension":
+        # Default visualization for other architecture types
+        lazy_loader.lazy_load_component('fractal_architecture')
+        fig = visualizer.create_fractal_dimension_plot(
+            ai_system.architectures.get(selected_architecture,
+            ai_system.architecture_generator.generate_fractal_neural_network())
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     elif selected_architecture == "chaotic_attractor":
         lazy_loader.lazy_load_component('chaotic_attractor')
@@ -1570,23 +1578,15 @@ with tab1:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    elif selected_architecture == "neuromorphic":
+    else:
+        # Default visualization for other architecture types
         lazy_loader.lazy_load_component('neuromorphic')
         fig = visualizer.create_neuromorphic_visualization(
             ai_system.architectures.get(selected_architecture,
             ai_system.architecture_generator.generate_neuromorphic_network())
         )
         st.plotly_chart(fig, use_container_width=True)
-
-    else:
-        # Default visualization for other architecture types
-        lazy_loader.lazy_load_component('fractal_architecture')
-        fig = visualizer.create_fractal_dimension_plot(
-            ai_system.architectures.get(selected_architecture,
-            ai_system.architecture_generator.generate_fractal_neural_network())
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
+    
     # Architecture statistics
     if selected_architecture in ai_system.architectures:
         arch = ai_system.architectures[selected_architecture]
