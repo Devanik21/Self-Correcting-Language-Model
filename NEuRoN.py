@@ -450,12 +450,12 @@ def main():
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
     
     with st.sidebar.expander("🌍 Simulation Physics", expanded=True):
-        sim_speed = st.slider("Simulation Speed (Generations/sec)", 1, 100, 10)
         difficulty = st.slider("Task Complexity (Entropy)", 0.1, 5.0, 1.5)
         noise = st.slider("Stochastic Noise Level", 0.0, 1.0, 0.1)
         
     with st.sidebar.expander("🧬 Evolutionary Dynamics", expanded=True):
         pop_size = st.slider("Population Size", 10, 500, 50)
+        generations_to_run = st.number_input("Generations to Run per Click", 1, 1000, 10)
         mutation_rate = st.slider("Mutation Rate (Alpha)", 0.01, 1.0, 0.2)
         meta_learning = st.checkbox("Enable Meta-Cognitive Self-Correction", True)
         
@@ -473,24 +473,19 @@ def main():
         st.session_state.evolver = CortexEvolver()
         st.session_state.history = []
         st.session_state.generation = 0
-        st.session_state.is_running = False
         
         # Create seed population
         for _ in range(pop_size):
             st.session_state.evolver.population.append(st.session_state.evolver.create_genesis_architecture())
 
-    col1, col2, col3 = st.columns(3)
-    start_btn = col1.button("▶️ INITIATE GENESIS", type="primary")
-    stop_btn = col2.button("⏸️ PAUSE SIMULATION")
-    reset_btn = col3.button("🔄 SYSTEM RESET")
+    col1, col2 = st.columns(2)
+    run_btn = col1.button("▶️ Run Simulation", type="primary")
+    reset_btn = col2.button("🔄 System Reset")
     
-    if start_btn: st.session_state.is_running = True
-    if stop_btn: st.session_state.is_running = False
     if reset_btn:
         st.session_state.evolver = CortexEvolver()
         st.session_state.history = []
         st.session_state.generation = 0
-        st.session_state.is_running = False
         st.rerun()
 
     # --- DASHBOARD LAYOUT ---
@@ -512,10 +507,10 @@ def main():
     
     stats_plot = st.empty()
 
-    # --- SIMULATION LOOP ---
-    if st.session_state.is_running:
-        
-        # 1. EVALUATE
+    # --- SIMULATION LOGIC ---
+    if run_btn:
+        progress_bar = st.progress(0, text="Running simulation...")
+
         evolver = st.session_state.evolver
         # Apply physics settings
         evolver.physics.difficulty = difficulty
@@ -523,71 +518,81 @@ def main():
         
         scores = []
         for arch in evolver.population:
-            loss = evolver.physics.evaluate(arch)
-            arch.loss = loss
-            # Inverse loss mapped to "IQ" for fun
-            arch.accuracy = 100 * (1 / (1 + loss)) 
-            scores.append(loss)
+            if arch.loss == 100.0: # Only evaluate if not already scored
+                loss = evolver.physics.evaluate(arch)
+                arch.loss = loss
+                arch.accuracy = 100 * (1 / (1 + loss))
+
+        for i in range(generations_to_run):
+            # 1. EVALUATE
+            for arch in evolver.population:
+                loss = evolver.physics.evaluate(arch)
+                arch.loss = loss
+                arch.accuracy = 100 * (1 / (1 + loss))
             
-        # 2. SELECT & REPRODUCE
-        evolver.population.sort(key=lambda x: x.loss)
-        elites = evolver.population[:int(pop_size * 0.2)] # Top 20%
-        
-        # Record history
-        best_arch = elites[0]
-        st.session_state.history.append({
-            'generation': st.session_state.generation,
-            'loss': best_arch.loss,
-            'parameter_count': best_arch.parameter_count,
-            'inference_speed': best_arch.inference_speed,
-            'depth': len(best_arch.nodes),
-            'id': best_arch.id
-        })
-        
-        # Create next gen
-        next_gen = [copy.deepcopy(e) for e in elites] # Elites survive
-        
-        while len(next_gen) < pop_size:
-            parent = random.choice(elites)
-            child = evolver.mutate_architecture(parent, mutation_rate)
+            # 2. SELECT & REPRODUCE
+            evolver.population.sort(key=lambda x: x.loss)
+            elites = evolver.population[:int(pop_size * 0.2)] # Top 20%
             
-            # Meta-Cognition: Child analyzes parent's mistakes
-            if meta_learning:
-                # Simulate "Gradient Descent on Topology"
-                # If parent had high compute cost, child prioritizes efficient modules
-                if parent.inference_speed < 100:
-                    child.curiosity += 0.1 # Try weirder things
-                    # Force prune heavy nodes
-                    heavy_nodes = [n for n in child.nodes.values() if n.properties['compute_cost'] > 1.0]
-                    if heavy_nodes and random.random() < 0.5:
-                        victim = random.choice(heavy_nodes)
-                        child.mutations_log.append(f"Meta-Correction: Optimization of {victim.id}")
-                        # Replaced with lighter variant (simulated)
-                        victim.properties['compute_cost'] *= 0.8
+            # Record history for the best of this generation
+            best_arch_gen = elites[0]
+            st.session_state.history.append({
+                'generation': st.session_state.generation,
+                'loss': best_arch_gen.loss,
+                'parameter_count': best_arch_gen.parameter_count,
+                'inference_speed': best_arch_gen.inference_speed,
+                'depth': len(best_arch_gen.nodes),
+                'id': best_arch_gen.id
+            })
+            
+            # Create next gen
+            next_gen = [copy.deepcopy(e) for e in elites] # Elites survive
+            
+            while len(next_gen) < pop_size:
+                parent = random.choice(elites)
+                child = evolver.mutate_architecture(parent, mutation_rate)
                 
-            next_gen.append(child)
-            
-        evolver.population = next_gen
-        st.session_state.generation += 1
+                if meta_learning:
+                    if parent.inference_speed < 100:
+                        child.curiosity += 0.1
+                        heavy_nodes = [n for n in child.nodes.values() if n.properties['compute_cost'] > 1.0]
+                        if heavy_nodes and random.random() < 0.5:
+                            victim = random.choice(heavy_nodes)
+                            child.mutations_log.append(f"Meta-Correction: Optimization of {victim.id}")
+                            victim.properties['compute_cost'] *= 0.8
+                    
+                next_gen.append(child)
+                
+            evolver.population = next_gen
+            st.session_state.generation += 1
+            progress_bar.progress((i + 1) / generations_to_run, text=f"Running Generation {st.session_state.generation}...")
         
-        # --- UPDATE UI ---
-        best_loss_ph.metric("Lowest Loss", f"{best_arch.loss:.4f}", f"{-0.01:.4f}")
-        avg_iq_ph.metric("System IQ", f"{best_arch.accuracy:.1f}", "+1.2")
-        arch_depth_ph.metric("Network Depth", f"{len(best_arch.nodes)} Layers", "+1")
-        gen_ph.metric("Generation", f"{st.session_state.generation}")
-        
-        # 3D Topology Plot of the BEST Architecture
+        progress_bar.empty()
+
+    # --- UI UPDATE LOGIC (runs after simulation step or on first load) ---
+    if st.session_state.evolver.population:
+        # Sort population to find the current best
+        st.session_state.evolver.population.sort(key=lambda x: x.loss)
+        best_arch = st.session_state.evolver.population[0]
+
+        best_loss_ph.metric("Lowest Loss", f"{best_arch.loss:.4f}")
+        avg_iq_ph.metric("Best System IQ", f"{best_arch.accuracy:.1f}")
+        arch_depth_ph.metric("Best Network Depth", f"{len(best_arch.nodes)} Layers")
+        gen_ph.metric("Current Generation", f"{st.session_state.generation}")
+
         with topo_plot:
             fig_3d = plot_neural_topology_3d(best_arch)
-            st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{st.session_state.generation}")
-            
-        # Log Stream
+            st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{best_arch.id}")
+
         with log_area.container():
-            st.markdown("#### 📜 System Logs")
-            for log in best_arch.mutations_log[-5:]:
-                st.code(f"> [GEN {st.session_state.generation}] {log}")
+            st.markdown("#### 📜 Latest Mutations (Best Arch)")
+            if best_arch.mutations_log:
+                for log in best_arch.mutations_log[-5:]:
+                    st.code(f"> {log}")
+            else:
+                st.caption("No mutations logged for this architecture yet.")
             
-            st.markdown("#### 🧠 Top Components")
+            st.markdown("#### 🧠 Top Components (Best Arch)")
             types = [n.type_name for n in best_arch.nodes.values()]
             top_types = Counter(types).most_common(3)
             for t, c in top_types:
@@ -608,11 +613,8 @@ def main():
                 font=dict(color='white')
             )
             stats_plot.plotly_chart(fig_stats, use_container_width=True)
-            
-        time.sleep(0.1 if sim_speed > 50 else 1.0/sim_speed)
-        st.rerun()
 
-    # --- IF PAUSED, SHOW DEEP ANALYSIS ---
+    # --- DEEP ANALYSIS (Always available when not running) ---
     else:
         st.info("Simulation Paused. Detailed Analysis Mode Active.")
         
