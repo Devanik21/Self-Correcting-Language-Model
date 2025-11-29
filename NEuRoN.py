@@ -433,6 +433,93 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     
     return go.Figure(data=[edge_trace, node_trace], layout=layout)
 
+def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
+    """
+    Renders the architecture as an abstract, bio-mechanical sculpture.
+    This uses non-linear mappings to create "bizarre" and beautiful shapes.
+    """
+    if not arch.nodes:
+        return go.Figure()
+
+    G = nx.DiGraph()
+    for nid, node in arch.nodes.items():
+        G.add_node(nid, **(asdict(node)))
+        for parent in node.inputs:
+            if parent in arch.nodes:
+                G.add_edge(parent, nid)
+
+    # Use Kamada-Kawai layout for a more 'organic' base structure
+    try:
+        pos = nx.kamada_kawai_layout(G, dim=3, scale=2)
+    except nx.NetworkXError: # Fallback for disconnected graphs
+        pos = nx.spring_layout(G, dim=3, seed=42, scale=2)
+
+    # --- Create the "Bizarre" Shape Transformation ---
+    node_x, node_y, node_z = [], [], []
+    node_color, node_text, node_size = [], [], []
+
+    for node_id in G.nodes():
+        x, y, z = pos[node_id]
+        props = arch.nodes[node_id].properties
+        
+        # Non-linear warping based on properties
+        complexity = props.get('complexity', 1.0)
+        compute = props.get('compute_cost', 1.0)
+        
+        # Warp space: x -> spiral, y -> wave, z -> based on complexity
+        warped_x = x * math.cos(complexity * math.pi) - y * math.sin(complexity * math.pi)
+        warped_y = x * math.sin(complexity * math.pi) + y * math.cos(complexity * math.pi)
+        warped_z = z + math.sin(compute * 2) * 0.5
+
+        node_x.append(warped_x)
+        node_y.append(warped_y)
+        node_z.append(warped_z)
+
+        node_color.append(props.get('color', '#FFFFFF'))
+        node_size.append(10 + complexity * 5)
+        node_text.append(f"<b>{node_id}</b><br>Type: {arch.nodes[node_id].type_name}<br>Complexity: {complexity:.2f}")
+
+    # Edges connecting the warped points
+    edge_x, edge_y, edge_z = [], [], []
+    for u, v in G.edges():
+        x0, y0, z0 = pos[u]
+        x1, y1, z1 = pos[v]
+        
+        # Apply the same warping to edge endpoints
+        u_props, v_props = arch.nodes[u].properties, arch.nodes[v].properties
+        ux_w = x0 * math.cos(u_props['complexity'] * math.pi) - y0 * math.sin(u_props['complexity'] * math.pi)
+        uy_w = x0 * math.sin(u_props['complexity'] * math.pi) + y0 * math.cos(u_props['complexity'] * math.pi)
+        uz_w = z0 + math.sin(u_props['compute_cost'] * 2) * 0.5
+        
+        vx_w = x1 * math.cos(v_props['complexity'] * math.pi) - y1 * math.sin(v_props['complexity'] * math.pi)
+        vy_w = x1 * math.sin(v_props['complexity'] * math.pi) + y1 * math.cos(v_props['complexity'] * math.pi)
+        vz_w = z1 + math.sin(v_props['compute_cost'] * 2) * 0.5
+
+        edge_x.extend([ux_w, vx_w, None])
+        edge_y.extend([uy_w, vy_w, None])
+        edge_z.extend([uz_w, vz_w, None])
+
+    edge_trace = go.Scatter3d(x=edge_x, y=edge_y, z=edge_z, mode='lines', line=dict(color='#555555', width=1.5), hoverinfo='none')
+    node_trace = go.Scatter3d(x=node_x, y=node_y, z=node_z, mode='markers', text=node_text, hoverinfo='text',
+        marker=dict(
+            size=node_size, color=node_color,
+            line=dict(color='rgba(255, 255, 255, 0.9)', width=2),
+            opacity=0.9, symbol='circle'
+        ))
+
+    layout = go.Layout(
+        title=dict(text=f"Bio-Mechanical Abstract: {arch.id}", font=dict(color='#DDDDDD')),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        scene=dict(xaxis_title='', yaxis_title='', zaxis_title='',
+                   xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                   yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                   zaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                   bgcolor='rgba(0,0,0,0)'),
+        margin=dict(l=0, r=0, b=0, t=40))
+
+    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+
 def plot_loss_landscape_surface(history):
     """
     Visualizes the evolutionary path on a 3D surface representing the loss landscape.
@@ -1210,9 +1297,15 @@ def main():
         metric_placeholders["Parent ID"].metric("Parent ID", best_arch.parent_id)
         metric_placeholders["Architecture ID"].metric("Architecture ID", best_arch.id)
 
-        with topo_plot:
-            fig_3d = plot_neural_topology_3d(best_arch)
-            st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{best_arch.id}")
+        with topo_plot.container():
+            plot_tabs = st.tabs(["🧬 Neural Topology", "🎨 Bio-Mechanical Abstract"])
+            with plot_tabs[0]:
+                fig_3d = plot_neural_topology_3d(best_arch)
+                st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{best_arch.id}")
+            with plot_tabs[1]:
+                fig_abs = plot_architectural_abstract_3d(best_arch)
+                st.plotly_chart(fig_abs, use_container_width=True, key=f"abstract_{best_arch.id}")
+
 
         with log_area.container():
             st.markdown("#### 📜 Latest Mutations (Best Arch)")
