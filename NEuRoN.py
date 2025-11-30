@@ -260,7 +260,7 @@ class LossLandscapePhysics:
         G = nx.DiGraph()
         ai_complexity = 0
         for nid, node in arch.nodes.items():
-            G.add_node(nid); 
+            G.add_node(nid)
             for p in node.inputs: G.add_edge(p, nid)
             # Bonus for using advanced AI nodes
             if node.properties['type'] in ['Attention', 'SSM', 'Meta']:
@@ -272,12 +272,16 @@ class LossLandscapePhysics:
             depth = 1
         
         # Intelligence Score (Higher is better)
-        intelligence = (depth * 0.5) + (ai_complexity * 0.2)
-        ignorance_penalty = max(0, 10.0 - intelligence) # We punish it if it's too stupid
+        # UPDATE: We boosted the multiplier for depth and complexity!
+        intelligence = (depth * 2.5) + (ai_complexity * 3.0) 
+        
+        # Ignorance Penalty: Lowered the ceiling so it's easier to become "smart"
+        ignorance_penalty = max(0, 50.0 - intelligence) 
 
         # --- 2. CALCULATE AGING (The "Body") ---
         # Metabolic Stress: Complex AI brains generate "heat" (entropy)
-        metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty
+        # UPDATE: We divided stress by 10.0 to make parameters 'cheaper'
+        metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.1 
         
         # Repair Capacity: Sum of all Biological Primitives
         repair_power = 0
@@ -285,18 +289,18 @@ class LossLandscapePhysics:
         for node in arch.nodes.values():
             if node.properties['type'] == 'Repair': repair_power += node.properties['complexity']
             if node.properties['type'] == 'Cleanup': cleanup_power += node.properties['complexity']
-            if node.properties['type'] == 'Energy': metabolic_stress *= 0.8 # Energy nodes reduce stress!
+            if node.properties['type'] == 'Energy': metabolic_stress *= 0.5 # Energy nodes are now very powerful!
 
         # The Aging Equation: 
-        # Aging = (Stress) - (Repair + Cleanup)
-        current_aging = max(0, metabolic_stress - (repair_power * 1.5 + cleanup_power))
+        current_aging = max(0, metabolic_stress - (repair_power * 2.0 + cleanup_power))
         
         # Store the Aging Score specifically for the plot!
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
         # The AI must minimize BOTH ignorance and aging.
-        total_loss = ignorance_penalty + (current_aging * 2.0) 
+        # UPDATE: We balanced the weights.
+        total_loss = ignorance_penalty + (current_aging * 0.5) 
         
         return max(0.0001, total_loss)
 
@@ -348,70 +352,83 @@ class CortexEvolver:
         
         node_ids = list(child.nodes.keys())
         
-        # 1. Add Node (Layer)
+        # UPDATE: Boosted mutation probability slightly for this function scope
+        effective_rate = max(mutation_rate, 0.3) # Ensure at least 30% chance of change
+
+        # 1. Add Node (Layer) - The "Growth" Spurt
         depth_growth_rate = st.session_state.get('depth_growth_rate', 1)
-        for _ in range(random.randint(1, depth_growth_rate)):
-            if random.random() < mutation_rate:
+        
+        # UPDATE: Loop ensures we try harder to add nodes
+        for _ in range(random.randint(1, max(1, depth_growth_rate))):
+            if random.random() < effective_rate:
                 # Pick a random insertion point
-                if len(node_ids) > 1:
+                if len(node_ids) >= 1:
                     target_id = random.choice(node_ids)
-                    if target_id != "input":
+                    if target_id != "input_sensor": # Don't mess with the input sensor directly
                         # Create new node
                         new_type_name = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                        new_props = NEURAL_PRIMITIVES[new_type_name]
+                        new_props = NEURAL_PRIMITIVES[new_type_name].copy() # Important: Copy properties!
                         new_id = f"{new_type_name.split('-')[0]}_{uuid.uuid4().hex[:4]}"
                         
-                        new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=child.nodes[target_id].inputs)
+                        # Logic: Insert NEW node between Target and its Inputs
+                        # This ensures the graph actually gets longer/deeper
+                        original_inputs = child.nodes[target_id].inputs.copy()
+                        if not original_inputs: continue # Skip if orphan
+
+                        new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=original_inputs)
                         
                         # Reroute target to point to new node
                         child.nodes[target_id].inputs = [new_id]
                         child.nodes[new_id] = new_node
                         child.mutations_log.append(f"Inserted {new_type_name} before {target_id}")
 
-        # 2. Add Skip Connection (Residual)
-        if random.random() < mutation_rate:
+        # 2. Add Skip Connection (Residual) - The "Brain Wiring"
+        if random.random() < effective_rate:
             if len(node_ids) > 2:
                 source_id = random.choice(node_ids)
                 target_id = random.choice(node_ids)
                 
-                # --- Robust Cycle Prevention ---
-                # Build a temporary graph to check for path existence
+                # Robust Cycle Prevention
                 G_temp = nx.DiGraph()
                 for nid, node in child.nodes.items():
                     for parent in node.inputs:
                         G_temp.add_edge(parent, nid)
 
-                # A cycle would be created if a path already exists from target to source
-                if target_id != "input" and source_id != target_id and source_id not in child.nodes[target_id].inputs and not nx.has_path(G_temp, target_id, source_id):
-                    child.nodes[target_id].inputs.append(source_id)
-                    child.mutations_log.append(f"Added Skip Connection {source_id} -> {target_id}")
+                # Only add if path does NOT exist (prevents cycles) and not self-loop
+                if source_id != target_id and source_id not in child.nodes[target_id].inputs:
+                    try:
+                        if not nx.has_path(G_temp, target_id, source_id):
+                            child.nodes[target_id].inputs.append(source_id)
+                            child.mutations_log.append(f"Added Skip Connection {source_id} -> {target_id}")
+                    except:
+                        pass # NetworkX error safety
 
-        # 3. Change Component Type (Mutation)
-        if random.random() < mutation_rate:
+        # 3. Change Component Type (Mutation) - The "Evolution"
+        if random.random() < effective_rate:
             target_id = random.choice(node_ids)
-            if target_id not in ["input", "output"]:
+            # Don't mutate the fixed input/output/mitochondria structure too easily
+            if target_id not in ["input_sensor", "output_action", "mitochondria_0"]:
                 new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
                 child.nodes[target_id].type_name = new_type
-                child.nodes[target_id].properties = NEURAL_PRIMITIVES[new_type]
+                child.nodes[target_id].properties = NEURAL_PRIMITIVES[new_type].copy()
                 child.mutations_log.append(f"Mutated {target_id} to {new_type}")
                 
         # 4. Meta-Cognitive Pruning (Self-Correction)
-        # The AI realizes a node is useless and removes it
-        if child.self_confidence > 0.6 and random.random() < 0.1:
-            if len(node_ids) > 3:
-                target_to_prune = random.choice(node_ids[1:-1]) # Don't prune I/O
-                # Rewire
-                inputs_of_pruned = child.nodes[target_to_prune].inputs
-                for n_id, n in child.nodes.items():
-                    if target_to_prune in n.inputs:
-                        n.inputs.remove(target_to_prune)
-                        n.inputs.extend(inputs_of_pruned)
-                del child.nodes[target_to_prune]
-                child.mutations_log.append(f"Self-Corrected: Pruned inefficient node {target_to_prune}")
+        # UPDATE: Made pruning rarer so we don't delete progress too fast
+        if child.self_confidence > 0.8 and random.random() < 0.05:
+            if len(node_ids) > 5: # Only prune if we are big enough
+                target_to_prune = random.choice(node_ids[1:-1]) 
+                if target_to_prune in child.nodes:
+                    inputs_of_pruned = child.nodes[target_to_prune].inputs
+                    for n_id, n in child.nodes.items():
+                        if target_to_prune in n.inputs:
+                            n.inputs.remove(target_to_prune)
+                            n.inputs.extend(inputs_of_pruned)
+                    del child.nodes[target_to_prune]
+                    child.mutations_log.append(f"Pruned inefficient node {target_to_prune}")
 
         child.compute_stats()
         return child
-
 # ==================== VISUALIZATION ENGINE (PLOTLY) ====================
 
 # ==================== VISUALIZATION ENGINE (PLOTLY): DEEPMIND EDITION ====================
@@ -434,7 +451,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
                 G.add_edge(parent, nid)
             
     # Layout
-    pos = nx.spring_layout(G, dim=3, seed=42)
+    pos = nx.spring_layout(G, dim=3)
     
     # Edges
     edge_x, edge_y, edge_z = [], [], []
