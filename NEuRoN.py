@@ -469,20 +469,35 @@ class CortexEvolver:
 
         # --- STRATEGY 3: SYNAPTIC REWIRING (The Brain) ---
         # Connect unconnected areas to increase 'Brain Power' (Depth)
+        # --- STRATEGY 3: SYNAPTIC REWIRING (The Brain) ---
+        # Connect unconnected areas to increase 'Brain Power' (Depth)
         if random.random() < effective_rate:
             if len(node_ids) > 4:
                 src = random.choice(node_ids)
                 tgt = random.choice(node_ids)
                 
-                # Check for cycles
+                # --- FIX START: ROBUST CYCLE CHECKING ---
+                # 1. Create a graph that definitely contains ALL nodes
                 G_temp = nx.DiGraph()
-                for nid, node in child.nodes.items():
-                    for p in node.inputs: G_temp.add_edge(p, nid)
+                G_temp.add_nodes_from(child.nodes.keys()) # <--- CRITICAL FIX
                 
+                # 2. Add existing connections
+                for nid, node in child.nodes.items():
+                    for p in node.inputs: 
+                        if p in child.nodes: # Double safety check
+                            G_temp.add_edge(p, nid)
+                
+                # 3. Safe Path Check
                 if src != tgt and src not in child.nodes[tgt].inputs:
-                     if not nx.has_path(G_temp, tgt, src): # Prevent cycle
-                        child.nodes[tgt].inputs.append(src)
-                        child.mutations_log.append(f"Synaptic Rewiring: {src} -> {tgt}")
+                    # Only check for path if both nodes exist in the graph (Triple safety)
+                    if G_temp.has_node(src) and G_temp.has_node(tgt):
+                        try:
+                            if not nx.has_path(G_temp, tgt, src): # Prevent cycle
+                                child.nodes[tgt].inputs.append(src)
+                                child.mutations_log.append(f"Synaptic Rewiring: {src} -> {tgt}")
+                        except Exception:
+                            pass # If pathfinding fails, we just skip this mutation
+                # --- FIX END ---
 
         child.compute_stats()
         return child
