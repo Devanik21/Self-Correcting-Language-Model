@@ -2264,11 +2264,18 @@ def main():
      # --- SELF-HEALING MECHANISM (Fixes AttributeError) ---
     # This loop checks every existing AI. If they lack the new 'aging_score'
     # attribute (because they are from an older session), we give them a default value.
+    # --- SELF-HEALING MECHANISM (Upgraded) ---
+    # Fixes both "Missing Attributes" and "Ghost Immortality"
     for arch in st.session_state.evolver.population:
+        # 1. Add missing aging score if it doesn't exist
         if not hasattr(arch, 'aging_score'):
-            arch.aging_score = 100.0  # Default to "Mortal"
+            arch.aging_score = 100.0
             
-    # Also heal the archive if it exists
+        # 2. CURE GHOST IMMORTALITY: If params are 0, force a re-weighing!
+        if arch.parameter_count == 0:
+            arch.compute_stats()
+            
+    # Also heal the archive
     if 'archive' in st.session_state.evolver.__dict__:
         for gen, arch in st.session_state.evolver.archive.items():
             if not hasattr(arch, 'aging_score'):
