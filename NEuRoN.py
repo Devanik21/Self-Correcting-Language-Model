@@ -496,6 +496,112 @@ def build_nx_graph(arch, directed=True):
 
 
 
+def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
+    """
+    Renders the architecture using the Golden Ratio (Fibonacci Phyllotaxis).
+    This mimics how living organisms (like pinecones or sunflowers) arrange 
+    growing cells for maximum packing efficiency.
+    """
+    G = nx.DiGraph()
+    for nid, node in arch.nodes.items():
+        # Safe attribute access
+        props = getattr(node, 'properties', {})
+        t_name = getattr(node, 'type_name', 'Unknown')
+        G.add_node(nid, type=t_name, color=props.get('color', '#FFFFFF'), complexity=props.get('complexity', 1.0))
+        
+        inputs = getattr(node, 'inputs', [])
+        for parent in inputs:
+            if parent in arch.nodes:
+                G.add_edge(parent, nid)
+    
+    node_list = list(G.nodes())
+    num_nodes = len(node_list)
+    
+    # --- FIBONACCI PHYLLOTAXIS MATH ---
+    golden_angle = math.pi * (3 - math.sqrt(5)) # ~137.5 degrees in radians
+    
+    node_x, node_y, node_z = [], [], []
+    pos_map = {}
+    
+    for i, node in enumerate(node_list):
+        # Y goes from -1 to 1 (Height of the structure)
+        y = 1 - (i / (num_nodes - 1)) * 2 if num_nodes > 1 else 0
+        
+        # Radius at this height (Spherical distribution)
+        radius = math.sqrt(1 - y * y) * 10
+        
+        # Angle based on Golden Ratio
+        theta = golden_angle * i
+        
+        x = math.cos(theta) * radius
+        z = math.sin(theta) * radius
+        y = y * 12 # Stretch height
+        
+        # Add organic jitter
+        x += random.uniform(-0.5, 0.5)
+        z += random.uniform(-0.5, 0.5)
+        
+        pos_map[node] = (x, y, z)
+        node_x.append(x)
+        node_y.append(y)
+        node_z.append(z)
+
+    # Render Nodes
+    node_colors = [G.nodes[n]['color'] for n in node_list]
+    node_sizes = [8 + G.nodes[n]['complexity'] * 5 for n in node_list]
+    
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        marker=dict(
+            size=node_sizes,
+            color=node_colors,
+            colorscale='Viridis', # Nature-like gradient
+            line=dict(color='rgba(255,255,255,0.5)', width=1),
+            opacity=0.9
+        ),
+        text=[f"Neuron: {n}<br>Type: {G.nodes[n]['type']}" for n in node_list],
+        hoverinfo='text'
+    )
+    
+    # Render Organic Tendrils (Edges)
+    edge_x, edge_y, edge_z = [], [], []
+    for u, v in G.edges():
+        if u in pos_map and v in pos_map:
+            x0, y0, z0 = pos_map[u]
+            x1, y1, z1 = pos_map[v]
+            
+            # Curved lines using a mid-point control (Quadratic Bezier simulation)
+            mid_x = (x0 + x1) / 2 * 0.8 # Pull towards center
+            mid_y = (y0 + y1) / 2
+            mid_z = (z0 + z1) / 2 * 0.8
+            
+            # Segment the line for curvature
+            edge_x.extend([x0, mid_x, x1, None])
+            edge_y.extend([y0, mid_y, y1, None])
+            edge_z.extend([z0, mid_z, z1, None])
+
+    edge_trace = go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z,
+        mode='lines',
+        line=dict(color='rgba(100, 200, 100, 0.4)', width=2), # Plant-like green connections
+        hoverinfo='none'
+    )
+
+    layout = go.Layout(
+        title=dict(text=f"Fibonacci Neuro-Spiral: {arch.id}", font=dict(color='#AAFFAA')),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=40)
+    )
+    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+
+
+
 
 
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
@@ -2232,11 +2338,14 @@ def main():
             # ==================== NEW SECTION: ABSTRACT DECK ====================
             st.markdown("### 🔮 Abstract Visualization Deck")
             
-            # 1. Cyberpunk Topology (Displayed by Default)
-            with st.expander("Cyberpunk Neural Topology (Holographic View)", expanded=True):
-                with st.spinner("Rendering Cyberpunk Holograph..."):
-                    fig_cyber = plot_neural_topology_3d(best_arch)
-                    st.plotly_chart(fig_cyber, use_container_width=True)
+            # 1. Fibonacci Neuro-Spiral (Nature's Math) - LAZY LOADED (Collapsed)
+            with st.expander("Fibonacci Neuro-Spiral (Golden Ratio View)", expanded=False):
+                with st.spinner("Calculating Phyllotaxis Geometry..."):
+                    fig_spiral = plot_fibonacci_phyllotaxis_3d(best_arch)
+                    st.plotly_chart(fig_spiral, use_container_width=True)
+
+            
+
             
             # 2. Bio-Mechanical Abstract (Hidden by Default)
             with st.expander("Bio-Mechanical Abstract (Artistic View)", expanded=False):
