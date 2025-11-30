@@ -2089,6 +2089,58 @@ def main():
     # --- MAIN PAGE ---
     st.title("Autonomous Architecture Evolution")
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
+
+    # ==================== CYBERPUNK UI STYLING ====================
+    st.markdown("""
+    <style>
+        /* 1. Target ALL buttons (Primary & Secondary) */
+        div.stButton > button {
+            background-color: transparent !important;
+            color: #00FFFF !important;              /* Neon Cyan Text */
+            border: 2px solid #00FFFF !important;   /* Neon Cyan Border */
+            border-radius: 4px !important;          /* Sharp, techy corners */
+            
+            /* The Glow Effect */
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 5px rgba(0, 255, 255, 0.1) !important;
+            
+            transition: all 0.3s ease-in-out !important;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5) !important;
+            font-family: 'Courier New', monospace !important;
+            font-weight: bold !important;
+            letter-spacing: 1px !important;
+        }
+
+        /* 2. Hover State (High Energy) */
+        div.stButton > button:hover {
+            background-color: rgba(0, 255, 255, 0.05) !important; /* Slight fill on hover */
+            box-shadow: 0 0 20px #00FFFF, inset 0 0 10px #00FFFF !important; /* Intense Glow */
+            color: #FFFFFF !important;             /* White Text on Hover */
+            border-color: #FFFFFF !important;      /* White Border on Hover */
+            transform: scale(1.02) !important;     /* Slight pop effect */
+        }
+
+        /* 3. Active/Click State */
+        div.stButton > button:active {
+            transform: scale(0.98) !important;
+            box-shadow: 0 0 5px #00FFFF !important;
+        }
+
+        /* 4. FORCE OVERRIDE for "Primary" Red Buttons */
+        button[kind="primary"] {
+            background-color: transparent !important;
+            border-color: #00FFFF !important;
+            color: #00FFFF !important;
+        }
+        
+        /* 5. Target the Expander Headers (optional, to match the theme) */
+        .streamlit-expanderHeader {
+            background-color: transparent !important;
+            color: #00FFFF !important;
+            border: 1px solid rgba(0, 255, 255, 0.3) !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    # ==============================================================
     
     # Session State Initialization
     if 'evolver' not in st.session_state or not st.session_state.evolver.population:
