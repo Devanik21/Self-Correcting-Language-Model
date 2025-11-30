@@ -121,6 +121,23 @@ NEURAL_PRIMITIVES = {
     'Gene_Silencer': {'type': 'Control', 'complexity': 0.4, 'param_density': 0.1, 'compute_cost': 0.1, 'memory_cost': 0.0, 'plasticity': 0.2, 'color': '#606060'},
 }
 
+# ... [Keep your existing NEURAL_PRIMITIVES here] ...
+
+# ==================== APPEND THESE BIOLOGICAL PRIMITIVES ====================
+# These are the specific "genes" the AI can choose to evolve to stop aging.
+
+# 1. THE REPAIR GENES (Lowers Entropy directly)
+NEURAL_PRIMITIVES['Telomerase_Pump'] = {'type': 'Repair', 'complexity': 2.5, 'param_density': 1.0, 'compute_cost': 3.0, 'memory_cost': 2.0, 'plasticity': 0.4, 'color': '#FF0055'}
+NEURAL_PRIMITIVES['DNA_Error_Corrector'] = {'type': 'Repair', 'complexity': 3.0, 'param_density': 0.8, 'compute_cost': 2.5, 'memory_cost': 1.5, 'plasticity': 0.1, 'color': '#FF5500'}
+
+# 2. THE ENERGY REGULATORS (Reduces Metabolic Stress)
+NEURAL_PRIMITIVES['Mitochondrial_Filter'] = {'type': 'Energy', 'complexity': 1.2, 'param_density': 0.9, 'compute_cost': 0.8, 'memory_cost': 0.8, 'plasticity': 0.9, 'color': '#FFFF00'}
+NEURAL_PRIMITIVES['Caloric_Restrictor'] = {'type': 'Energy', 'complexity': 0.8, 'param_density': 0.7, 'compute_cost': 0.5, 'memory_cost': 0.6, 'plasticity': 0.5, 'color': '#CCFF00'}
+
+# 3. THE CLEANUP CREW (Removes Dead Nodes/Senescent Cells)
+NEURAL_PRIMITIVES['Senolytic_Hunter'] = {'type': 'Cleanup', 'complexity': 2.0, 'param_density': 2.0, 'compute_cost': 1.5, 'memory_cost': 1.0, 'plasticity': 0.9, 'color': '#0055FF'}
+NEURAL_PRIMITIVES['Autophagy_Trigger'] = {'type': 'Cleanup', 'complexity': 0.5, 'param_density': 1.5, 'compute_cost': 0.5, 'memory_cost': 1.0, 'plasticity': 0.4, 'color': '#00AAFF'}
+
 # --- EXTEND THE REGISTRY FOR "EXTREME COMPLEXITY" ---
 # Procedurally generating variations to simulate a massive search space
 modifiers = ['Gated', 'Norm', 'Pre-LN', 'Post-LN', 'Quantized', 'LoRA', 'Bayesian']
@@ -176,6 +193,9 @@ class CognitiveArchitecture:
     inference_speed: float = 0.0 # Tokens/sec
     parameter_count: int = 0
     vram_usage: float = 0.0 # GB
+
+
+    aging_score: float = 100.0 # 100 = Mortal, 0 = Immortal
     
     # Meta-Cognitive State
     self_confidence: float = 0.5 # AI's estimation of its own correctness
@@ -231,54 +251,54 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates the 'Mortality Score'.
-        To survive, the AI must be both Intelligent (Function) and Ageless (Structure).
-        
-        Formula: Mortality = (Ignorance) + (Cellular_Decay)
+        Calculates fitness based on:
+        1. Intelligence (Can it think?)
+        2. Longevity (Can it stop aging?)
         """
-        # 1. Structural Analysis using NetworkX
+        # --- 1. CALCULATE INTELLIGENCE (The "Brain") ---
+        # We check if it has good AI components (Attention, SSM, etc.)
         G = nx.DiGraph()
+        ai_complexity = 0
         for nid, node in arch.nodes.items():
-            G.add_node(nid, type=node.type_name)
-            for parent in node.inputs:
-                G.add_edge(parent, nid)
-        
-        # --- FACTOR A: INTELLIGENCE (The "Mind") ---
-        # Connectivity and Complexity represent the ability to think.
+            G.add_node(nid); 
+            for p in node.inputs: G.add_edge(p, nid)
+            # Bonus for using advanced AI nodes
+            if node.properties['type'] in ['Attention', 'SSM', 'Meta']:
+                ai_complexity += node.properties['complexity']
+
         try:
             depth = nx.dag_longest_path_length(G)
         except:
-            depth = 1 
-            
-        # Diversity of AI components (Attention, MLP, SSM)
-        node_types = [n.properties['type'] for n in arch.nodes.values()]
-        ai_types = ['Attention', 'SSM', 'MLP', 'Memory']
-        ai_diversity = sum(1 for t in set(node_types) if t in ai_types)
+            depth = 1
         
-        # Ignorance Penalty: High if the network is too simple or disconnected
-        ignorance = 100.0 / (depth * ai_diversity + 1.0)
+        # Intelligence Score (Higher is better)
+        intelligence = (depth * 0.5) + (ai_complexity * 0.2)
+        ignorance_penalty = max(0, 10.0 - intelligence) # We punish it if it's too stupid
 
-        # --- FACTOR B: CELLULAR DECAY (The "Body") ---
-        # Metabolic Stress: Thinking costs energy. More parameters = More Free Radicals.
+        # --- 2. CALCULATE AGING (The "Body") ---
+        # Metabolic Stress: Complex AI brains generate "heat" (entropy)
         metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty
         
-        # Repair Capacity: The sum of all biological defense mechanisms
-        repair_types = ['Repair', 'Cleanup', 'Defense', 'Energy']
-        repair_capacity = sum(n.properties['complexity'] for n in arch.nodes.values() if n.properties['type'] in repair_types)
+        # Repair Capacity: Sum of all Biological Primitives
+        repair_power = 0
+        cleanup_power = 0
+        for node in arch.nodes.values():
+            if node.properties['type'] == 'Repair': repair_power += node.properties['complexity']
+            if node.properties['type'] == 'Cleanup': cleanup_power += node.properties['complexity']
+            if node.properties['type'] == 'Energy': metabolic_stress *= 0.8 # Energy nodes reduce stress!
+
+        # The Aging Equation: 
+        # Aging = (Stress) - (Repair + Cleanup)
+        current_aging = max(0, metabolic_stress - (repair_power * 1.5 + cleanup_power))
         
-        # The Entropy Equation:
-        # Decay = Stress - (Repair * Efficiency)
-        decay = metabolic_stress - (repair_capacity * 1.2)
+        # Store the Aging Score specifically for the plot!
+        arch.aging_score = current_aging
+
+        # --- 3. TOTAL LOSS ---
+        # The AI must minimize BOTH ignorance and aging.
+        total_loss = ignorance_penalty + (current_aging * 2.0) 
         
-        # If Repair > Stress, Decay becomes Negative (Rejuvenation)
-        # However, we add a base aging factor that always increases with time (noise)
-        aging_factor = max(0, decay) + random.normalvariate(0, self.noise)
-        
-        # --- FINAL MORTALITY SCORE ---
-        # We want to minimize THIS number.
-        mortality_score = ignorance + aging_factor + (len(arch.nodes) * 0.01) # Small tax on size
-        
-        return max(0.0001, mortality_score)
+        return max(0.0001, total_loss)
 
 class CortexEvolver:
     """
@@ -523,6 +543,63 @@ def build_nx_graph(arch, directed=True):
             if parent in arch.nodes:
                 G.add_edge(parent, nid)
     return G
+
+
+
+
+
+def plot_immortality_curve(history):
+    """
+    Visualizes the evolutionary journey toward 'Biological Immortality'.
+    Y-Axis: Aging Score (Lower is better).
+    X-Axis: Generations.
+    """
+    if not history: return go.Figure()
+    
+    df = pd.DataFrame(history)
+    
+    # We need to ensure 'aging_score' is in the history. 
+    # (See Step 5 for how to make sure it gets there).
+    if 'aging_score' not in df.columns:
+        return go.Figure()
+
+    fig = go.Figure()
+    
+    # 1. The Aging Trajectory Line
+    fig.add_trace(go.Scatter(
+        x=df['generation'], 
+        y=df['aging_score'],
+        mode='lines+markers',
+        name='Biological Age',
+        line=dict(color='#00FFCC', width=3, shape='spline'), # Cyan "Life" color
+        marker=dict(size=8, color='#FFFFFF', line=dict(width=2, color='#00FFCC'))
+    ))
+    
+    # 2. The "Immortality Threshold" (Zero Line)
+    fig.add_hline(y=0.1, line_dash="dash", line_color="#FF0055", annotation_text="IMMORTALITY THRESHOLD")
+
+    # 3. Add a fill to show the "Zone of Mortality"
+    fig.add_trace(go.Scatter(
+        x=df['generation'], y=df['aging_score'],
+        fill='tozeroy',
+        fillcolor='rgba(0, 255, 204, 0.1)', # Faint glow
+        mode='none',
+        showlegend=False
+    ))
+
+    fig.update_layout(
+        title="🧬 The Path to Immortality (Aging Reduction over Time)",
+        xaxis_title="Generation",
+        yaxis_title="Cellular Aging Score (Entropy)",
+        template="plotly_dark",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Courier New, monospace"),
+        hovermode="x unified"
+    )
+    return fig
+
+
 
 
 
@@ -2211,6 +2288,9 @@ def main():
     
     stats_plot = st.empty()
 
+ 
+
+
     # --- SIMULATION LOGIC ---
     if run_btn:
        
@@ -2254,6 +2334,7 @@ def main():
                 'generation': st.session_state.generation,
                 'loss': best_arch_gen.loss,
                 'parameter_count': best_arch_gen.parameter_count,
+                'aging_score': best_arch_gen.aging_score, # <--- ADD THIS!
                 'inference_speed': best_arch_gen.inference_speed,
                 'depth': len(best_arch_gen.nodes),
                 'id': best_arch_gen.id
@@ -2446,6 +2527,8 @@ def main():
             
             st.divider()
 
+            
+
             # ==================== MAIN INSPECTION DECK ====================
             st.markdown("### 🧬 Holographic Architecture Inspection")
             
@@ -2580,6 +2663,22 @@ def main():
                 font=dict(color='white')
             )
             stats_plot.plotly_chart(fig_stats, use_container_width=True)
+         # --- [START OF NEW CODE] ---
+        # 1. Create the visual space for the Longevity Plot
+        st.markdown("---")
+        st.markdown("### 🧬 Longevity Analysis (The Path to Immortality)")
+        aging_plot_col = st.empty()
+
+        # 2. Calculate and Draw the "Aging Curve"
+        with aging_plot_col.container():
+            if st.session_state.history:
+                # This calls the function we added to the visualization section
+                fig_aging = plot_immortality_curve(st.session_state.history)
+                st.plotly_chart(fig_aging, use_container_width=True)
+            else:
+                st.info("Awaiting evolution data for longevity analysis...")
+        # --- [END OF NEW CODE] ---
+          
 
     # --- DEEP ANALYSIS (Always available when not running) ---
     else:
