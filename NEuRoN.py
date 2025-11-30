@@ -1911,32 +1911,91 @@ def main():
         metric_placeholders["Parent ID"].metric("Parent ID", best_arch.parent_id)
         metric_placeholders["Architecture ID"].metric("Architecture ID", best_arch.id)
 
+# ==================== REPLACEMENT BLOCK START ====================
+        
+        # 1. Initialize State for the Visualization Deck
+        if 'current_viz_view' not in st.session_state:
+            st.session_state.current_viz_view = 'Neural Topology' # Default view
+
         with topo_plot.container():
-            plot_tabs = st.tabs(["🧬 Neural Topology", "🎨 Bio-Mechanical Abstract"])
-            with plot_tabs[0]:
-                # The primary topology view loads by default
-                fig_3d = plot_neural_topology_3d(best_arch)
-                st.plotly_chart(fig_3d, use_container_width=True, key=f"topo_{best_arch.id}")
-            with plot_tabs[1]:
-                # Lazy load the abstract plot on click
-                if 'abstract_loaded' not in st.session_state:
-                    st.session_state.abstract_loaded = False
+            st.markdown("### 🧬 Holographic Architecture Inspection")
+            
+            # 2. Define the Registry of 12 Views (Connecting your new functions!)
+            viz_registry = {
+                "Structural Engineering": {
+                    "Neural Topology": plot_neural_topology_3d,
+                    "Component Cityscape": plot_component_cityscape_3d,
+                    "Architectural Flux": plot_architectural_flux,
+                    "Radial Density": plot_radial_network_density_3d,
+                },
+                "Abstract Manifolds": {
+                    "Phenotype Manifold": plot_architectural_abstract_3d,
+                    "Hyperbolic Map": plot_hyperbolic_connectivity_3d,
+                    "Temporal Vortex": plot_temporal_vortex_3d,
+                    "Entropy Quasar": plot_entropy_diversity_quasar,
+                },
+                "Analytical Metrics": {
+                    "Loss Gradient Force": plot_loss_gradient_force_3d,
+                    "Compute Landscape": plot_compute_cost_landscape,
+                    "Type Clusters": plot_component_type_manifold,
+                    "Genetic Heritage": plot_genetic_heritage_view,
+                }
+            }
 
-                # Reset if the architecture we are looking at has changed
-                if st.session_state.get('abstract_arch_id') != best_arch.id:
-                    st.session_state.abstract_loaded = False
-                    st.session_state.abstract_arch_id = best_arch.id
+            # 3. The Control Panel (Buttons for Lazy Loading)
+            st.caption("Select a lens to analyze the Neural Substrate:")
+            
+            for category, views in viz_registry.items():
+                cols = st.columns(len(views))
+                for i, (view_name, view_func) in enumerate(views.items()):
+                    # Check if this view is currently active
+                    is_active = (st.session_state.current_viz_view == view_name)
+                    
+                    # Create the button
+                    if cols[i].button(
+                        f"{'🔴' if is_active else '⚪'} {view_name}", 
+                        key=f"btn_{view_name}", 
+                        use_container_width=True,
+                        type="primary" if is_active else "secondary"
+                    ):
+                        st.session_state.current_viz_view = view_name
+                        st.rerun() # Reload to render the new choice
 
-                if st.session_state.abstract_loaded:
-                    if st.button("Hide Abstract View", key="hide_abstract"):
-                        st.session_state.abstract_loaded = False
-                        st.rerun()
-                    fig_abs = plot_architectural_abstract_3d(best_arch)
-                    st.plotly_chart(fig_abs, use_container_width=True, key=f"abstract_{best_arch.id}")
-                else:
-                    if st.button("Generate Abstract View", key="load_abstract"):
-                        st.session_state.abstract_loaded = True
-                        st.rerun()
+            st.divider()
+
+            # 4. Lazy Rendering Engine
+            # This logic finds the correct function and runs ONLY that one
+            selected_view = st.session_state.current_viz_view
+            
+            # Search for the function in our registry
+            active_func = None
+            for cat in viz_registry.values():
+                if selected_view in cat:
+                    active_func = cat[selected_view]
+                    break
+            
+            # Render the plot
+            if active_func:
+                try:
+                    with st.spinner(f"Rendering {selected_view} via Plotly WebGL..."):
+                        # Generate the figure (This is where the magic happens)
+                        fig = active_func(best_arch)
+                        
+                        # Apply consistent DeepMind styling
+                        fig.update_layout(
+                            height=700, 
+                            margin=dict(l=0, r=0, b=0, t=40),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            font=dict(family="Courier New, monospace", color="#EEEEEE")
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                except Exception as e:
+                    st.error(f"⚠️ Holographic Projection Failed: {str(e)}")
+                    st.caption("Try selecting a simpler view or resetting the simulation.")
+
+        # ==================== REPLACEMENT BLOCK END ====================
 
 
         with log_area.container():
