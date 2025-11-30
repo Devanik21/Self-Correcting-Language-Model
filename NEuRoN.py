@@ -2228,11 +2228,12 @@ def main():
             st.session_state.current_viz_view = 'Neural Topology' # Default view
 
         with topo_plot.container():
+            
 
             # [Existing Code] ... metric_placeholders["Architecture ID"].metric("Architecture ID", best_arch.id)
 
-        # ==================== NEW SECTION: ABSTRACT DECK ====================
-        st.markdown("### 🔮 Abstract Visualization Deck")
+        
+            st.markdown("### 🔮 Abstract Visualization Deck")
         
         # 1. Cyberpunk Topology (Displayed by Default)
         with st.expander("Cyberpunk Neural Topology (Holographic View)", expanded=True):
@@ -2247,10 +2248,8 @@ def main():
                 st.plotly_chart(fig_abstract, use_container_width=True)
         
         st.divider()
-        # ====================================================================
 
-        # [Existing Code] ... with topo_plot.container():
-        # [Existing Code] ...    st.markdown("### 🧬 Holographic Architecture Inspection")
+        
             st.markdown("### 🧬 Holographic Architecture Inspection")
             
             # 2. Define the Registry of 12 Views (Connecting your new functions!)
