@@ -2091,52 +2091,60 @@ def main():
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
 
     # ==================== CYBERPUNK UI STYLING ====================
+    # ==================== CYBERPUNK GLASS UI STYLING ====================
     st.markdown("""
     <style>
-        /* 1. Target ALL buttons (Primary & Secondary) */
+        /* 1. Target ALL buttons */
         div.stButton > button {
-            background-color: transparent !important;
-            color: #00FFFF !important;              /* Neon Cyan Text */
-            border: 2px solid #00FFFF !important;   /* Neon Cyan Border */
-            border-radius: 4px !important;          /* Sharp, techy corners */
+            background: rgba(0, 255, 255, 0.02) !important; /* Tiny hint of color */
+            backdrop-filter: blur(8px) !important;          /* Frosted Glass Effect */
+            -webkit-backdrop-filter: blur(8px) !important;
             
-            /* The Glow Effect */
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 5px rgba(0, 255, 255, 0.1) !important;
+            color: #00FFFF !important;
+            border: 1px solid rgba(0, 255, 255, 0.5) !important; /* Semi-transparent border */
+            border-radius: 20px !important;                 /* MODERN CURVED EDGES */
             
-            transition: all 0.3s ease-in-out !important;
-            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5) !important;
+            /* Soft, attractive glow */
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1) !important;
+            
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important; /* Smooth physics */
             font-family: 'Courier New', monospace !important;
-            font-weight: bold !important;
-            letter-spacing: 1px !important;
+            letter-spacing: 2px !important;
+            padding: 0.5rem 1.5rem !important;
         }
 
-        /* 2. Hover State (High Energy) */
+        /* 2. Hover State (The "Activation") */
         div.stButton > button:hover {
-            background-color: rgba(0, 255, 255, 0.05) !important; /* Slight fill on hover */
-            box-shadow: 0 0 20px #00FFFF, inset 0 0 10px #00FFFF !important; /* Intense Glow */
-            color: #FFFFFF !important;             /* White Text on Hover */
-            border-color: #FFFFFF !important;      /* White Border on Hover */
-            transform: scale(1.02) !important;     /* Slight pop effect */
+            background: rgba(0, 255, 255, 0.1) !important;
+            border: 1px solid #00FFFF !important;           /* Solid border on hover */
+            color: #FFFFFF !important;
+            
+            /* Deep, beautiful glow */
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), 
+                        inset 0 0 10px rgba(0, 255, 255, 0.2) !important;
+            
+            transform: translateY(-2px) scale(1.02) !important; /* Floats up slightly */
         }
 
-        /* 3. Active/Click State */
+        /* 3. Click State */
         div.stButton > button:active {
-            transform: scale(0.98) !important;
-            box-shadow: 0 0 5px #00FFFF !important;
+            transform: translateY(1px) scale(0.98) !important;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.4) !important;
         }
 
-        /* 4. FORCE OVERRIDE for "Primary" Red Buttons */
+        /* 4. Remove Red from Primary Buttons */
         button[kind="primary"] {
-            background-color: transparent !important;
-            border-color: #00FFFF !important;
+            background: transparent !important;
+            border-color: rgba(0, 255, 255, 0.6) !important;
             color: #00FFFF !important;
         }
         
-        /* 5. Target the Expander Headers (optional, to match the theme) */
+        /* 5. Modern curved expanders to match */
         .streamlit-expanderHeader {
-            background-color: transparent !important;
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border-radius: 15px !important;
             color: #00FFFF !important;
-            border: 1px solid rgba(0, 255, 255, 0.3) !important;
+            border: 1px solid rgba(0, 255, 255, 0.2) !important;
         }
     </style>
     """, unsafe_allow_html=True)
