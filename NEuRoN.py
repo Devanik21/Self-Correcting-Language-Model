@@ -1048,13 +1048,20 @@ def plot_compute_cost_landscape(arch: CognitiveArchitecture):
 def plot_component_type_manifold(arch: CognitiveArchitecture):
     """
     2. Component Type Manifold (Clustering View)
-    Uses the geometric positions but colors/symbols by component type for visual clustering.
+    Corrected to use only valid 3D symbols.
     """
     metrics = get_node_metrics(arch)
     node_types = [n.type_name for n in arch.nodes.values()]
+    
+    # --- FIX: Define only the symbols supported by Plotly 3D ---
+    valid_symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'circle-open', 'square-open', 'diamond-open']
+    
     unique_types = sorted(list(set(node_types)))
     type_map = {t: i for i, t in enumerate(unique_types)}
-    type_colors = px.colors.qualitative.D3 # Distinct colors for types
+    type_colors = px.colors.qualitative.D3 
+    
+    # Safe symbol mapping using modulo operator to prevent index errors
+    assigned_symbols = [valid_symbols[type_map[t] % len(valid_symbols)] for t in node_types]
     
     fig = go.Figure(data=[go.Scatter3d(
         x=metrics['x'],
@@ -1066,7 +1073,7 @@ def plot_component_type_manifold(arch: CognitiveArchitecture):
         marker=dict(
             size=12,
             color=[type_colors[type_map[t] % len(type_colors)] for t in node_types],
-            symbol=[f'square{type_map[t]}' for t in node_types],
+            symbol=assigned_symbols, # UPDATED: Now uses only valid 3D symbols
             line=dict(color='white', width=1),
             opacity=0.8
         )
@@ -1084,17 +1091,19 @@ def plot_component_type_manifold(arch: CognitiveArchitecture):
 def plot_architectural_flux(arch: CognitiveArchitecture):
     """
     3. Architectural Flux Diagram (Energy Flow View)
-    Plots edges whose thickness represents the theoretical 'flux' (sum of parent/child complexity).
+    Corrected: 3D lines must have constant width. We use color to show intensity.
     """
     metrics = get_node_metrics(arch)
     pos_map = {nid: (metrics['x'][i], metrics['y'][i], metrics['z'][i]) for i, nid in enumerate(arch.nodes)}
     
     edge_x, edge_y, edge_z = [], [], []
-    edge_flux = []
     
-    G = arch.to_networkx_graph()
+    # We need a color list that matches the vertices (including None for gaps)
+    # But coloring segments individually in one trace is tricky in 3D.
+    # We will use a solid cool color for the lines and rely on nodes for info.
     
-    max_flux = 1.0
+    G = build_nx_graph(arch) # Use the helper we made earlier!
+    
     for u, v in G.edges():
         if u in pos_map and v in pos_map:
             x0, y0, z0 = pos_map[u]
@@ -1103,35 +1112,27 @@ def plot_architectural_flux(arch: CognitiveArchitecture):
             edge_y.extend([y0, y1, None])
             edge_z.extend([z0, z1, None])
             
-            # Flux proxy: Sum of source/target complexity
-            flux = arch.nodes[u].properties.get('complexity', 0) + arch.nodes[v].properties.get('complexity', 0)
-            edge_flux.append(flux)
-            max_flux = max(max_flux, flux)
-        
-    # Scale flux to line width (from 1 to 10)
-    scaled_flux = [max(1, (f / max_flux) * 9) for f in edge_flux]
-    
     fig = go.Figure(data=[
         go.Scatter3d(
             x=edge_x, y=edge_y, z=edge_z,
             mode='lines',
             line=dict(
-                # Use a specific color for the flux lines, like neon green/blue
-                color=px.colors.sequential.Viridis, 
-                width=scaled_flux,
+                color='#00FFCC', # Neon cyan energy color
+                width=5,         # FIX: Width must be a single integer, not a list
             ),
-            hoverinfo='none'
+            hoverinfo='none',
+            opacity=0.5
         ),
         # Add nodes back for context
         go.Scatter3d(
             x=metrics['x'], y=metrics['y'], z=metrics['z'],
-            mode='markers', marker=dict(size=5, color='white', opacity=0.7),
+            mode='markers', marker=dict(size=6, color='white', opacity=0.8),
             hoverinfo='text', text=metrics['text']
         )
     ])
     
     fig.update_layout(
-        title="3. Architectural Flux Diagram (Connection Strength)",
+        title="3. Architectural Flux Diagram (Connection Pathways)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
