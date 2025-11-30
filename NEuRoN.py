@@ -1077,30 +1077,7 @@ def main():
 
     # --- SIMULATION LOGIC ---
     if run_btn:
-        # This block is now inside the run_btn logic to avoid errors on reset
-        metric_placeholders = {}
-        with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
-            cols = st.columns(6)
-            metric_names = [
-                "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
-                "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
-                "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
-                "Attention %", "SSM %", "MLP %", "Memory %",
-                "Meta %", "Control %", "Dominant Component", "Mutation Count",
-                "Self-Confidence", "Curiosity", "Parent ID", "Architecture ID"
-            ]
-
-            for i, name in enumerate(metric_names):
-                metric_placeholders[name] = cols[i % 6].empty()
-
-        # Original placeholders for backward compatibility in logic, though now unused for display
-        if metric_placeholders:
-            best_loss_ph = metric_placeholders["Lowest Loss"]
-            avg_iq_ph = metric_placeholders["Best System IQ"]
-            arch_depth_ph = metric_placeholders["Network Depth"]
-            gen_ph = metric_placeholders["Current Generation"]
-        else: # Dummy placeholders if not running
-            best_loss_ph, avg_iq_ph, arch_depth_ph, gen_ph = st.empty(), st.empty(), st.empty(), st.empty()
+       
 
         progress_bar = st.progress(0, text="Running simulation...")
 
