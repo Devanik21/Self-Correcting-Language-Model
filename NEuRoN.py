@@ -2229,30 +2229,26 @@ def main():
 
         with topo_plot.container():
             
-
-            # [Existing Code] ... metric_placeholders["Architecture ID"].metric("Architecture ID", best_arch.id)
-
-        
+            # ==================== NEW SECTION: ABSTRACT DECK ====================
             st.markdown("### 🔮 Abstract Visualization Deck")
-        
-        # 1. Cyberpunk Topology (Displayed by Default)
-        with st.expander("Cyberpunk Neural Topology (Holographic View)", expanded=True):
-            with st.spinner("Rendering Cyberpunk Holograph..."):
-                fig_cyber = plot_neural_topology_3d(best_arch)
-                st.plotly_chart(fig_cyber, use_container_width=True)
-        
-        # 2. Bio-Mechanical Abstract (Hidden by Default)
-        with st.expander("Bio-Mechanical Abstract (Artistic View)", expanded=False):
-            with st.spinner("Sculpting Bio-Mechanical Abstract..."):
-                fig_abstract = plot_architectural_abstract_3d(best_arch)
-                st.plotly_chart(fig_abstract, use_container_width=True)
-        
-        st.divider()
+            
+            # 1. Cyberpunk Topology (Displayed by Default)
+            with st.expander("Cyberpunk Neural Topology (Holographic View)", expanded=True):
+                with st.spinner("Rendering Cyberpunk Holograph..."):
+                    fig_cyber = plot_neural_topology_3d(best_arch)
+                    st.plotly_chart(fig_cyber, use_container_width=True)
+            
+            # 2. Bio-Mechanical Abstract (Hidden by Default)
+            with st.expander("Bio-Mechanical Abstract (Artistic View)", expanded=False):
+                with st.spinner("Sculpting Bio-Mechanical Abstract..."):
+                    fig_abstract = plot_architectural_abstract_3d(best_arch)
+                    st.plotly_chart(fig_abstract, use_container_width=True)
+            
+            st.divider()
 
-        
+            # ==================== MAIN INSPECTION DECK ====================
             st.markdown("### 🧬 Holographic Architecture Inspection")
             
-            # 2. Define the Registry of 12 Views (Connecting your new functions!)
             # 2. Define the Registry of Views (Expanded to 16)
             viz_registry = {
                 "Structural Engineering": {
