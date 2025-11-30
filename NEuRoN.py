@@ -344,102 +344,158 @@ class CortexEvolver:
 
 # ==================== VISUALIZATION ENGINE (PLOTLY) ====================
 
+# ==================== VISUALIZATION ENGINE (PLOTLY): DEEPMIND EDITION ====================
+
 def plot_neural_topology_3d(arch: CognitiveArchitecture):
     """
-    Renders the neural network as a 3D Cyberpunk holograph.
+    Renders the neural network with a "DeepMind-style" Stratified Flow.
+    Data flows from Left (Input) to Right (Output) with glowing connections.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
-        G.add_node(nid, type=node.type_name, color=node.properties.get('color', '#FFFFFF'), complexity=node.properties.get('complexity', 1.0))
+        G.add_node(nid, type=node.type_name, 
+                   color=node.properties.get('color', '#FFFFFF'), 
+                   complexity=node.properties.get('complexity', 1.0))
         for parent in node.inputs:
-            if parent in arch.nodes: # Ensure parent exists
+            if parent in arch.nodes:
                 G.add_edge(parent, nid)
             
-    # Layout
-    pos = nx.spring_layout(G, dim=3, seed=42)
+    # --- PRO LEVEL LAYOUT: Stratified (Layered) Positioning ---
+    # This makes it look like a real Engineering Diagram (Input -> Output)
+    pos = {}
     
-    # Edges
+    # 1. Organize by "Generation" (Depth in graph)
+    try:
+        layers = list(nx.topological_generations(G))
+    except:
+        # Fallback for cyclic graphs
+        layers = [[n] for n in G.nodes()]
+
+    max_layer_width = max([len(l) for l in layers]) if layers else 1
+    
+    # 2. Assign 3D coordinates based on layer
+    for x_idx, layer in enumerate(layers):
+        # Sort layer by complexity to reduce tangling
+        layer_sorted = sorted(layer, key=lambda n: arch.nodes[n].properties.get('compute_cost', 0))
+        
+        for y_idx, node_id in enumerate(layer_sorted):
+            # X = Depth (Flow), Y = Width, Z = Complexity/jitter
+            x = (x_idx / max(1, len(layers))) * 100 
+            
+            # Center the nodes in Y
+            y_offset = (len(layer) - 1) / 2
+            y = (y_idx - y_offset) * 15  # Spacing
+            
+            # Z is based on node type/complexity to add "verticality"
+            z = (arch.nodes[node_id].properties.get('complexity', 1.0) * 10) + ((y_idx % 2) * 5)
+            
+            pos[node_id] = np.array([x, y, z])
+
+    # --- GLOWING EDGES ---
     edge_x, edge_y, edge_z = [], [], []
     for u, v in G.edges():
-        x0, y0, z0 = pos[u]
-        x1, y1, z1 = pos[v]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
-        edge_z.extend([z0, z1, None])
+        if u in pos and v in pos:
+            x0, y0, z0 = pos[u]
+            x1, y1, z1 = pos[v]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+            edge_z.extend([z0, z1, None])
         
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
         mode='lines',
-        line=dict(color='#888888', width=2),
+        # DeepMind Grey/Blue sleek lines with low opacity
+        line=dict(color='rgba(100, 200, 255, 0.3)', width=3), 
         hoverinfo='none'
     )
     
-    # Nodes
+    # --- NODES: DUAL LAYER FOR "GLOW" EFFECT ---
     node_x, node_y, node_z = [], [], []
     node_color = []
     node_text = []
     node_size = []
+    node_symbol = []
     
     for node in G.nodes():
-        x, y, z = pos[node]
-        node_x.append(x)
-        node_y.append(y)
-        node_z.append(z)
-        
-        n_data = arch.nodes[node]
-        props = n_data.properties
-        hover_text = (
-            f"<b>ID: {node}</b><br>"
-            f"Type: {n_data.type_name}<br>"
-            f"Complexity: {props.get('complexity', 0):.2f} | Compute: {props.get('compute_cost', 0):.2f}<br>"
-            f"Memory: {props.get('memory_cost', 0):.2f} | Params: {props.get('param_density', 0):.2f}<br>"
-            f"Inputs: {len(n_data.inputs)}"
-        )
-        node_color.append(n_data.properties.get('color', '#FFFFFF'))
-        node_text.append(hover_text)
-        node_size.append(8 + n_data.properties.get('complexity', 1.0) * 4)
-        
-    node_trace = go.Scatter3d(
+        if node in pos:
+            x, y, z = pos[node]
+            node_x.append(x)
+            node_y.append(y)
+            node_z.append(z)
+            
+            n_data = arch.nodes[node]
+            props = n_data.properties
+            
+            # HTML styled hover text
+            hover_text = (
+                f"<span style='font-size:16px; color:#AAEEFF'><b>{n_data.type_name.upper()}</b></span><br>"
+                f"<span style='color:#888'>ID: {node}</span><br>"
+                f"⚡ Complexity: <b>{props.get('complexity', 0):.2f}</b><br>"
+                f"💾 Memory: <b>{props.get('memory_cost', 0):.2f}</b>"
+            )
+            node_color.append(props.get('color', '#FFFFFF'))
+            node_text.append(hover_text)
+            node_size.append(12 + props.get('complexity', 1.0) * 8)
+            
+            # Shapes based on type
+            if 'Attention' in n_data.type_name: node_symbol.append('diamond')
+            elif 'SSM' in n_data.type_name: node_symbol.append('square')
+            elif 'MLP' in n_data.type_name: node_symbol.append('circle')
+            else: node_symbol.append('circle-open')
+
+    # 1. The Core (Solid)
+    node_trace_core = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
         mode='markers',
         marker=dict(
             size=node_size,
             color=node_color,
-            line=dict(color='rgba(255, 255, 255, 0.8)', width=1),
-            opacity=0.9
+            symbol=node_symbol,
+            line=dict(color='white', width=1), # Rim lighting
+            opacity=1.0
         ),
         text=node_text,
         hoverinfo='text'
     )
-    
-    layout = go.Layout(
-        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#DDDDDD')),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        hoverlabel=dict(
-            font_size=16,
-            bgcolor="rgba(10, 10, 10, 0.8)"
+
+    # 2. The Halo (Glow)
+    node_trace_glow = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        marker=dict(
+            size=[s * 2.5 for s in node_size], # Bigger size
+            color=node_color,
+            symbol=node_symbol,
+            opacity=0.2 # See-through
         ),
-        showlegend=False,
-        scene=dict(
-            camera=dict(eye=dict(x=1.5, y=1.5, z=0.5)),
-            xaxis=dict(showbackground=False, showticklabels=False, title=''),
-            yaxis=dict(showbackground=False, showticklabels=False, title=''),
-            zaxis=dict(showbackground=False, showticklabels=False, title=''),
-            bgcolor='rgba(0,0,0,0)'
-        ),
-        margin=dict(l=0, r=0, b=0, t=40)
+        hoverinfo='skip'
     )
     
-    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+    layout = go.Layout(
+        title=dict(text=f"SYS.ARCH // {arch.id}", font=dict(color='#00FFFF', size=14, family="Courier New")),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        scene=dict(
+            # Pitch black DeepMind void
+            xaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            yaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            zaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            bgcolor='rgba(0,0,0,0)',
+            camera=dict(eye=dict(x=0.5, y=2.0, z=0.5)) # Dynamic angle
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    
+    return go.Figure(data=[edge_trace, node_trace_glow, node_trace_core], layout=layout)
+
 
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     """
-    Renders the architecture as an abstract, bio-mechanical sculpture.
-    This uses non-linear mappings to create "bizarre" and beautiful shapes.
+    Renders the architecture as a "Neural Quasar".
+    Uses non-linear warping and 'Turbo' coloring for a high-energy look.
     """
-    if not arch.nodes:
-        return go.Figure()
+    if not arch.nodes: return go.Figure()
 
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
@@ -448,13 +504,13 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             if parent in arch.nodes:
                 G.add_edge(parent, nid)
 
-    # Use Kamada-Kawai layout for a more 'organic' base structure
+    # Use Kamada-Kawai for organic base
     try:
-        pos = nx.kamada_kawai_layout(G, dim=3, scale=2)
-    except nx.NetworkXError: # Fallback for disconnected graphs
-        pos = nx.spring_layout(G, dim=3, seed=42, scale=2)
+        pos = nx.kamada_kawai_layout(G, dim=3, scale=10)
+    except:
+        pos = nx.spring_layout(G, dim=3, seed=42, scale=10)
 
-    # --- Create the "Bizarre" Shape Transformation ---
+    # --- HYPER-DIMENSIONAL WARPING ---
     node_x, node_y, node_z = [], [], []
     node_color, node_text, node_size = [], [], []
 
@@ -462,63 +518,71 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
         x, y, z = pos[node_id]
         props = arch.nodes[node_id].properties
         
-        # Non-linear warping based on properties
+        # Math: Spiral Galaxy Transformation
         complexity = props.get('complexity', 1.0)
-        compute = props.get('compute_cost', 1.0)
+        radius = math.sqrt(x**2 + y**2)
+        theta = math.atan2(y, x) + (complexity * math.pi) # Twist based on smarts
         
-        # Warp space: x -> spiral, y -> wave, z -> based on complexity
-        warped_x = x * math.cos(complexity * math.pi) - y * math.sin(complexity * math.pi)
-        warped_y = x * math.sin(complexity * math.pi) + y * math.cos(complexity * math.pi)
-        warped_z = z + math.sin(compute * 2) * 0.5
+        warped_x = radius * math.cos(theta)
+        warped_y = radius * math.sin(theta)
+        warped_z = z * (1 + complexity) # Stretch vertically
 
         node_x.append(warped_x)
         node_y.append(warped_y)
         node_z.append(warped_z)
 
-        node_color.append(props.get('color', '#FFFFFF'))
-        node_size.append(10 + complexity * 5)
-        node_text.append(f"<b>{node_id}</b><br>Type: {arch.nodes[node_id].type_name}<br>Complexity: {complexity:.2f}")
+        # Color based on "Energy" (Compute Cost)
+        node_color.append(props.get('compute_cost', 0.5))
+        node_size.append(5 + complexity * 10)
+        node_text.append(f"{arch.nodes[node_id].type_name}")
 
-    # Edges connecting the warped points
+    # Connections
     edge_x, edge_y, edge_z = [], [], []
     for u, v in G.edges():
-        x0, y0, z0 = pos[u]
-        x1, y1, z1 = pos[v]
-        
-        # Apply the same warping to edge endpoints
-        u_props, v_props = arch.nodes[u].properties, arch.nodes[v].properties
-        ux_w = x0 * math.cos(u_props['complexity'] * math.pi) - y0 * math.sin(u_props['complexity'] * math.pi)
-        uy_w = x0 * math.sin(u_props['complexity'] * math.pi) + y0 * math.cos(u_props['complexity'] * math.pi)
-        uz_w = z0 + math.sin(u_props['compute_cost'] * 2) * 0.5
-        
-        vx_w = x1 * math.cos(v_props['complexity'] * math.pi) - y1 * math.sin(v_props['complexity'] * math.pi)
-        vy_w = x1 * math.sin(v_props['complexity'] * math.pi) + y1 * math.cos(v_props['complexity'] * math.pi)
-        vz_w = z1 + math.sin(v_props['compute_cost'] * 2) * 0.5
+        u_idx = list(G.nodes()).index(u)
+        v_idx = list(G.nodes()).index(v)
+        edge_x.extend([node_x[u_idx], node_x[v_idx], None])
+        edge_y.extend([node_y[u_idx], node_y[v_idx], None])
+        edge_z.extend([node_z[u_idx], node_z[v_idx], None])
 
-        edge_x.extend([ux_w, vx_w, None])
-        edge_y.extend([uy_w, vy_w, None])
-        edge_z.extend([uz_w, vz_w, None])
-
-    edge_trace = go.Scatter3d(x=edge_x, y=edge_y, z=edge_z, mode='lines', line=dict(color='#555555', width=1.5), hoverinfo='none')
-    node_trace = go.Scatter3d(x=node_x, y=node_y, z=node_z, mode='markers', text=node_text, hoverinfo='text',
+    # 1. Energy Lines
+    edge_trace = go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z, 
+        mode='lines', 
+        line=dict(color='rgba(255, 255, 255, 0.15)', width=1), 
+        hoverinfo='none'
+    )
+    
+    # 2. The Nodes (Using a Colorscale)
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z, 
+        mode='markers', 
+        text=node_text, 
+        hoverinfo='text',
         marker=dict(
-            size=node_size, color=node_color,
-            line=dict(color='rgba(255, 255, 255, 0.9)', width=2),
-            opacity=0.9, symbol='circle'
-        ))
+            size=node_size, 
+            color=node_color,
+            colorscale='Turbo', # Very sci-fi high contrast
+            showscale=False,
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=2),
+            opacity=0.9
+        )
+    )
 
     layout = go.Layout(
-        title=dict(text=f"Bio-Mechanical Abstract: {arch.id}", font=dict(color='#DDDDDD')),
+        title=dict(text="PHENOTYPE MANIFOLD", font=dict(color='#FF0055', family="Courier New")),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
-        scene=dict(xaxis_title='', yaxis_title='', zaxis_title='',
-                   xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                   yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                   zaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                   bgcolor='rgba(0,0,0,0)'),
-        margin=dict(l=0, r=0, b=0, t=40))
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
 
     return go.Figure(data=[edge_trace, node_trace], layout=layout)
+
+
 
 def plot_loss_landscape_surface(history):
     """
