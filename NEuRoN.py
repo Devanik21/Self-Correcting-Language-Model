@@ -111,6 +111,8 @@ for key in base_keys:
 
 # ==================== DATA STRUCTURES ====================
 
+# ==================== DATA STRUCTURES ====================
+
 @dataclass
 class ArchitectureNode:
     """Represents a single layer or module in the Neural Network Graph."""
@@ -123,6 +125,9 @@ class ArchitectureNode:
     activation_level: float = 0.0
     gradient_magnitude: float = 0.0
     attention_focus: float = 0.0 # 0.0 to 1.0
+    
+    # --- NEW: Metric Tracking for Advanced Plots ---
+    loss: Optional[float] = None # Stores individual node contribution to loss
     
     def __hash__(self):
         return hash(self.id)
@@ -172,6 +177,20 @@ class CognitiveArchitecture:
         self.vram_usage = total_vram
         # Base speed minus complexity drag
         self.inference_speed = max(1.0, 1000.0 / (total_speed_penalty + 0.1))
+
+    # --- NEW: Helper method for the Visualization Engine ---
+    def to_networkx_graph(self, directed=True):
+        """Converts the internal dictionary structure to a NetworkX graph object."""
+        G = nx.DiGraph() if directed else nx.Graph()
+        for nid, node in self.nodes.items():
+            # Convert dataclass to dict for attributes, handling the 'loss' field safely
+            attrs = asdict(node)
+            # Remove complex objects if necessary, but here we keep them
+            G.add_node(nid, **attrs)
+            for parent in node.inputs:
+                if parent in self.nodes:
+                    G.add_edge(parent, nid)
+        return G
 
 # ==================== SIMULATION LOGIC ====================
 
