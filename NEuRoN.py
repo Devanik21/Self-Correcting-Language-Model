@@ -2525,21 +2525,47 @@ def main():
         with topo_plot.container():
             
             # ==================== NEW SECTION: ABSTRACT DECK ====================
+            # ==================== NEW SECTION: ABSTRACT DECK (TRUE LAZY LOADING) ====================
             st.markdown("### 🔮 Abstract Visualization Deck")
             
-            # 1. Fibonacci Neuro-Spiral (Nature's Math) - LAZY LOADED (Collapsed)
-            with st.expander("Fibonacci Neuro-Spiral (Golden Ratio View)", expanded=False):
-                with st.spinner("Calculating Phyllotaxis Geometry..."):
+            # 1. Initialize Toggle States (Memory for the buttons)
+            if 'viz_spiral_active' not in st.session_state: 
+                st.session_state.viz_spiral_active = False
+            if 'viz_abstract_active' not in st.session_state: 
+                st.session_state.viz_abstract_active = False
+
+            # 2. The Control Buttons (Side-by-Side)
+            abs_col1, abs_col2 = st.columns(2)
+            
+            with abs_col1:
+                # Dynamic Label based on state
+                lbl_spiral = "❌ Close Spiral" if st.session_state.viz_spiral_active else "🌀 Reveal Fibonacci Spiral"
+                if st.button(lbl_spiral, key="btn_spiral_toggle", use_container_width=True):
+                    # Flip the switch
+                    st.session_state.viz_spiral_active = not st.session_state.viz_spiral_active
+                    st.rerun()
+
+            with abs_col2:
+                lbl_abstract = "❌ Close Abstract" if st.session_state.viz_abstract_active else "🎨 Reveal Bio-Mechanical"
+                if st.button(lbl_abstract, key="btn_abstract_toggle", use_container_width=True):
+                    st.session_state.viz_abstract_active = not st.session_state.viz_abstract_active
+                    st.rerun()
+
+            # 3. The Rendering Logic (Only runs if active)
+            if st.session_state.viz_spiral_active:
+                st.caption("Displaying: Fibonacci Phyllotaxis Geometry")
+                with st.spinner("Calculating Golden Ratio Geometry..."):
                     fig_spiral = plot_fibonacci_phyllotaxis_3d(best_arch)
+                    # DeepMind Styling override
+                    fig_spiral.update_layout(height=600, margin=dict(l=0,r=0,b=0,t=40), paper_bgcolor='rgba(0,0,0,0)')
                     st.plotly_chart(fig_spiral, use_container_width=True)
 
-            
-
-            
-            # 2. Bio-Mechanical Abstract (Hidden by Default)
-            with st.expander("Bio-Mechanical Abstract (Artistic View)", expanded=False):
+            if st.session_state.viz_abstract_active:
+                st.caption("Displaying: Bio-Mechanical Manifold")
                 with st.spinner("Sculpting Bio-Mechanical Abstract..."):
                     fig_abstract = plot_architectural_abstract_3d(best_arch)
+                    # DeepMind Styling override
+                    fig_abstract.update_layout(height=600, margin=dict(l=0,r=0,b=0,t=40), paper_bgcolor='rgba(0,0,0,0)')
                     st.plotly_chart(fig_abstract, use_container_width=True)
             
             st.divider()
