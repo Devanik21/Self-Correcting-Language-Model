@@ -63,8 +63,9 @@ st.set_page_config(
 # Defines the "Atomic Elements" of intelligence available to the system.
 # The AI constructs itself by wiring these blocks together.
 
+# ==================== THE HYBRID REGISTRY ====================
 NEURAL_PRIMITIVES = {
-    # --- CLASSICAL ATTENTION MECHANISMS ---
+    # --- CLASSICAL ATTENTION MECHANISMS (THE BRAIN) ---
     'MultiHeadAttention': {'type': 'Attention', 'complexity': 1.0, 'param_density': 1.0, 'compute_cost': 2.0, 'memory_cost': 2.0, 'plasticity': 0.8, 'color': '#FF0055'},
     'SparseAttention': {'type': 'Attention', 'complexity': 1.2, 'param_density': 0.8, 'compute_cost': 1.0, 'memory_cost': 1.5, 'plasticity': 0.7, 'color': '#FF5500'},
     'LinearAttention': {'type': 'Attention', 'complexity': 0.8, 'param_density': 0.6, 'compute_cost': 0.5, 'memory_cost': 0.5, 'plasticity': 0.6, 'color': '#FFAA00'},
@@ -94,6 +95,30 @@ NEURAL_PRIMITIVES = {
     'CriticBlock': {'type': 'Meta', 'complexity': 1.5, 'param_density': 0.5, 'compute_cost': 0.5, 'memory_cost': 0.1, 'plasticity': 0.6, 'color': '#888888'},
     'RouterGate': {'type': 'Control', 'complexity': 0.4, 'param_density': 0.1, 'compute_cost': 0.1, 'memory_cost': 0.0, 'plasticity': 0.2, 'color': '#444444'},
     'ResidualLink': {'type': 'Control', 'complexity': 0.1, 'param_density': 0.0, 'compute_cost': 0.0, 'memory_cost': 0.0, 'plasticity': 0.0, 'color': '#222222'},
+
+    # ==================== BIOLOGICAL LONGEVITY EXTENSIONS ====================
+    
+    # --- DNA REPAIR MECHANISMS (The Shield) ---
+    'Telomerase_Activator': {'type': 'Repair', 'complexity': 2.5, 'param_density': 1.0, 'compute_cost': 3.0, 'memory_cost': 2.0, 'plasticity': 0.4, 'color': '#E60000'},
+    'P53_Tumor_Suppressor': {'type': 'Repair', 'complexity': 3.0, 'param_density': 0.8, 'compute_cost': 2.5, 'memory_cost': 1.5, 'plasticity': 0.1, 'color': '#FF3333'},
+    'CRISPR_Editor': {'type': 'Repair', 'complexity': 1.5, 'param_density': 0.5, 'compute_cost': 1.0, 'memory_cost': 1.0, 'plasticity': 1.0, 'color': '#FF6633'},
+    
+    # --- METABOLIC REGULATION (The Engine) ---
+    'Mitochondrial_Booster': {'type': 'Energy', 'complexity': 1.2, 'param_density': 0.9, 'compute_cost': 0.8, 'memory_cost': 0.8, 'plasticity': 0.9, 'color': '#FFFF33'},
+    'Insulin_Signaling_Gate': {'type': 'Energy', 'complexity': 0.8, 'param_density': 0.7, 'compute_cost': 0.5, 'memory_cost': 0.6, 'plasticity': 0.5, 'color': '#CCFF33'},
+    'mTOR_Inhibitor': {'type': 'Energy', 'complexity': 1.4, 'param_density': 0.6, 'compute_cost': 1.2, 'memory_cost': 0.5, 'plasticity': 0.7, 'color': '#66FF33'},
+    
+    # --- CELLULAR CLEANUP (The Filter) ---
+    'Lysosome_Transporter': {'type': 'Cleanup', 'complexity': 0.5, 'param_density': 1.5, 'compute_cost': 0.5, 'memory_cost': 1.0, 'plasticity': 0.4, 'color': '#0099FF'},
+    'Senolytic_Agent': {'type': 'Cleanup', 'complexity': 2.0, 'param_density': 2.0, 'compute_cost': 1.5, 'memory_cost': 1.0, 'plasticity': 0.9, 'color': '#0033FF'},
+    
+    # --- STRESS RESISTANCE (The Armor) ---
+    'Heat_Shock_Protein': {'type': 'Defense', 'complexity': 0.7, 'param_density': 0.8, 'compute_cost': 0.4, 'memory_cost': 0.2, 'plasticity': 0.3, 'color': '#9900FF'},
+    'Antioxidant_Generator': {'type': 'Defense', 'complexity': 1.0, 'param_density': 1.2, 'compute_cost': 0.8, 'memory_cost': 1.0, 'plasticity': 0.8, 'color': '#FF0099'},
+    
+    # --- CONTROL & SIGNALING (The Interface) ---
+    'Hormonal_Feedback_Loop': {'type': 'Control', 'complexity': 1.5, 'param_density': 0.5, 'compute_cost': 0.5, 'memory_cost': 0.1, 'plasticity': 0.6, 'color': '#E0E0E0'},
+    'Gene_Silencer': {'type': 'Control', 'complexity': 0.4, 'param_density': 0.1, 'compute_cost': 0.1, 'memory_cost': 0.0, 'plasticity': 0.2, 'color': '#606060'},
 }
 
 # --- EXTEND THE REGISTRY FOR "EXTREME COMPLEXITY" ---
@@ -206,12 +231,10 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Returns a simulated 'Validation Loss'.
+        Calculates the 'Mortality Score'.
+        To survive, the AI must be both Intelligent (Function) and Ageless (Structure).
         
-        The formula favors:
-        1. Complexity (up to a point, then overfitting)
-        2. Connectivity (Skip connections reduce loss)
-        3. Diversity of components (MoE + Attention + SSM > Just MLP)
+        Formula: Mortality = (Ignorance) + (Cellular_Decay)
         """
         # 1. Structural Analysis using NetworkX
         G = nx.DiGraph()
@@ -219,44 +242,43 @@ class LossLandscapePhysics:
             G.add_node(nid, type=node.type_name)
             for parent in node.inputs:
                 G.add_edge(parent, nid)
-                
-        # Topological metrics
+        
+        # --- FACTOR A: INTELLIGENCE (The "Mind") ---
+        # Connectivity and Complexity represent the ability to think.
         try:
             depth = nx.dag_longest_path_length(G)
         except:
-            depth = 1 # Cycle detected or empty
+            depth = 1 
             
-        width = len(arch.nodes)
+        # Diversity of AI components (Attention, MLP, SSM)
+        node_types = [n.properties['type'] for n in arch.nodes.values()]
+        ai_types = ['Attention', 'SSM', 'MLP', 'Memory']
+        ai_diversity = sum(1 for t in set(node_types) if t in ai_types)
         
-        # Component Diversity Bonus
-        types = [n.properties['type'] for n in arch.nodes.values()]
-        diversity_score = entropy(list(Counter(types).values()))
+        # Ignorance Penalty: High if the network is too simple or disconnected
+        ignorance = 100.0 / (depth * ai_diversity + 1.0)
+
+        # --- FACTOR B: CELLULAR DECAY (The "Body") ---
+        # Metabolic Stress: Thinking costs energy. More parameters = More Free Radicals.
+        metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty
         
-        # 2. Simulated Training Curve Physics
-        # Loss = Base / (Capacity * Efficiency) + Noise
+        # Repair Capacity: The sum of all biological defense mechanisms
+        repair_types = ['Repair', 'Cleanup', 'Defense', 'Energy']
+        repair_capacity = sum(n.properties['complexity'] for n in arch.nodes.values() if n.properties['type'] in repair_types)
         
-        capacity = (arch.parameter_count / 1_000_000) ** 0.6
-        efficiency = (diversity_score * 1.5) + (1.0 / (depth * 0.1 + 1))
+        # The Entropy Equation:
+        # Decay = Stress - (Repair * Efficiency)
+        decay = metabolic_stress - (repair_capacity * 1.2)
         
-        # --- REFINED PENALTIES for more realistic evolution ---
+        # If Repair > Stress, Decay becomes Negative (Rejuvenation)
+        # However, we add a base aging factor that always increases with time (noise)
+        aging_factor = max(0, decay) + random.normalvariate(0, self.noise)
         
-        # 1. Overfitting Penalty: More sensitive to difficulty.
-        #    If capacity greatly exceeds the task's complexity, it gets penalized.
-        overfit_penalty = max(0, capacity - (self.difficulty * 5))**1.5 * 0.005
+        # --- FINAL MORTALITY SCORE ---
+        # We want to minimize THIS number.
+        mortality_score = ignorance + aging_factor + (len(arch.nodes) * 0.01) # Small tax on size
         
-        # 2. Complexity Tax: A small, ever-present cost for just having parameters.
-        complexity_tax = (arch.parameter_count / 1_000_000) * 0.0001
-        
-        # 3. Dimensionality Curse: Penalty for excessive depth, simulating optimization challenges.
-        dimensionality_curse = (depth**2) * 0.001
-        
-        # 4. User-defined Max Depth Penalty
-        max_depth_penalty = max(0, depth - st.session_state.get('max_depth', 100))**2 * 0.01
-        
-        base_loss = 10.0 / (capacity * efficiency + 0.01)
-        simulated_loss = base_loss + overfit_penalty + complexity_tax + dimensionality_curse + max_depth_penalty + random.normalvariate(0, self.noise)
-        
-        return max(0.0001, simulated_loss)
+        return max(0.0001, mortality_score)
 
 class CortexEvolver:
     """
@@ -268,21 +290,30 @@ class CortexEvolver:
         self.physics = LossLandscapePhysics()
         
     def create_genesis_architecture(self) -> CognitiveArchitecture:
-        """Creates a minimal 'seed' AI."""
-        arch = CognitiveArchitecture(generation=0, parent_id="PRIMORDIAL")
+        """Creates a minimal 'Cyborg' seed: Part Neural, Part Biological."""
+        arch = CognitiveArchitecture(generation=0, parent_id="CYBORG_EVE")
         
-        # Input Layer
-        input_node = ArchitectureNode("input", "RouterGate", NEURAL_PRIMITIVES['RouterGate'])
+        # 1. The Sensor (Input)
+        input_node = ArchitectureNode("input_sensor", "RouterGate", NEURAL_PRIMITIVES['RouterGate'])
         
-        # Core Processing
-        attn_props = NEURAL_PRIMITIVES['MultiHeadAttention']
-        core_node = ArchitectureNode("core_0", "MultiHeadAttention", attn_props, inputs=["input"])
+        # 2. The Brain (Processing)
+        brain_props = NEURAL_PRIMITIVES['MultiHeadAttention']
+        brain_node = ArchitectureNode("cortex_0", "MultiHeadAttention", brain_props, inputs=["input_sensor"])
         
-        # Output Head
+        # 3. The Energy Source (Metabolism) - NECESSARY to prevent immediate aging
+        mito_props = NEURAL_PRIMITIVES['Mitochondrial_Booster']
+        mito_node = ArchitectureNode("mitochondria_0", "Mitochondrial_Booster", mito_props, inputs=["cortex_0"])
+        
+        # 4. The Action (Output)
         out_props = NEURAL_PRIMITIVES['DenseGatedGLU']
-        out_node = ArchitectureNode("output", "DenseGatedGLU", out_props, inputs=["core_0"])
+        out_node = ArchitectureNode("output_action", "DenseGatedGLU", out_props, inputs=["mitochondria_0"])
         
-        arch.nodes = {"input": input_node, "core_0": core_node, "output": out_node}
+        arch.nodes = {
+            "input_sensor": input_node, 
+            "cortex_0": brain_node, 
+            "mitochondria_0": mito_node, 
+            "output_action": out_node
+        }
         return arch
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
