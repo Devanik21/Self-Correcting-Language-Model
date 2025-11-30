@@ -1,5 +1,5 @@
 """
-🧠 CORTEX GENESIS: THE SELF-CORRECTING AI SANDBOX 🧠
+ CORTEX GENESIS: THE SELF-CORRECTING AI SANDBOX 
 A Meta-Cognitive Simulation of Recursive Self-Improvement.
 
 Version: 1.0.0 (Alpha-Omega)
@@ -2457,7 +2457,7 @@ def main():
                     
                     # Create the button
                     if cols[i].button(
-                        f"{'🔴' if is_active else '⚪'} {view_name}", 
+                        f"{'' if is_active else ''} {view_name}", 
                         key=f"btn_{view_name}", 
                         use_container_width=True,
                         type="primary" if is_active else "secondary"
