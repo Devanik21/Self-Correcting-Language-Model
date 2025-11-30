@@ -938,6 +938,287 @@ def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
 
 
 
+# ==================== FORBIDDEN TIER: EXTREME COMPLEXITY PLOTS ====================
+
+def plot_bio_connectome_web(arch: CognitiveArchitecture):
+    """
+    1. Bio-Connectome Web
+    Simulates a dense biological neural tissue.
+    Adds 'synaptic crosstalk' edges between nodes that are spatially close but not logically connected,
+    creating a massive 'hairball' of connectivity similar to a real brain scan.
+    """
+    # Robust graph build
+    G = build_nx_graph(arch, directed=True) 
+    if len(G.nodes) < 2: return go.Figure()
+
+    # 1. Physics Simulation (Heavy calculation)
+    # High iterations for a very settled, organic structure
+    pos = nx.spring_layout(G, dim=3, seed=101, iterations=100, k=0.5) 
+
+    # 2. Generate "Synaptic Crosstalk" (Visual-only edges for density)
+    # Real brains have connections based on proximity, not just logic.
+    node_list = list(G.nodes())
+    extra_edges_x, extra_edges_y, extra_edges_z = [], [], []
+    
+    # Calculate pairwise distances (O(N^2) complexity - hence the warning!)
+    import itertools
+    for i, j in itertools.combinations(range(len(node_list)), 2):
+        u, v = node_list[i], node_list[j]
+        x0, y0, z0 = pos[u]
+        x1, y1, z1 = pos[v]
+        dist = math.sqrt((x1-x0)**2 + (y1-y0)**2 + (z1-z0)**2)
+        
+        # Connect if close, even if no logical link exists (simulating tissue density)
+        if dist < 1.5: 
+            extra_edges_x.extend([x0, x1, None])
+            extra_edges_y.extend([y0, y1, None])
+            extra_edges_z.extend([z0, z1, None])
+
+    # 3. Render
+    fig = go.Figure()
+    
+    # The Crosstalk Web (Faint, massive quantity)
+    fig.add_trace(go.Scatter3d(
+        x=extra_edges_x, y=extra_edges_y, z=extra_edges_z,
+        mode='lines',
+        line=dict(color='rgba(100, 255, 100, 0.05)', width=1), # Very faint organic green
+        hoverinfo='none',
+        name='Synaptic Crosstalk'
+    ))
+
+    # The Actual Logical Edges (Brighter)
+    edge_x, edge_y, edge_z = [], [], []
+    for u, v in G.edges():
+        if u in pos and v in pos:
+            edge_x.extend([pos[u][0], pos[v][0], None])
+            edge_y.extend([pos[u][1], pos[v][1], None])
+            edge_z.extend([pos[u][2], pos[v][2], None])
+
+    fig.add_trace(go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z,
+        mode='lines',
+        line=dict(color='white', width=2),
+        hoverinfo='none',
+        name='Axons'
+    ))
+
+    # The Neurons
+    node_x = [pos[n][0] for n in G.nodes()]
+    node_y = [pos[n][1] for n in G.nodes()]
+    node_z = [pos[n][2] for n in G.nodes()]
+    
+    fig.add_trace(go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        marker=dict(size=5, color='#00FF00', opacity=0.8),
+        hoverinfo='text',
+        text=[f"Neuron: {n}" for n in G.nodes()]
+    ))
+
+    fig.update_layout(
+        title="BIO-CONNECTOME (Synaptic Crosstalk Density)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_neuro_genesis_cloud(arch: CognitiveArchitecture):
+    """
+    2. Neuro-Genesis Cloud
+    A volumetric representation. Instead of lines, we use thousands of particles
+    to represent the 'probability cloud' of connections, creating a ghostly,
+    brain-like fog.
+    """
+    G = build_nx_graph(arch, directed=True)
+    pos = nx.kamada_kawai_layout(G, dim=3) # Organic, energy-based layout
+
+    # Generate Particle Cloud around nodes
+    cloud_x, cloud_y, cloud_z, cloud_c = [], [], [], []
+    
+    for nid, (x, y, z) in pos.items():
+        # Create a swarm of particles around each node
+        # Simulates dendrites/local neurotransmitter fields
+        num_particles = 30 
+        for _ in range(num_particles):
+            # Random gaussian jitter
+            dx = random.gauss(0, 0.2)
+            dy = random.gauss(0, 0.2)
+            dz = random.gauss(0, 0.2)
+            cloud_x.append(x + dx)
+            cloud_y.append(y + dy)
+            cloud_z.append(z + dz)
+            
+            # Color based on node complexity (Hot = Complex, Cold = Simple)
+            # Safe property access
+            comp = arch.nodes[nid].properties.get('complexity', 0.5) if nid in arch.nodes else 0.5
+            cloud_c.append(comp)
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=cloud_x, y=cloud_y, z=cloud_z,
+        mode='markers',
+        marker=dict(
+            size=2,
+            color=cloud_c,
+            colorscale='Magma', # Biological heat map
+            opacity=0.3
+        ),
+        hoverinfo='none'
+    )])
+
+    # Add core nodes as brighter centers
+    core_x = [pos[n][0] for n in G.nodes()]
+    core_y = [pos[n][1] for n in G.nodes()]
+    core_z = [pos[n][2] for n in G.nodes()]
+    
+    fig.add_trace(go.Scatter3d(
+        x=core_x, y=core_y, z=core_z,
+        mode='markers',
+        marker=dict(size=8, color='white', opacity=0.9),
+        text=list(G.nodes()),
+        hoverinfo='text'
+    ))
+
+    fig.update_layout(
+        title="NEURO-GENESIS CLOUD (Probabilistic Dendrites)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_thought_manifold_tissue(arch: CognitiveArchitecture):
+    """
+    3. Thought Manifold Tissue
+    Attempts to wrap the neural network in a continuous surface mesh,
+    visualizing the AI as a 'living tissue' rather than discrete parts.
+    """
+    G = build_nx_graph(arch, directed=True)
+    pos = nx.spring_layout(G, dim=3, seed=42)
+    
+    node_x = np.array([pos[n][0] for n in G.nodes()])
+    node_y = np.array([pos[n][1] for n in G.nodes()])
+    node_z = np.array([pos[n][2] for n in G.nodes()])
+    
+    if len(node_x) < 4: return go.Figure() # Need points for mesh
+
+    # We use Mesh3d to create a "skin" around the points
+    # This algorithm (Delaunay3D usually required, but alphahull is simpler in plotly)
+    fig = go.Figure(data=[go.Mesh3d(
+        x=node_x, y=node_y, z=node_z,
+        alphahull=5.0, # Adjusts how tight the skin is. Higher = looser/organic.
+        opacity=0.2,
+        color='cyan',
+        intensity=node_z, # Color varies by depth
+        colorscale='Electric'
+    )])
+    
+    # Overlay the nervous system (edges)
+    edge_x, edge_y, edge_z = [], [], []
+    for u, v in G.edges():
+        edge_x.extend([pos[u][0], pos[v][0], None])
+        edge_y.extend([pos[u][1], pos[v][1], None])
+        edge_z.extend([pos[u][2], pos[v][2], None])
+        
+    fig.add_trace(go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z,
+        mode='lines',
+        line=dict(color='white', width=3),
+        hoverinfo='none'
+    ))
+
+    fig.update_layout(
+        title="THOUGHT MANIFOLD (Cortical Tissue Simulation)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_dark_matter_void(arch: CognitiveArchitecture):
+    """
+    4. Dark Matter Void
+    A 'negative space' visualization. It pushes nodes far apart and visualizes
+    the long-range, sparse connections as 'threads' in a vast void.
+    Resembles cosmic web structures.
+    """
+    G = build_nx_graph(arch, directed=True)
+    # Spectral layout spreads things out based on Eigenvectors (math-heavy)
+    try:
+        pos = nx.spectral_layout(G, dim=3) 
+    except:
+        pos = nx.spring_layout(G, dim=3, k=2.0) # Fallback
+
+    # Scale positions to simulate vast distance
+    node_x = [pos[n][0]*100 for n in G.nodes()]
+    node_y = [pos[n][1]*100 for n in G.nodes()]
+    node_z = [pos[n][2]*100 for n in G.nodes()]
+
+    edge_x, edge_y, edge_z = [], [], []
+    
+    for u, v in G.edges():
+        x0, y0, z0 = pos[u]
+        x1, y1, z1 = pos[v]
+        
+        # Bezier-like curve simulation (just jagged lines for complexity)
+        # We break the line into segments and add noise to make it look like lightning
+        steps = 5
+        last_x, last_y, last_z = x0*100, y0*100, z0*100
+        for s in range(1, steps + 1):
+            t = s / steps
+            # Linear interpolation
+            tx = (x0 + (x1-x0)*t) * 100
+            ty = (y0 + (y1-y0)*t) * 100
+            tz = (z0 + (z1-z0)*t) * 100
+            
+            # Add "Void Noise"
+            jitter = 5.0 
+            if s < steps: # Don't jitter the target endpoint
+                tx += random.uniform(-jitter, jitter)
+                ty += random.uniform(-jitter, jitter)
+                tz += random.uniform(-jitter, jitter)
+            
+            edge_x.extend([last_x, tx])
+            edge_y.extend([last_y, ty])
+            edge_z.extend([last_z, tz])
+            last_x, last_y, last_z = tx, ty, tz
+        
+        edge_x.append(None)
+        edge_y.append(None)
+        edge_z.append(None)
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z,
+        mode='lines',
+        line=dict(color='#AA00FF', width=1), # Dark purple void energy
+        hoverinfo='none',
+        opacity=0.6
+    )])
+    
+    fig.add_trace(go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        marker=dict(size=4, color='white', symbol='diamond'),
+        hoverinfo='text',
+        text=list(G.nodes())
+    ))
+
+    fig.update_layout(
+        title="DARK MATTER VOID (Sparse Long-Range Connectivity)",
+        scene=dict(
+            xaxis=dict(visible=False, backgroundcolor='black'), 
+            yaxis=dict(visible=False, backgroundcolor='black'), 
+            zaxis=dict(visible=False, backgroundcolor='black'), 
+            bgcolor='black' # Pitch black background
+        ),
+        paper_bgcolor='black', 
+        plot_bgcolor='black'
+    )
+    return fig
+
+
+
+
 def get_node_metrics(arch: CognitiveArchitecture):
     """Helper to extract normalized and raw metrics for plotting.
     Updated to safely handle missing 'loss' attributes in older objects.
@@ -1994,6 +2275,7 @@ def main():
             st.markdown("### 🧬 Holographic Architecture Inspection")
             
             # 2. Define the Registry of 12 Views (Connecting your new functions!)
+            # 2. Define the Registry of Views (Expanded to 16)
             viz_registry = {
                 "Structural Engineering": {
                     "Neural Topology": plot_neural_topology_3d,
@@ -2012,6 +2294,12 @@ def main():
                     "Compute Landscape": plot_compute_cost_landscape,
                     "Type Clusters": plot_component_type_manifold,
                     "Genetic Heritage": plot_genetic_heritage_view,
+                },
+                "⚠️ EXPERIMENTAL": {
+                     "Bio-Connectome": plot_bio_connectome_web,
+                     "Neuro-Genesis": plot_neuro_genesis_cloud,
+                     "Cortical Tissue": plot_thought_manifold_tissue,
+                     "Dark Matter Void": plot_dark_matter_void
                 }
             }
 
@@ -2036,27 +2324,46 @@ def main():
 
             st.divider()
 
-            # 4. Lazy Rendering Engine
-            # This logic finds the correct function and runs ONLY that one
+            # 4. Lazy Rendering Engine with Safety Interlock
             selected_view = st.session_state.current_viz_view
             
             # Search for the function in our registry
             active_func = None
-            for cat in viz_registry.values():
-                if selected_view in cat:
-                    active_func = cat[selected_view]
+            is_experimental = False
+            
+            for cat_name, cat_views in viz_registry.items():
+                if selected_view in cat_views:
+                    active_func = cat_views[selected_view]
+                    if cat_name == "⚠️ EXPERIMENTAL":
+                        is_experimental = True
                     break
             
+            # --- THE SAFETY GATE ---
+            render_permitted = True
+            
+            if is_experimental:
+                # The Warning Box with the requested "?" sign logic
+                warn_col1, warn_col2 = st.columns([0.1, 0.9])
+                with warn_col1:
+                    st.markdown("## ❓") # Big Question Mark
+                with warn_col2:
+                    st.warning(f"**COMPUTE WARNING:** '{selected_view}' generates highly complex organic topology.\n\nThis simulation requires O(N²) physics calculations to simulate biological randomness. It may slow down your browser. Proceed?")
+                
+                # We require a second button click to actually render these beasts
+                if not st.button(" I Understand, Engage Hyper-Vis"):
+                    render_permitted = False
+                    st.info("Visualization paused. Awaiting confirmation.")
+
             # Render the plot
-            if active_func:
+            if active_func and render_permitted:
                 try:
-                    with st.spinner(f"Rendering {selected_view} via Plotly WebGL..."):
-                        # Generate the figure (This is where the magic happens)
+                    with st.spinner(f"Simulating {selected_view} physics..."):
+                        # Generate the figure
                         fig = active_func(best_arch)
                         
                         # Apply consistent DeepMind styling
                         fig.update_layout(
-                            height=700, 
+                            height=800, # Taller for these complex plots
                             margin=dict(l=0, r=0, b=0, t=40),
                             paper_bgcolor='rgba(0,0,0,0)',
                             plot_bgcolor='rgba(0,0,0,0)',
@@ -2066,7 +2373,6 @@ def main():
                         
                 except Exception as e:
                     st.error(f"⚠️ Holographic Projection Failed: {str(e)}")
-                    st.caption("Try selecting a simpler view or resetting the simulation.")
 
         # ==================== REPLACEMENT BLOCK END ====================
 
