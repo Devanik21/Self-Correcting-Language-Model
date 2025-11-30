@@ -241,6 +241,82 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
+    NATURAL SELECTION ENGINE: The Red Queen's Race.
+    The environment gets more hostile (entropic) over time.
+    Only complex, self-repairing architectures survive.
+    """
+    def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
+        self.difficulty = difficulty_scalar
+        self.noise = noise_level
+        
+    def evaluate(self, arch: CognitiveArchitecture) -> float:
+        # --- 1. THE ENTROPY STORM (Environmental Pressure) ---
+        # Nature gets harder over time. Generation 0 is easy. Generation 50 is toxic.
+        # This forces the AI to adapt or die.
+        environmental_entropy = 5.0 + (arch.generation * 0.5 * self.difficulty)
+        
+        # --- 2. THE BODY (Metabolic Cost vs. Repair) ---
+        # Every node costs energy (creates metabolic stress/oxidative stress)
+        # But 'Repair', 'Defense', and 'Energy' nodes fight back.
+        
+        total_metabolic_cost = 0.0
+        total_repair_capacity = 0.0
+        
+        for node in arch.nodes.values():
+            # Everything costs energy to run
+            cost = node.properties.get('complexity', 1.0)
+            total_metabolic_cost += cost
+            
+            # Specific Genes fight aging
+            n_type = node.properties['type']
+            if n_type == 'Repair': 
+                total_repair_capacity += (node.properties['complexity'] * 3.0) # Telomerase, CRISPR
+            elif n_type == 'Defense':
+                total_repair_capacity += (node.properties['complexity'] * 2.0) # Antioxidants
+            elif n_type == 'Cleanup':
+                total_repair_capacity += (node.properties['complexity'] * 1.5) # Autophagy
+            elif n_type == 'Energy':
+                # Efficient mitochondria LOWER the metabolic cost of the whole system
+                total_metabolic_cost *= 0.8 
+
+        # --- 3. THE AGING CALCULATION ---
+        # Aging = (External Damage + Internal Stress) - Repair Ability
+        raw_damage = environmental_entropy + (total_metabolic_cost * 0.1)
+        current_aging = max(0, raw_damage - total_repair_capacity)
+        
+        arch.aging_score = current_aging # Save for the plot!
+
+        # --- 4. THE BRAIN (Intelligence is required to coordinate the body) ---
+        # A body with great repair genes but no brain is just a plant.
+        # We need a brain to manage the complexity.
+        G = nx.DiGraph()
+        for nid, node in arch.nodes.items():
+            G.add_node(nid); 
+            for p in node.inputs: G.add_edge(p, nid)
+            
+        try:
+            depth = nx.dag_longest_path_length(G)
+        except:
+            depth = 1
+            
+        # Intelligence must scale with Body Size.
+        # If Body > Brain, the organism is clumsy and dies.
+        brain_power = depth * 5.0
+        coordination_deficit = max(0, total_metabolic_cost - brain_power)
+
+        # --- 5. NATURAL SELECTION (The Loss Function) ---
+        # You die if you Age (current_aging) OR if you are Stupid (coordination_deficit)
+        total_loss = current_aging + (coordination_deficit * 2.0)
+        
+        # Add a small 'Existence Tax' to prevent doing nothing
+        if len(arch.nodes) < 3: total_loss += 1000.0
+
+        return max(0.0001, total_loss)
+
+
+
+class LossLandscapePhysics:
+    """
     Simulates the 'Training Process' without actually training a neural net.
     Uses concepts from Information Geometry and Physics to simulate how
     'good' an architecture is based on its topology.
@@ -342,7 +418,7 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        Applies graph transformations to evolve the neural network.
+        BIOLOGICAL EVOLUTION: Duplication, Divergence, and Repair.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -352,80 +428,61 @@ class CortexEvolver:
         
         node_ids = list(child.nodes.keys())
         
-        # UPDATE: Boosted mutation probability slightly for this function scope
-        effective_rate = max(mutation_rate, 0.3) # Ensure at least 30% chance of change
+        # A higher mutation rate is needed to keep up with the Entropy Storm
+        effective_rate = max(mutation_rate, 0.4) 
 
-        # 1. Add Node (Layer) - The "Growth" Spurt
-        depth_growth_rate = st.session_state.get('depth_growth_rate', 1)
-        
-        # UPDATE: Loop ensures we try harder to add nodes
-        for _ in range(random.randint(1, max(1, depth_growth_rate))):
-            if random.random() < effective_rate:
-                # Pick a random insertion point
-                if len(node_ids) >= 1:
-                    target_id = random.choice(node_ids)
-                    if target_id != "input_sensor": # Don't mess with the input sensor directly
-                        # Create new node
-                        new_type_name = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                        new_props = NEURAL_PRIMITIVES[new_type_name].copy() # Important: Copy properties!
-                        new_id = f"{new_type_name.split('-')[0]}_{uuid.uuid4().hex[:4]}"
-                        
-                        # Logic: Insert NEW node between Target and its Inputs
-                        # This ensures the graph actually gets longer/deeper
-                        original_inputs = child.nodes[target_id].inputs.copy()
-                        if not original_inputs: continue # Skip if orphan
-
-                        new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=original_inputs)
-                        
-                        # Reroute target to point to new node
-                        child.nodes[target_id].inputs = [new_id]
-                        child.nodes[new_id] = new_node
-                        child.mutations_log.append(f"Inserted {new_type_name} before {target_id}")
-
-        # 2. Add Skip Connection (Residual) - The "Brain Wiring"
+        # --- STRATEGY 1: GENE DUPLICATION (The Engine of Complexity) ---
+        # Real complexity comes from taking a working gene and copying it.
         if random.random() < effective_rate:
-            if len(node_ids) > 2:
-                source_id = random.choice(node_ids)
+            if len(node_ids) >= 1:
                 target_id = random.choice(node_ids)
+                target_node = child.nodes[target_id]
                 
-                # Robust Cycle Prevention
+                # Duplicate the node
+                new_id = f"{target_node.type_name.split('-')[0]}_copy_{uuid.uuid4().hex[:4]}"
+                new_props = target_node.properties.copy()
+                
+                # Divergence: The copy is slightly different (Mutation)
+                new_props['complexity'] *= random.uniform(0.9, 1.2)
+                
+                # Add to graph (in parallel to the original)
+                new_node = ArchitectureNode(new_id, target_node.type_name, new_props, inputs=target_node.inputs)
+                child.nodes[new_id] = new_node
+                child.mutations_log.append(f"Duplicated {target_id} -> {new_id}")
+
+        # --- STRATEGY 2: ADAPTIVE RESPONSE (The Shield) ---
+        # If the parent was 'aging' (high loss), the child tries to mutate a Repair Gene specifically.
+        if parent.loss > 10.0 and random.random() < 0.6:
+            # Urgent mutation: Insert a Repair or Defense mechanism
+            repair_genes = ['Telomerase_Activator', 'CRISPR_Editor', 'P53_Tumor_Suppressor', 'Mitochondrial_Booster']
+            gene_name = random.choice(repair_genes)
+            
+            # Find a place to insert
+            target_id = random.choice(node_ids)
+            new_id = f"REPAIR_{uuid.uuid4().hex[:4]}"
+            new_props = NEURAL_PRIMITIVES[gene_name].copy()
+            
+            # Insert
+            new_node = ArchitectureNode(new_id, gene_name, new_props, inputs=[target_id])
+            child.nodes[new_id] = new_node
+            child.mutations_log.append(f"Adaptive Response: Evolved {gene_name}")
+
+        # --- STRATEGY 3: SYNAPTIC REWIRING (The Brain) ---
+        # Connect unconnected areas to increase 'Brain Power' (Depth)
+        if random.random() < effective_rate:
+            if len(node_ids) > 4:
+                src = random.choice(node_ids)
+                tgt = random.choice(node_ids)
+                
+                # Check for cycles
                 G_temp = nx.DiGraph()
                 for nid, node in child.nodes.items():
-                    for parent in node.inputs:
-                        G_temp.add_edge(parent, nid)
-
-                # Only add if path does NOT exist (prevents cycles) and not self-loop
-                if source_id != target_id and source_id not in child.nodes[target_id].inputs:
-                    try:
-                        if not nx.has_path(G_temp, target_id, source_id):
-                            child.nodes[target_id].inputs.append(source_id)
-                            child.mutations_log.append(f"Added Skip Connection {source_id} -> {target_id}")
-                    except:
-                        pass # NetworkX error safety
-
-        # 3. Change Component Type (Mutation) - The "Evolution"
-        if random.random() < effective_rate:
-            target_id = random.choice(node_ids)
-            # Don't mutate the fixed input/output/mitochondria structure too easily
-            if target_id not in ["input_sensor", "output_action", "mitochondria_0"]:
-                new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                child.nodes[target_id].type_name = new_type
-                child.nodes[target_id].properties = NEURAL_PRIMITIVES[new_type].copy()
-                child.mutations_log.append(f"Mutated {target_id} to {new_type}")
+                    for p in node.inputs: G_temp.add_edge(p, nid)
                 
-        # 4. Meta-Cognitive Pruning (Self-Correction)
-        # UPDATE: Made pruning rarer so we don't delete progress too fast
-        if child.self_confidence > 0.8 and random.random() < 0.05:
-            if len(node_ids) > 5: # Only prune if we are big enough
-                target_to_prune = random.choice(node_ids[1:-1]) 
-                if target_to_prune in child.nodes:
-                    inputs_of_pruned = child.nodes[target_to_prune].inputs
-                    for n_id, n in child.nodes.items():
-                        if target_to_prune in n.inputs:
-                            n.inputs.remove(target_to_prune)
-                            n.inputs.extend(inputs_of_pruned)
-                    del child.nodes[target_to_prune]
-                    child.mutations_log.append(f"Pruned inefficient node {target_to_prune}")
+                if src != tgt and src not in child.nodes[tgt].inputs:
+                     if not nx.has_path(G_temp, tgt, src): # Prevent cycle
+                        child.nodes[tgt].inputs.append(src)
+                        child.mutations_log.append(f"Synaptic Rewiring: {src} -> {tgt}")
 
         child.compute_stats()
         return child
