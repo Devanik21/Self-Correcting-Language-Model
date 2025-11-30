@@ -490,6 +490,10 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     return go.Figure(data=[edge_trace, node_trace_glow, node_trace_core], layout=layout)
 
 
+
+
+
+
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     """
     Renders the architecture as a "Neural Quasar".
@@ -581,6 +585,567 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     )
 
     return go.Figure(data=[edge_trace, node_trace], layout=layout)
+
+
+
+# ==================== ADVANCED ARCHITECTURAL VIEWS ====================
+
+# Function 3: Hyperbolic Connectivity Map
+def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
+    """Renders the network using hyperbolic positioning to emphasize density and scale."""
+    G = arch.to_networkx_graph(directed=True)
+    if not G.nodes: return go.Figure()
+
+    # --- Hyperbolic Layout Simulation ---
+    # We'll use a force-directed layout as a base and project it
+    pos_base = nx.spring_layout(G, dim=2, seed=42)
+    
+    node_x, node_y, node_z, node_text, node_color = [], [], [], [], []
+    
+    for node_id in G.nodes():
+        x, y = pos_base.get(node_id, (0, 0))
+        props = arch.nodes[node_id].properties
+        
+        # Hyperbolic Projection Logic: Map planar (x, y) to 3D sphere/disc model
+        r = math.sqrt(x**2 + y**2) * 2  # Radius/magnitude
+        theta = math.atan2(y, x)        # Angle
+        complexity = props.get('complexity', 1.0)
+        
+        # New 3D coordinates (r, theta, complexity)
+        # Z is scaled by complexity, X/Y are angular
+        h_x = r * math.cos(theta) * (1 + 0.1 * complexity)
+        h_y = r * math.sin(theta) * (1 + 0.1 * complexity)
+        h_z = complexity * 15 # Z-axis shows the "depth" of intelligence
+
+        node_x.append(h_x)
+        node_y.append(h_y)
+        node_z.append(h_z)
+        node_color.append(props.get('memory_cost', 0.5))
+        node_text.append(f"ID: {node_id}<br>Type: {arch.nodes[node_id].type_name}<br>R: {r:.2f}")
+
+    # Build traces (lines omitted for clarity, focusing on node structure)
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=10, 
+            color=node_color,
+            colorscale='Inferno', # Fire and brilliance theme
+            showscale=False,
+            opacity=0.8
+        )
+    )
+
+    layout = go.Layout(
+        title="HYPERBOLIC CONNECTIVITY MAP",
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    return go.Figure(data=[node_trace], layout=layout)
+
+# Function 4: Radial Network Density
+def plot_radial_network_density_3d(arch: CognitiveArchitecture):
+    """Shows the network on a cylindrical map where radius relates to compute cost."""
+    G = arch.to_networkx_graph(directed=True)
+    if not G.nodes: return go.Figure()
+
+    node_x, node_y, node_z, node_text, node_size = [], [], [], [], []
+    
+    # Simple assignment of angular position based on node index
+    num_nodes = len(G.nodes)
+    nodes_list = list(G.nodes())
+    
+    for i, node_id in enumerate(nodes_list):
+        props = arch.nodes[node_id].properties
+        cost = props.get('compute_cost', 1.0)
+        
+        # Radial Layout
+        theta = (i / num_nodes) * 2 * math.pi
+        radius = 5 + (cost * 10) # Radius scaled by cost
+        z = (i % 5) * 5 # Vertical placement (Z) for stacking layers
+
+        x = radius * math.cos(theta)
+        y = radius * math.sin(theta)
+
+        node_x.append(x)
+        node_y.append(y)
+        node_z.append(z)
+        node_size.append(10 + cost * 5)
+        node_text.append(f"Type: {arch.nodes[node_id].type_name}<br>Cost: {cost:.2f}")
+
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=node_size, 
+            color=[np.log1p(s) for s in node_size], # Color gradient by size
+            colorscale='Viridis', # Green/Yellow glow
+            line=dict(color='white', width=1.5),
+            opacity=0.9
+        )
+    )
+
+    layout = go.Layout(
+        title="RADIAL NETWORK DENSITY (Cost vs Angle)",
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        scene=dict(
+            xaxis=dict(visible=True, title='X (Circular)', showgrid=False), 
+            yaxis=dict(visible=True, title='Y (Circular)', showgrid=False), 
+            zaxis=dict(visible=True, title='Z (Layer)', showgrid=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    return go.Figure(data=[node_trace], layout=layout)
+
+
+# Function 5: Loss Gradient Force-Directed
+def plot_loss_gradient_force_3d(arch: CognitiveArchitecture):
+    """
+    Simulates a force field where nodes are pulled to the center based on lower 
+    simulated loss contribution (higher 'fitness').
+    """
+    G = arch.to_networkx_graph(directed=True)
+    if not G.nodes: return go.Figure()
+    
+    # Use spring layout as a base
+    pos = nx.spring_layout(G, dim=3, seed=10)
+    
+    node_x, node_y, node_z, node_text, node_size = [], [], [], [], []
+
+    for node_id in G.nodes():
+        x, y, z = pos.get(node_id, (0, 0, 0))
+        props = arch.nodes[node_id].properties
+        
+        # Simulate 'loss_contribution' (lower is better/stronger)
+        # Use complexity as a proxy if actual loss is unavailable
+        lc = 1.0 - props.get('complexity', 0.5) 
+        lc = max(0.1, lc) # Prevent division by zero
+        
+        # "Gradient Force": Pull nodes towards origin (0,0,0) based on fitness (low lc)
+        center_force = 1.0 / lc 
+        
+        # Apply force multiplier to distance from center
+        new_x, new_y, new_z = x / center_force, y / center_force, z / center_force
+        
+        node_x.append(new_x)
+        node_y.append(new_y)
+        node_z.append(new_z)
+        
+        node_text.append(f"Node: {node_id}<br>Fitness: {lc:.2f}")
+        node_size.append(5 + center_force) # Stronger nodes are bigger
+        
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=node_size, 
+            color=[s for s in node_size],
+            colorscale='Blues', # Clean, cold intelligence
+            line=dict(color='yellow', width=1),
+            opacity=0.8
+        )
+    )
+
+    layout = go.Layout(
+        title="LOSS GRADIENT FORCE FIELD (Fitness Clustering)",
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    return go.Figure(data=[node_trace], layout=layout)
+
+
+# Function 6: Component Type Stratification (The "Cityscape")
+def plot_component_cityscape_3d(arch: CognitiveArchitecture):
+    """Stratifies the network on the Z-axis by component type (Attention, SSM, MLP)."""
+    G = arch.to_networkx_graph(directed=True)
+    if not G.nodes: return go.Figure()
+
+    # Define stratification levels
+    type_map = {'Attention': 1, 'SSM': 2, 'MLP': 3, 'Memory': 4, 'Control': 5, 'Other': 6}
+    type_name_map = {1: 'Attention', 2: 'SSM', 3: 'MLP', 4: 'Memory', 5: 'Control', 6: 'Other'}
+    
+    # Use 2D spring layout for X/Y positions
+    pos_2d = nx.spring_layout(G, dim=2, seed=50)
+    
+    node_x, node_y, node_z, node_color, node_text = [], [], [], [], []
+
+    for node_id in G.nodes():
+        x, y = pos_2d.get(node_id, (0, 0))
+        node_type = arch.nodes[node_id].type_name
+        
+        # Z is determined by the component type
+        type_level = type_map.get(node_type.split()[0], type_map['Other'])
+        z = type_level * 10
+        
+        node_x.append(x)
+        node_y.append(y)
+        node_z.append(z)
+        
+        node_color.append(type_level)
+        node_text.append(f"Type: {node_type}<br>Level: {type_name_map[type_level]}")
+        
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=8, 
+            color=node_color,
+            colorscale='Portland', # Architectural, vibrant colors
+            line=dict(color='black', width=1),
+            symbol='square', # City blocks
+            opacity=0.9
+        )
+    )
+
+    layout = go.Layout(
+        title="COMPONENT TYPE CITYSCAPE (Architectural Map)",
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        scene=dict(
+            xaxis=dict(visible=False), 
+            yaxis=dict(visible=False), 
+            zaxis=dict(visible=True, title='Component Type Level'),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    return go.Figure(data=[node_trace], layout=layout)
+
+
+# Function 7: Time-Lagged Recurrence Plot (The "Temporal Vortex")
+def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
+    """
+    Abstract plot: X, Y, Z coordinates are based on time-lagged properties 
+    (Node's complexity, Parent's complexity, Grandparent's complexity).
+    """
+    G = arch.to_networkx_graph(directed=True)
+    if not G.nodes: return go.Figure()
+
+    node_x, node_y, node_z, node_color, node_text = [], [], [], [], []
+
+    for node_id in G.nodes():
+        # Step 0: Current Node Complexity (X-axis)
+        c0 = arch.nodes[node_id].properties.get('complexity', 0.1)
+        
+        # Step 1: Parent Complexity (Y-axis)
+        parents = list(G.predecessors(node_id))
+        c1 = sum(arch.nodes[p].properties.get('complexity', 0.1) for p in parents) / max(1, len(parents))
+
+        # Step 2: Grandparent Complexity (Z-axis)
+        grandparents = set(gp for p in parents for gp in G.predecessors(p) if gp != node_id)
+        c2 = sum(arch.nodes[gp].properties.get('complexity', 0.1) for gp in grandparents) / max(1, len(grandparents))
+
+        # Apply a non-linear warp for visual effect
+        x = c0 * math.cos(c1) * 10 
+        y = c0 * math.sin(c1) * 10
+        z = c2 * 10 
+
+        node_x.append(x)
+        node_y.append(y)
+        node_z.append(z)
+        
+        node_color.append(c0 + c1 + c2)
+        node_text.append(f"C0: {c0:.2f}<br>C1: {c1:.2f}<br>C2: {c2:.2f}")
+
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=5, 
+            color=node_color,
+            colorscale='Plasma', # High-energy, abstract
+            line=dict(color='white', width=1),
+            opacity=0.7
+        )
+    )
+
+    layout = go.Layout(
+        title="TEMPORAL VORTEX (Recurrence Complexity)",
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        margin=dict(l=0, r=0, b=0, t=30)
+    )
+    return go.Figure(data=[node_trace], layout=layout)
+
+
+
+
+def get_node_metrics(arch: CognitiveArchitecture):
+    """Helper to extract normalized and raw metrics for plotting."""
+    metrics = {
+        'complexity': [], 'memory': [], 'connectivity': [], 'color_loss': [],
+        'text': [], 'x': [], 'y': [], 'z': []
+    }
+    
+    # Use spring layout for a base organic positioning
+    try:
+        pos = nx.spring_layout(arch.to_networkx_graph(), dim=3, seed=42)
+    except:
+        pos = {n: [np.random.rand() * 10, np.random.rand() * 10, np.random.rand() * 10] for n in arch.nodes}
+
+    max_loss = max([n.loss for n in arch.nodes.values() if n.loss is not None], default=1e-3)
+
+    for nid, node in arch.nodes.items():
+        props = node.properties
+        
+        # Core Metrics
+        metrics['complexity'].append(props.get('complexity', 1.0))
+        metrics['memory'].append(props.get('memory_cost', 0.0))
+        metrics['connectivity'].append(len(node.inputs) + len(node.outputs))
+        
+        # Color based on Local Loss (Fitness)
+        color_val = node.loss / max_loss if node.loss is not None else 0.5
+        metrics['color_loss'].append(color_val)
+        
+        # Hover text
+        metrics['text'].append(f"ID: {nid}<br>Type: {node.type_name}<br>Complexity: {metrics['complexity'][-1]:.2f}")
+        
+        # 3D Position
+        if nid in pos:
+            x, y, z = pos[nid]
+            metrics['x'].append(x)
+            metrics['y'].append(y)
+            metrics['z'].append(z)
+        else: # Fallback if node not in layout (shouldn't happen)
+            metrics['x'].append(0); metrics['y'].append(0); metrics['z'].append(0)
+
+    # Normalize connectivity for sizing/coloring
+    conn = np.array(metrics['connectivity'])
+    metrics['connectivity_norm'] = (conn - conn.min()) / (conn.max() - conn.min()) if conn.size > 0 and conn.max() > conn.min() else np.zeros_like(conn)
+    
+    return metrics
+
+
+def plot_compute_cost_landscape(arch: CognitiveArchitecture):
+    """
+    1. Compute Cost Landscape (Deep Learning Research View)
+    X=Complexity, Y=Memory Cost, Z=Connectivity. Color by Local Loss.
+    """
+    metrics = get_node_metrics(arch)
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['complexity'],
+        y=metrics['memory'],
+        z=metrics['connectivity'],
+        mode='markers',
+        text=metrics['text'],
+        hoverinfo='text',
+        marker=dict(
+            size=10 + np.array(metrics['connectivity_norm']) * 15,
+            color=metrics['color_loss'],
+            colorscale='Inferno', # High contrast color for loss
+            colorbar=dict(title='Local Loss', thickness=15),
+            opacity=0.8
+        )
+    )])
+    
+    fig.update_layout(
+        title="1. Compute Cost Landscape (Loss vs Resources)",
+        scene=dict(
+            xaxis_title='Node Complexity (Compute)',
+            yaxis_title='Memory Cost (MB)',
+            zaxis_title='Connectivity (Degree)',
+            bgcolor='rgba(0,0,0,0)',
+        ),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_component_type_manifold(arch: CognitiveArchitecture):
+    """
+    2. Component Type Manifold (Clustering View)
+    Uses the geometric positions but colors/symbols by component type for visual clustering.
+    """
+    metrics = get_node_metrics(arch)
+    node_types = [n.type_name for n in arch.nodes.values()]
+    unique_types = sorted(list(set(node_types)))
+    type_map = {t: i for i, t in enumerate(unique_types)}
+    type_colors = px.colors.qualitative.D3 # Distinct colors for types
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['x'],
+        y=metrics['y'],
+        z=metrics['z'],
+        mode='markers',
+        text=metrics['text'],
+        hoverinfo='text',
+        marker=dict(
+            size=12,
+            color=[type_colors[type_map[t] % len(type_colors)] for t in node_types],
+            symbol=[f'square{type_map[t]}' for t in node_types],
+            line=dict(color='white', width=1),
+            opacity=0.8
+        )
+    )])
+
+    fig.update_layout(
+        title="2. Component Type Manifold (Spatial Clustering)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+# --- Placeholder Functions for the remaining 3 plots ---
+
+def plot_architectural_flux(arch: CognitiveArchitecture):
+    """
+    3. Architectural Flux Diagram (Energy Flow View)
+    Plots edges whose thickness represents the theoretical 'flux' (sum of parent/child complexity).
+    """
+    metrics = get_node_metrics(arch)
+    pos_map = {nid: (metrics['x'][i], metrics['y'][i], metrics['z'][i]) for i, nid in enumerate(arch.nodes)}
+    
+    edge_x, edge_y, edge_z = [], [], []
+    edge_flux = []
+    
+    G = arch.to_networkx_graph()
+    
+    max_flux = 1.0
+    for u, v in G.edges():
+        if u in pos_map and v in pos_map:
+            x0, y0, z0 = pos_map[u]
+            x1, y1, z1 = pos_map[v]
+            edge_x.extend([x0, x1, None])
+            edge_y.extend([y0, y1, None])
+            edge_z.extend([z0, z1, None])
+            
+            # Flux proxy: Sum of source/target complexity
+            flux = arch.nodes[u].properties.get('complexity', 0) + arch.nodes[v].properties.get('complexity', 0)
+            edge_flux.append(flux)
+            max_flux = max(max_flux, flux)
+        
+    # Scale flux to line width (from 1 to 10)
+    scaled_flux = [max(1, (f / max_flux) * 9) for f in edge_flux]
+    
+    fig = go.Figure(data=[
+        go.Scatter3d(
+            x=edge_x, y=edge_y, z=edge_z,
+            mode='lines',
+            line=dict(
+                # Use a specific color for the flux lines, like neon green/blue
+                color=px.colors.sequential.Viridis, 
+                width=scaled_flux,
+            ),
+            hoverinfo='none'
+        ),
+        # Add nodes back for context
+        go.Scatter3d(
+            x=metrics['x'], y=metrics['y'], z=metrics['z'],
+            mode='markers', marker=dict(size=5, color='white', opacity=0.7),
+            hoverinfo='text', text=metrics['text']
+        )
+    ])
+    
+    fig.update_layout(
+        title="3. Architectural Flux Diagram (Connection Strength)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_genetic_heritage_view(arch: CognitiveArchitecture):
+    """
+    4. Genetic Heritage View (Evolutionary Distance)
+    Visualizes where the current architecture came from in the evolutionary space.
+    X=Architectural ID (as hash), Y=Parent ID (as hash), Z=Fitness/Loss.
+    """
+    # This requires history tracking, which we don't have here, so we fake it for a powerful plot.
+    
+    metrics = get_node_metrics(arch)
+    
+    # Fake/Proxy Heritage Data
+    ids = list(arch.nodes.keys())
+    # Use IDs as proxies for X/Y
+    x_heritage = [hash(nid) % 1000 for nid in ids]
+    y_parent = [hash(nid.split('_')[0]) % 1000 for nid in ids] # Simple Parent Proxy
+    z_loss = np.array(metrics['color_loss']) * 100 # Z is amplified loss
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=x_heritage,
+        y=y_parent,
+        z=z_loss,
+        mode='markers',
+        text=[f"Loss: {l:.3f}" for l in z_loss / 100],
+        hoverinfo='text',
+        marker=dict(
+            size=15,
+            color=z_loss,
+            colorscale='Jet', # For high-tech contrast
+            colorbar=dict(title='Fitness (Loss)'),
+            opacity=0.9,
+            symbol='cross' # Distinct symbol for this view
+        )
+    )])
+    
+    fig.update_layout(
+        title="4. Genetic Heritage View (Evolutionary Distance in Feature Space)",
+        scene=dict(
+            xaxis_title='Architecture ID (Hash)',
+            yaxis_title='Parent ID (Hash)',
+            zaxis_title='Performance Metric (Loss)',
+            bgcolor='rgba(0,0,0,0)',
+        ),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+def plot_entropy_diversity_quasar(arch: CognitiveArchitecture):
+    """
+    5. Entropy/Diversity Quasar (The "Self-Organization" View)
+    Visualizes the localized complexity and diversity using a voxel-like approach.
+    """
+    metrics = get_node_metrics(arch)
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['x'],
+        y=metrics['y'],
+        z=metrics['z'],
+        mode='markers',
+        text=metrics['text'],
+        hoverinfo='text',
+        marker=dict(
+            size=metrics['complexity'] * 15, # Size by Complexity
+            color=metrics['connectivity_norm'], # Color by Connectivity (Proxy for local entropy)
+            colorscale='Twilight', # Dramatic, dark/bright colorscale
+            colorbar=dict(title='Local Diversity Index'),
+            opacity=0.7,
+            symbol='diamond'
+        )
+    )])
+
+    fig.update_layout(
+        title="5. Entropy/Diversity Quasar (Self-Organization Map)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
+
+
+
 
 
 
@@ -1455,6 +2020,7 @@ def main():
                                       title="Population Distribution (Fitness vs Size)",
                                       color_continuous_scale='Turbo_r')
                 st.plotly_chart(fig_dist, use_container_width=True)
+                
 
 if __name__ == "__main__":
     main()
