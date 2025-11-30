@@ -551,17 +551,17 @@ def build_nx_graph(arch, directed=True):
 def plot_immortality_curve(history):
     """
     Visualizes the evolutionary journey toward 'Biological Immortality'.
-    Y-Axis: Aging Score (Lower is better).
-    X-Axis: Generations.
     """
     if not history: return go.Figure()
     
     df = pd.DataFrame(history)
     
-    # We need to ensure 'aging_score' is in the history. 
-    # (See Step 5 for how to make sure it gets there).
+    # --- FIX FOR EMPTY PLOT ---
+    # If old history exists without 'aging_score', fill it with a default value (100.0)
     if 'aging_score' not in df.columns:
-        return go.Figure()
+        df['aging_score'] = 100.0
+    else:
+        df['aging_score'] = df['aging_score'].fillna(100.0)
 
     fig = go.Figure()
     
@@ -598,8 +598,6 @@ def plot_immortality_curve(history):
         hovermode="x unified"
     )
     return fig
-
-
 
 
 
@@ -2263,6 +2261,18 @@ def main():
         st.session_state.evolver = CortexEvolver() # Ensure evolver exists
         st.session_state.history = []
         st.session_state.generation = 0
+     # --- SELF-HEALING MECHANISM (Fixes AttributeError) ---
+    # This loop checks every existing AI. If they lack the new 'aging_score'
+    # attribute (because they are from an older session), we give them a default value.
+    for arch in st.session_state.evolver.population:
+        if not hasattr(arch, 'aging_score'):
+            arch.aging_score = 100.0  # Default to "Mortal"
+            
+    # Also heal the archive if it exists
+    if 'archive' in st.session_state.evolver.__dict__:
+        for gen, arch in st.session_state.evolver.archive.items():
+            if not hasattr(arch, 'aging_score'):
+                arch.aging_score = 100.0
         
         # Create seed population
         for _ in range(pop_size):
@@ -2334,7 +2344,7 @@ def main():
                 'generation': st.session_state.generation,
                 'loss': best_arch_gen.loss,
                 'parameter_count': best_arch_gen.parameter_count,
-                'aging_score': best_arch_gen.aging_score, # <--- ADD THIS!
+                'aging_score': getattr(best_arch_gen, 'aging_score', 100.0),
                 'inference_speed': best_arch_gen.inference_speed,
                 'depth': len(best_arch_gen.nodes),
                 'id': best_arch_gen.id
