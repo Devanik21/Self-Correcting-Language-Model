@@ -510,6 +510,34 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
 
 
 
+# --- NEW HELPER FUNCTION TO FIX ATTRIBUTE ERROR ---
+def build_nx_graph(arch, directed=True):
+    """
+    Standalone function to convert architecture to NetworkX graph.
+    Robust against stale session state objects.
+    """
+    G = nx.DiGraph() if directed else nx.Graph()
+    if not arch.nodes:
+        return G
+        
+    for nid, node in arch.nodes.items():
+        # Safely get attributes even if the dataclass definition changed
+        node_attrs = {
+            'type': getattr(node, 'type_name', 'Unknown'),
+            'color': node.properties.get('color', '#FFFFFF') if hasattr(node, 'properties') else '#FFFFFF',
+            'complexity': node.properties.get('complexity', 1.0) if hasattr(node, 'properties') else 1.0
+        }
+        G.add_node(nid, **node_attrs)
+        
+        # Handle inputs safely
+        inputs = getattr(node, 'inputs', [])
+        for parent in inputs:
+            if parent in arch.nodes:
+                G.add_edge(parent, nid)
+    return G
+
+
+
 
 
 
@@ -612,7 +640,7 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
 # Function 3: Hyperbolic Connectivity Map
 def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
     """Renders the network using hyperbolic positioning to emphasize density and scale."""
-    G = arch.to_networkx_graph(directed=True)
+    G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
     # --- Hyperbolic Layout Simulation ---
@@ -671,7 +699,7 @@ def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
 # Function 4: Radial Network Density
 def plot_radial_network_density_3d(arch: CognitiveArchitecture):
     """Shows the network on a cylindrical map where radius relates to compute cost."""
-    G = arch.to_networkx_graph(directed=True)
+    G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
     node_x, node_y, node_z, node_text, node_size = [], [], [], [], []
@@ -732,7 +760,7 @@ def plot_loss_gradient_force_3d(arch: CognitiveArchitecture):
     Simulates a force field where nodes are pulled to the center based on lower 
     simulated loss contribution (higher 'fitness').
     """
-    G = arch.to_networkx_graph(directed=True)
+    G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
     
     # Use spring layout as a base
@@ -791,7 +819,7 @@ def plot_loss_gradient_force_3d(arch: CognitiveArchitecture):
 # Function 6: Component Type Stratification (The "Cityscape")
 def plot_component_cityscape_3d(arch: CognitiveArchitecture):
     """Stratifies the network on the Z-axis by component type (Attention, SSM, MLP)."""
-    G = arch.to_networkx_graph(directed=True)
+    G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
     # Define stratification levels
@@ -853,7 +881,7 @@ def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
     Abstract plot: X, Y, Z coordinates are based on time-lagged properties 
     (Node's complexity, Parent's complexity, Grandparent's complexity).
     """
-    G = arch.to_networkx_graph(directed=True)
+    G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
     node_x, node_y, node_z, node_color, node_text = [], [], [], [], []
@@ -911,19 +939,33 @@ def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
 
 
 def get_node_metrics(arch: CognitiveArchitecture):
-    """Helper to extract normalized and raw metrics for plotting."""
+    """Helper to extract normalized and raw metrics for plotting.
+    Updated to safely handle missing 'loss' attributes in older objects.
+    """
     metrics = {
         'complexity': [], 'memory': [], 'connectivity': [], 'color_loss': [],
         'text': [], 'x': [], 'y': [], 'z': []
     }
     
+    # Use the new helper function here
+    G = build_nx_graph(arch, directed=True)
+    
     # Use spring layout for a base organic positioning
     try:
-        pos = nx.spring_layout(arch.to_networkx_graph(), dim=3, seed=42)
+        pos = nx.spring_layout(G, dim=3, seed=42)
     except:
         pos = {n: [np.random.rand() * 10, np.random.rand() * 10, np.random.rand() * 10] for n in arch.nodes}
 
-    max_loss = max([n.loss for n in arch.nodes.values() if n.loss is not None], default=1e-3)
+    # Safely calculate max loss, defaulting to 1.0 if not found
+    losses = []
+    for n in arch.nodes.values():
+        # SAFELY GET LOSS: If 'loss' doesn't exist, use 0.5
+        val = getattr(n, 'loss', 0.5) 
+        if val is None: val = 0.5
+        losses.append(val)
+        
+    max_loss = max(losses) if losses else 1.0
+    if max_loss == 0: max_loss = 1.0
 
     for nid, node in arch.nodes.items():
         props = node.properties
@@ -931,10 +973,18 @@ def get_node_metrics(arch: CognitiveArchitecture):
         # Core Metrics
         metrics['complexity'].append(props.get('complexity', 1.0))
         metrics['memory'].append(props.get('memory_cost', 0.0))
-        metrics['connectivity'].append(len(node.inputs) + len(node.outputs))
         
-        # Color based on Local Loss (Fitness)
-        color_val = node.loss / max_loss if node.loss is not None else 0.5
+        # Safely get inputs/outputs
+        inputs = getattr(node, 'inputs', [])
+        # We estimate outputs by looking at the graph
+        out_degree = G.out_degree(nid) if nid in G else 0
+        metrics['connectivity'].append(len(inputs) + out_degree)
+        
+        # Color based on Local Loss (Fitness) - SAFE ACCESS
+        node_loss = getattr(node, 'loss', 0.5)
+        if node_loss is None: node_loss = 0.5
+        
+        color_val = node_loss / max_loss
         metrics['color_loss'].append(color_val)
         
         # Hover text
@@ -946,12 +996,15 @@ def get_node_metrics(arch: CognitiveArchitecture):
             metrics['x'].append(x)
             metrics['y'].append(y)
             metrics['z'].append(z)
-        else: # Fallback if node not in layout (shouldn't happen)
+        else: 
             metrics['x'].append(0); metrics['y'].append(0); metrics['z'].append(0)
 
     # Normalize connectivity for sizing/coloring
     conn = np.array(metrics['connectivity'])
-    metrics['connectivity_norm'] = (conn - conn.min()) / (conn.max() - conn.min()) if conn.size > 0 and conn.max() > conn.min() else np.zeros_like(conn)
+    if conn.size > 0 and conn.max() > conn.min():
+        metrics['connectivity_norm'] = (conn - conn.min()) / (conn.max() - conn.min())
+    else:
+        metrics['connectivity_norm'] = np.zeros_like(conn)
     
     return metrics
 
