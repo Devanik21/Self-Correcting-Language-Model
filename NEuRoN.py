@@ -375,7 +375,6 @@ class CortexEvolver:
         if depth <= 0:
             return
 
-        # Properties for the new nodes (inheriting from "stem cell" root)
         if root_id not in arch.nodes:
             return
 
@@ -397,7 +396,6 @@ class CortexEvolver:
             arch.mutations_log.append(f"Fractal Bloom: Created {new_id}")
             
             # RECURSION: The node we just made becomes the parent for the next layer
-            # We slightly reduce branching probability to prevent infinite crashes
             if random.random() > 0.1: 
                 self._fractal_burst(arch, new_id, depth - 1, branch_factor)
 
@@ -412,16 +410,16 @@ class CortexEvolver:
         child.generation = parent.generation + 1
         child.mutations_log = []
         
-        node_ids = list(child.nodes.keys())
+        # --- THE POWER SOURCE ---
+        # Get the slider value (Defaults to 20 if you haven't set the slider yet)
+        growth_velocity = st.session_state.get('depth_growth_rate', 20)
+        fractal_prob = st.session_state.get('fractal_force', 0.2)
         
-        # --- THE POWER SOURCE (From NEuRoN 9) ---
-        # We loop this many times to force massive growth in one step.
-        growth_velocity = st.session_state.get('depth_growth_rate', 1)
-        fractal_prob = st.session_state.get('fractal_force', 0.0)
+        # WE EXECUTE THE MUTATION LOGIC 'growth_velocity' TIMES PER GENERATION!
+        # If velocity is 50, we try to add components 50 times in ONE step.
+        loops = random.randint(1, max(1, growth_velocity))
         
-        # We execute the mutation logic 'growth_velocity' times!
-        # If velocity is 20, we try to add components 20 times in one generation.
-        for _ in range(random.randint(1, max(1, growth_velocity))):
+        for _ in range(loops):
             
             # REFRESH IDs (Critical because we are modifying the graph inside the loop)
             current_ids = list(child.nodes.keys())
@@ -429,23 +427,23 @@ class CortexEvolver:
             # --- 1. FRACTAL BURST (Exponential Complexity) ---
             if random.random() < fractal_prob:
                 target = random.choice(current_ids)
-                # Spawns a tree of 5-15 nodes instantly
-                self._fractal_burst(child, target, depth=2, branch_factor=2)
+                # Spawns a tree of nodes instantly
+                self._fractal_burst(child, target, depth=3, branch_factor=2)
                 child.mutations_log.append("⚠️ Fractal Burst Triggered")
 
             # --- 2. LINEAR INSERTION (Vertical Depth - The NEuRoN 9 Logic) ---
-            elif random.random() < mutation_rate:
+            elif random.random() < 0.8: # High probability to ensure growth
                 if len(current_ids) > 1:
                     target_id = random.choice(current_ids)
-                    if target_id != "input":
+                    if target_id != "input_sensor":
                         # Create new node
                         new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
                         new_props = NEURAL_PRIMITIVES[new_type].copy()
                         new_id = f"{new_type.split('-')[0]}_{uuid.uuid4().hex[:4]}"
                         
-                        # Insert into the chain
-                        # Reroute target's inputs to the new node
+                        # Insert into the chain logic (Splice it in)
                         original_inputs = child.nodes[target_id].inputs
+                        # Create new node pointing to whatever the target pointed to
                         new_node = ArchitectureNode(new_id, new_type, new_props, inputs=original_inputs)
                         
                         # Point target to new node
@@ -460,7 +458,7 @@ class CortexEvolver:
                 src = random.choice(current_ids)
                 tgt = random.choice(current_ids)
                 # Simple cycle check
-                if src != tgt and tgt != "input":
+                if src != tgt and tgt != "input_sensor":
                      child.nodes[tgt].inputs.append(src)
 
         # Anti-Aging Repair Gene Insertion (Biological Goal)
@@ -1800,30 +1798,21 @@ def main():
         generations_to_run = st.number_input("Generations to Run per Click", 1, 1000, 10)
         mutation_rate = st.slider("Mutation Rate (Alpha)", 0.01, 1.0, 0.2)
         meta_learning = st.checkbox("Enable Meta-Cognitive Self-Correction", True)
-        st.slider("Horizontal Gene Transfer Rate", 0.0, 0.1, 0.0)
-        st.slider("Epigenetic Inheritance Factor", 0.0, 1.0, 0.1)
-        st.slider("Pleiotropy Effect Strength", 0.0, 1.0, 0.2)
-        st.slider("Antagonistic Coevolution Rate", 0.0, 0.5, 0.0)
-        st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
-        st.session_state.max_depth = st.slider("Max Network Depth", 10, 10000, 100)
-        st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 100, 1)
-        st.markdown("---")
-        st.markdown("**⚠️CAMBRIAN EXPLOSION**")
-        # THIS IS THE NEW PARAMETER
         
-        # THE REFERENCE PARAMETER (Restored & Boosted)
-        # This controls how many linear layers are added PER GENERATION
+        st.markdown("---")
+        st.markdown("### ⚠️ ENDGAME PROTOCOLS")
+        
+        # THIS IS THE SLIDER THAT WAS MISSING ITS POWER
         st.session_state.depth_growth_rate = st.slider(
-            "Vertical Growth Velocity", 
-            min_value=1, max_value=50, value=10, 
-            help="How many layers to add in a SINGLE generation. Set high for massive depth."
+            "🚀 Vertical Growth Velocity (Loops/Gen)", 
+            min_value=1, max_value=100, value=20, 
+            help="CRITICAL: How many times we try to add a layer PER GENERATION. Set to 20+ for explosion."
         )
 
-        # THE NEW ENDGAME PARAMETER
-        # This controls the probability of spawning a Fractal Tree (Exponential)
+        # THIS IS THE FRACTAL FORCE
         st.session_state.fractal_force = st.slider(
-            " Fractal Explosion Probability", 
-            min_value=0.0, max_value=1.0, value=0.1, 
+            "🔥 Forced Fractal Complexity", 
+            min_value=0.0, max_value=1.0, value=0.3, 
             help="Probability of triggering a recursive fractal burst inside the growth loop."
         )
 
