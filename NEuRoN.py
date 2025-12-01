@@ -401,9 +401,9 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        HYPER-VERTICAL EVOLUTION:
-        Replaces single-node insertion with "Depth Charge" Chain Insertion.
-        Forces the network to grow TALL, not just wide.
+        HYPER-VERTICAL EVOLUTION (EXPONENTIAL EDITION):
+        Now creates chains proportional to the network size to force 
+        exponential depth growth.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -416,17 +416,18 @@ class CortexEvolver:
         growth_velocity = st.session_state.get('depth_growth_rate', 20)
         fractal_prob = st.session_state.get('fractal_force', 0.2)
         
-        # SAFETY: If the user wants 100 layers, we need to make sure the physics
-        # doesn't kill it immediately. We auto-boost the max_depth allowed if needed.
+        # SAFETY: Auto-expand the laws of physics if the network gets huge
         current_max = st.session_state.get('max_depth', 100)
         if len(child.nodes) > current_max * 0.8:
-            st.session_state.max_depth = current_max * 2 # Auto-expand the laws of physics
+            st.session_state.max_depth = int(current_max * 2.5) # Expands limit faster
         
         # EXECUTE MUTATION LOOP
+        # We ensure at least 1 loop runs, but up to 'growth_velocity' times
         loops = random.randint(1, max(1, growth_velocity))
         
         for _ in range(loops):
             current_ids = list(child.nodes.keys())
+            node_count = len(current_ids)
             
             # --- 1. FRACTAL BURST (Exponential Complexity - Width/Trees) ---
             if random.random() < fractal_prob:
@@ -435,19 +436,22 @@ class CortexEvolver:
                 child.mutations_log.append("⚠️ Fractal Burst Triggered")
 
             # --- 2. DEPTH CHARGE (Forced Vertical Chains - Depth/Height) ---
-            # This is the new logic to fix your "15 layers" problem.
-            elif random.random() < 0.9: # 90% chance to grow TALL
+            # INCREASED PROBABILITY to 95% to prioritize Height
+            elif random.random() < 0.95: 
                 if len(current_ids) > 1:
                     target_id = random.choice(current_ids)
                     if target_id != "input_sensor":
                         
-                        # Instead of 1 node, we create a CHAIN of 5 to 10 nodes!
-                        chain_len = random.randint(5, 10)
+                        # --- EXPONENTIAL GROWTH LOGIC ---
+                        # Instead of adding 5-10 layers, we add a % of the total nodes.
+                        # As the brain gets bigger, the new chains get LONGER.
+                        # Minimum 5, Maximum 15% of total size. 
+                        # If you have 100 nodes, it adds 15 layers at once.
+                        base_growth = 5
+                        exponential_growth = int(node_count * 0.15) 
+                        chain_len = random.randint(base_growth, base_growth + exponential_growth)
                         
                         # We insert this chain BEFORE the target node.
-                        # Old: [Inputs] -> [Target]
-                        # New: [Inputs] -> [Chain_1] -> [Chain_2] ... -> [Chain_10] -> [Target]
-                        
                         original_inputs = child.nodes[target_id].inputs
                         
                         # Start the chain connected to the original inputs
@@ -467,7 +471,7 @@ class CortexEvolver:
                         
                         # Finally, connect the target to the END of the chain
                         child.nodes[target_id].inputs = previous_link
-                        child.mutations_log.append(f"💥 Depth Charge: Added {chain_len} layers linearly")
+                        child.mutations_log.append(f"💥 Exponential Depth Charge: Added {chain_len} layers")
 
         # --- 3. STANDARD UTILITY MUTATIONS (Once per gen) ---
         if random.random() < mutation_rate:
@@ -475,7 +479,8 @@ class CortexEvolver:
             if len(current_ids) > 2:
                 src = random.choice(current_ids)
                 tgt = random.choice(current_ids)
-                if src != tgt and tgt != "input_sensor":
+                # Prevent cycles (basic check) and self-loops
+                if src != tgt and tgt != "input_sensor" and src != "output_action":
                      child.nodes[tgt].inputs.append(src)
 
         # Anti-Aging Repair Gene Insertion
