@@ -210,18 +210,26 @@ class CognitiveArchitecture:
         """Simulates calculating the 'physical' properties of the model."""
         total_params = 0
         total_vram = 0.0
-        total_speed_penalty = 0.0
+        total_compute_cost = 0.0
+        
+        node_count = len(self.nodes)
         
         for node in self.nodes.values():
             props = node.properties
-            total_params += int(props.get('param_density', 1.0) * 1_000_000)
+            # Params = Density * Complexity
+            total_params += int(props.get('param_density', 1.0) * props.get('complexity', 1.0) * 1_000_000)
             total_vram += props.get('memory_cost', 0.1)
-            total_speed_penalty += props.get('compute_cost', 0.1)
+            total_compute_cost += props.get('compute_cost', 0.1)
             
         self.parameter_count = total_params
         self.vram_usage = total_vram
-        # Base speed minus complexity drag
-        self.inference_speed = max(1.0, 1000.0 / (total_speed_penalty + 0.1))
+        
+        # Speed penalty scales logarithmically with massive node counts to simulate parallel processing
+        # Instead of linear slowdown, massive brains get parallelization benefits
+        parallel_factor = math.log1p(node_count) if node_count > 0 else 1
+        adjusted_drag = total_compute_cost / parallel_factor
+        
+        self.inference_speed = max(0.1, 1000.0 / (adjusted_drag + 0.1))
 
     # --- NEW: Helper method for the Visualization Engine ---
     def to_networkx_graph(self, directed=True):
@@ -251,52 +259,68 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        NATURAL LAW: TITAN EDITION
-        1. Depth < 100 = FATAL (You are not complex enough to be conscious).
-        2. Depth > 100 + Aging = DANGEROUS (You are complex, but dying).
-        3. Depth > 100 + No Aging = IMMORTAL (The Goal).
+        Calculates fitness with SYNERGY SCALING for Exponential Architectures.
         """
-        # --- 1. CALCULATE DEPTH ---
+        # --- 1. CALCULATE INTELLIGENCE ---
         G = nx.DiGraph()
+        ai_complexity = 0.0
+        repair_power = 0.0
+        cleanup_power = 0.0
+        energy_efficiency = 1.0
+
         for nid, node in arch.nodes.items():
             G.add_node(nid)
-            for p in node.inputs: 
-                if p in arch.nodes: G.add_edge(p, nid)
+            for p in node.inputs: G.add_edge(p, nid)
+            
+            # Tally capabilities
+            n_type = node.properties.get('type')
+            complexity = node.properties.get('complexity', 1.0)
+            
+            if n_type in ['Attention', 'SSM', 'Meta']:
+                ai_complexity += complexity
+            elif n_type == 'Repair':
+                repair_power += (complexity * 5.0) # Boosted repair impact
+            elif n_type == 'Cleanup':
+                cleanup_power += (complexity * 3.0)
+            elif n_type == 'Energy':
+                # Exponential efficiency: More mitochondria = logarithmic scaling of cost
+                energy_efficiency *= 0.95 
+
         try:
             depth = nx.dag_longest_path_length(G)
         except:
             depth = 1
-
-        # --- 2. THE TITAN GATE (Minimum Viable Complexity) ---
-        # The Goal is 100 layers.
-        # If you are at 10 layers, your penalty is (100 - 10) * 100 = 9000.
-        # If you are at 100 layers, your penalty is 0.
-        target_depth = 100.0
         
-        complexity_penalty = 0.0
-        if depth < target_depth:
-            complexity_penalty = (target_depth - depth) * 100.0 
-
-        # --- 3. THE AGING CALCULATION (Your Original Goal) ---
-        # We still calculate aging so that ONCE they are big, they start fixing it.
-        metabolic_stress = (len(arch.nodes) * 0.2) # Big body = High Stress
+        # Intelligence Score (Rewarding Exponential Depth)
+        # Using Log scale for massive numbers to keep score readable
+        intelligence = (depth * 5.0) + (math.log1p(ai_complexity) * 20.0)
         
-        repair_power = 0.0
-        for node in arch.nodes.values():
-            if node.properties['type'] in ['Repair', 'Cleanup']:
-                repair_power += (node.properties['complexity'] * 5.0) # Strong repair
-                
-        current_aging = max(0, metabolic_stress - repair_power)
+        ignorance_penalty = max(0, 100.0 - intelligence) 
+
+        # --- 2. CALCULATE AGING (The "Body") ---
+        # Standard Linear Stress
+        raw_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.1
+        
+        # SYNERGY BONUS (The fix for Exponential Growth):
+        # As nodes increase, if they are organized (depth), stress is reduced.
+        # This simulates "multicellular cooperation".
+        synergy_factor = 1.0 / (math.log10(len(arch.nodes) + 1) + 1)
+        
+        metabolic_stress = raw_stress * energy_efficiency * synergy_factor
+        
+        # The Aging Equation
+        current_aging = max(0, metabolic_stress - (repair_power + cleanup_power))
+        
+        # Store for visualization
         arch.aging_score = current_aging
 
-        # --- 4. TOTAL LOSS ---
-        # If you are small, Complexity Penalty dominates (Loss ~9000).
-        # If you are big, Aging Score dominates (Loss ~50).
-        # This forces them to GROW FIRST, then FIX AGING.
-        total_loss = complexity_penalty + (current_aging * 2.0)
+        # --- 3. TOTAL LOSS ---
+        # If aging > 0, it acts as a massive penalty multiplier
+        aging_penalty = current_aging * 2.0
         
-        # Add a tiny base loss so 0 doesn't break math
-        return max(0.1, total_loss)
+        total_loss = ignorance_penalty + aging_penalty
+        
+        return max(0.0001, total_loss)
 
 
 
@@ -401,10 +425,44 @@ class CortexEvolver:
         }
         return arch
 
+    def _fractal_burst(self, arch: CognitiveArchitecture, root_id: str, depth: int, branch_factor: int):
+        """
+        Helper function: Recursively generates a tree of nodes from a root.
+        This creates the EXPONENTIAL growth (Branch Factor ^ Depth).
+        """
+        if depth <= 0:
+            return
+
+        # Properties for the new nodes (inheriting from "stem cell" root)
+        if root_id not in arch.nodes:
+            return
+
+        base_props = arch.nodes[root_id].properties.copy()
+        
+        for i in range(branch_factor):
+            new_id = f"FRACTAL_{depth}_{i}_{uuid.uuid4().hex[:4]}"
+            
+            # Mutate the type slightly (Differentiation)
+            if random.random() < 0.3:
+                new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                new_props = NEURAL_PRIMITIVES[new_type].copy()
+            else:
+                new_props = base_props.copy()
+            
+            # Create node
+            new_node = ArchitectureNode(new_id, new_props.get('type', 'Unknown'), new_props, inputs=[root_id])
+            arch.nodes[new_id] = new_node
+            arch.mutations_log.append(f"Fractal Bloom: Created {new_id}")
+            
+            # RECURSION: The node we just made becomes the parent for the next layer
+            # We slightly reduce branching probability to prevent infinite crashes
+            if random.random() > 0.1: 
+                self._fractal_burst(arch, new_id, depth - 1, branch_factor)
+
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        BIOLOGICAL EVOLUTION: TITAN PROTOCOL
-        Forces massive vertical growth (Hyper-Extension) until the organism is complex enough.
+        BIOLOGICAL EVOLUTION: TITAN PROTOCOL + FRACTAL EXPANSION
+        Forces massive vertical growth (Hyper-Extension) or Exponential Fractal Bursts.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -415,7 +473,6 @@ class CortexEvolver:
         node_ids = list(child.nodes.keys())
         
         # --- CHECK CURRENT DEPTH ---
-        # We need to know if we are still an "embryo" (too small)
         G = nx.DiGraph()
         for nid, node in child.nodes.items():
             G.add_node(nid)
@@ -426,12 +483,32 @@ class CortexEvolver:
         except:
             current_depth = 1
 
-        # --- MODE 1: HYPER-EXTENSION (The Growth Spurt) ---
-        # If Depth < 100, we almost ALWAYS grow (80% chance).
-        # We attach a massive chain to the "end" of the network.
-        if current_depth < 100 and random.random() < 0.8:
+        # --- PREPARE FRACTAL TRIGGER ---
+        # Chance to trigger fractal growth increases if repair systems are strong
+        repair_power = sum([1 for n in child.nodes.values() if n.properties.get('type') == 'Repair'])
+        fractal_trigger_chance = 0.05 + (repair_power * 0.05) # Base 5% + 5% per repair node
+        # Cap chance to avoid total chaos (Max 40% chance)
+        fractal_trigger_chance = min(fractal_trigger_chance, 0.4) 
+
+        # =========================================================
+        # MODE 1: EXPONENTIAL FRACTAL BURST (The New Complexity Engine)
+        # =========================================================
+        if random.random() < fractal_trigger_chance:
+            target = random.choice(node_ids)
+            
+            # Exponential Parameters
+            recursion_depth = random.randint(2, 4) # How deep the tree goes
+            branching_factor = random.randint(2, 3) # How many splits per node
+            
+            child.mutations_log.append(f"⚠️ CAMBRIAN EXPLOSION: Fractal Burst (Depth {recursion_depth})")
+            self._fractal_burst(child, target, recursion_depth, branching_factor)
+
+        # =========================================================
+        # MODE 2: HYPER-EXTENSION (Legacy Linear Growth)
+        # =========================================================
+        # If Depth < 100, we still want to grow vertically.
+        elif current_depth < 100 and random.random() < 0.5:
             # Find a "Leaf" node (a node that is at the end of a path) to extend from
-            # This ensures we are adding to the DEPTH, not just the width.
             leaf_nodes = [n for n in G.nodes() if G.out_degree(n) == 0]
             if not leaf_nodes: leaf_nodes = node_ids
             
@@ -456,8 +533,9 @@ class CortexEvolver:
                 
             child.mutations_log.append(f"Titan Growth: Extended depth by {chain_len} layers")
 
-        # --- MODE 2: STANDARD EVOLUTION (Once Big) ---
-        # If we are already big (Depth > 100), we evolve normally (Optimizing & Anti-Aging)
+        # =========================================================
+        # MODE 3: STANDARD EVOLUTION (Optimizing & Anti-Aging)
+        # =========================================================
         else:
             # 1. Anti-Aging Response (The Goal)
             # If aging score is high, evolve a Repair Gene
@@ -483,6 +561,8 @@ class CortexEvolver:
 
         child.compute_stats()
         return child
+
+    
 # ==================== VISUALIZATION ENGINE (PLOTLY) ====================
 
 # ==================== VISUALIZATION ENGINE (PLOTLY): DEEPMIND EDITION ====================
