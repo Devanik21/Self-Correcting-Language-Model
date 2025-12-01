@@ -507,14 +507,15 @@ class CortexEvolver:
 
 def plot_neural_topology_3d(arch: CognitiveArchitecture):
     """
-    Renders the neural network as a 3D Cyberpunk holograph.
+    Renders the neural network with an EYE-FRIENDLY soothing gradient.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
         # Safely access properties for robustness
         props = getattr(node, 'properties', {})
         t_name = getattr(node, 'type_name', 'Unknown')
-        G.add_node(nid, type=t_name, color=props.get('color', '#FFFFFF'), complexity=props.get('complexity', 1.0))
+        # We ignore the hardcoded neon 'color' here and use complexity for the gradient instead
+        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0))
         
         # Safely access inputs
         inputs = getattr(node, 'inputs', [])
@@ -525,7 +526,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     # Layout
     pos = nx.spring_layout(G, dim=3)
     
-    # Edges
+    # Edges (Made slightly softer grey)
     edge_x, edge_y, edge_z = [], [], []
     for u, v in G.edges():
         if u in pos and v in pos:
@@ -538,13 +539,13 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
         mode='lines',
-        line=dict(color='#888888', width=2),
+        line=dict(color='rgba(200, 200, 200, 0.3)', width=2), # Soft Ghostly Grey
         hoverinfo='none'
     )
     
     # Nodes
     node_x, node_y, node_z = [], [], []
-    node_color = []
+    node_color_values = [] # We use values now, not hex codes
     node_text = []
     node_size = []
     
@@ -563,11 +564,13 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
             hover_text = (
                 f"<b>ID: {node}</b><br>"
                 f"Type: {t_name}<br>"
-                f"Complexity: {props.get('complexity', 0):.2f} | Compute: {props.get('compute_cost', 0):.2f}<br>"
-                f"Memory: {props.get('memory_cost', 0):.2f} | Params: {props.get('param_density', 0):.2f}<br>"
+                f"Complexity: {props.get('complexity', 0):.2f}<br>"
                 f"Inputs: {len(inputs)}"
             )
-            node_color.append(props.get('color', '#FFFFFF'))
+            
+            # Use Complexity as the source for the gradient color
+            node_color_values.append(props.get('complexity', 0.5))
+            
             node_text.append(hover_text)
             node_size.append(8 + props.get('complexity', 1.0) * 4)
         
@@ -576,8 +579,9 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         mode='markers',
         marker=dict(
             size=node_size,
-            color=node_color,
-            line=dict(color='rgba(255, 255, 255, 0.8)', width=1),
+            color=node_color_values, # Map values...
+            colorscale='Viridis',    # ...to this Eye-Friendly Palette (Blue-Green-Yellow)
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
             opacity=0.9
         ),
         text=node_text,
@@ -585,12 +589,12 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     )
     
     layout = go.Layout(
-        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#DDDDDD')),
+        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         hoverlabel=dict(
             font_size=16,
-            bgcolor="rgba(10, 10, 10, 0.8)"
+            bgcolor="rgba(20, 30, 40, 0.9)" # Dark blueish background for tooltip
         ),
         showlegend=False,
         scene=dict(
