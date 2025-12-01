@@ -507,25 +507,53 @@ class CortexEvolver:
 
 def plot_neural_topology_3d(arch: CognitiveArchitecture):
     """
-    Renders the neural network as a 3D Cyberpunk holograph.
+    Renders the neural network as a 3D Bioluminescent Holograph.
+    Refined for 'Eye-Friendly' beauty using a Nebula/Neon palette.
     """
     G = nx.DiGraph()
+    
+    # --- 1. THE BEAUTY PALETTE (Eye-Friendly Neon) ---
+    # Soft, glowing colors that look great on dark backgrounds
+    BEAUTY_PALETTE = {
+        'Attention': '#F72585', # Neon Rose (Focus)
+        'SSM':       '#4CC9F0', # Cyber Sky (Flow)
+        'MLP':       '#4361EE', # Royal Blue (Compute)
+        'Memory':    '#7209B7', # Deep Violet (Storage)
+        'Repair':    '#00FF9D', # Bioluminescent Green (Life/Healing) - CRITICAL
+        'Cleanup':   '#00FFCC', # Aqua (Purification)
+        'Energy':    '#FFD166', # Soft Gold (Power)
+        'Defense':   '#EF476F', # Soft Red (Protection)
+        'Control':   '#A0A0A0', # Silver (Structure)
+        'Meta':      '#FFFFFF', # Pure White (Consciousness)
+        'Unknown':   '#555555'  # Grey
+    }
+
+    # Build Graph
     for nid, node in arch.nodes.items():
-        # Safely access properties for robustness
-        props = getattr(node, 'properties', {})
-        t_name = getattr(node, 'type_name', 'Unknown')
-        G.add_node(nid, type=t_name, color=props.get('color', '#FFFFFF'), complexity=props.get('complexity', 1.0))
+        # Get type for coloring
+        n_type = getattr(node, 'type_name', 'Unknown')
         
-        # Safely access inputs
+        # Determine Color Category
+        color_key = 'Unknown'
+        for key in BEAUTY_PALETTE:
+            if key in n_type: # e.g. "MultiHeadAttention" contains "Attention"
+                color_key = key
+                break
+        
+        final_color = BEAUTY_PALETTE.get(color_key, '#555555')
+        
+        props = getattr(node, 'properties', {})
+        G.add_node(nid, type=n_type, color=final_color, complexity=props.get('complexity', 1.0))
+        
         inputs = getattr(node, 'inputs', [])
         for parent in inputs:
-            if parent in arch.nodes: # Ensure parent exists
+            if parent in arch.nodes:
                 G.add_edge(parent, nid)
             
-    # Layout
-    pos = nx.spring_layout(G, dim=3)
+    # Layout (Spring 3D)
+    pos = nx.spring_layout(G, dim=3, seed=42) # Seed 42 for consistent beauty
     
-    # Edges
+    # --- 2. ETHEREAL EDGES (Soft & Translucent) ---
     edge_x, edge_y, edge_z = [], [], []
     for u, v in G.edges():
         if u in pos and v in pos:
@@ -538,11 +566,12 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
         mode='lines',
-        line=dict(color='#888888', width=2),
+        # Very faint white/cyan for a "glass fiber" look
+        line=dict(color='rgba(200, 255, 255, 0.15)', width=2), 
         hoverinfo='none'
     )
     
-    # Nodes
+    # --- 3. LUMINOUS NODES (Glowing Orbs) ---
     node_x, node_y, node_z = [], [], []
     node_color = []
     node_text = []
@@ -560,16 +589,21 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
             t_name = getattr(n_data, 'type_name', 'Unknown')
             inputs = getattr(n_data, 'inputs', [])
 
+            # Rich Hover Data
             hover_text = (
                 f"<b>ID: {node}</b><br>"
-                f"Type: {t_name}<br>"
-                f"Complexity: {props.get('complexity', 0):.2f} | Compute: {props.get('compute_cost', 0):.2f}<br>"
-                f"Memory: {props.get('memory_cost', 0):.2f} | Params: {props.get('param_density', 0):.2f}<br>"
+                f"<span style='color:{G.nodes[node]['color']}'>Type: {t_name}</span><br>"
+                f"Complexity: {props.get('complexity', 0):.2f}<br>"
                 f"Inputs: {len(inputs)}"
             )
-            node_color.append(props.get('color', '#FFFFFF'))
+            
+            node_color.append(G.nodes[node]['color'])
             node_text.append(hover_text)
-            node_size.append(8 + props.get('complexity', 1.0) * 4)
+            
+            # Size varies slightly by complexity, but kept elegant
+            base_size = 10
+            size_boost = props.get('complexity', 1.0) * 3
+            node_size.append(base_size + size_boost)
         
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
@@ -577,30 +611,33 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         marker=dict(
             size=node_size,
             color=node_color,
-            line=dict(color='rgba(255, 255, 255, 0.8)', width=1),
-            opacity=0.9
+            # Soft white outline gives a "halo" effect
+            line=dict(color='rgba(255, 255, 255, 0.3)', width=1), 
+            opacity=0.95
         ),
         text=node_text,
         hoverinfo='text'
     )
     
     layout = go.Layout(
-        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#DDDDDD')),
+        title=dict(text=f"✨ Neural Topology: {arch.id}", font=dict(color='#DDDDDD', size=14)),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         hoverlabel=dict(
-            font_size=16,
-            bgcolor="rgba(10, 10, 10, 0.8)"
+            font_size=14,
+            font_family="Courier New",
+            bgcolor="rgba(20, 20, 20, 0.9)",
+            bordercolor="#333333"
         ),
         showlegend=False,
         scene=dict(
             camera=dict(eye=dict(x=1.5, y=1.5, z=0.5)),
-            xaxis=dict(showbackground=False, showticklabels=False, title=''),
-            yaxis=dict(showbackground=False, showticklabels=False, title=''),
-            zaxis=dict(showbackground=False, showticklabels=False, title=''),
-            bgcolor='rgba(0,0,0,0)'
+            xaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            yaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            zaxis=dict(showbackground=False, showticklabels=False, title='', visible=False),
+            bgcolor='rgba(0,0,0,0)' # Transparent background
         ),
-        margin=dict(l=0, r=0, b=0, t=40)
+        margin=dict(l=0, r=0, b=0, t=30)
     )
     
     return go.Figure(data=[edge_trace, node_trace], layout=layout)
