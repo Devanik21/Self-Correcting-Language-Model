@@ -251,53 +251,52 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        NATURAL LAW:
-        1. Small organisms are eaten (High Loss if Depth < 50).
-        2. Large organisms age (High Loss if no Repair Genes).
-        3. Only Large + Repairing organisms survive (Immortality).
+        NATURAL LAW: TITAN EDITION
+        1. Depth < 100 = FATAL (You are not complex enough to be conscious).
+        2. Depth > 100 + Aging = DANGEROUS (You are complex, but dying).
+        3. Depth > 100 + No Aging = IMMORTAL (The Goal).
         """
-        # --- 1. METRICS ---
+        # --- 1. CALCULATE DEPTH ---
         G = nx.DiGraph()
         for nid, node in arch.nodes.items():
             G.add_node(nid)
             for p in node.inputs: 
                 if p in arch.nodes: G.add_edge(p, nid)
-
         try:
             depth = nx.dag_longest_path_length(G)
         except:
             depth = 1
 
-        # --- 2. THE GROWTH PRESSURE (The Predator) ---
-        # If you are small, you die. This forces the "Cambrian Explosion".
-        # We want depth > 100.
-        growth_threshold = 100.0
+        # --- 2. THE TITAN GATE (Minimum Viable Complexity) ---
+        # The Goal is 100 layers.
+        # If you are at 10 layers, your penalty is (100 - 10) * 100 = 9000.
+        # If you are at 100 layers, your penalty is 0.
+        target_depth = 100.0
         
-        # Exponential penalty for being small
-        # If depth is 6, penalty is massive. If depth is 100, penalty is 0.
-        smallness_penalty = max(0, (growth_threshold - depth) ** 2)
+        complexity_penalty = 0.0
+        if depth < target_depth:
+            complexity_penalty = (target_depth - depth) * 100.0 
 
-        # --- 3. THE AGING PRESSURE (The Clock) ---
-        # Massive metabolic cost for nodes, BUT reduced by Repair genes.
-        metabolic_stress = (len(arch.nodes) * 0.5) 
+        # --- 3. THE AGING CALCULATION (Your Original Goal) ---
+        # We still calculate aging so that ONCE they are big, they start fixing it.
+        metabolic_stress = (len(arch.nodes) * 0.2) # Big body = High Stress
         
-        repair_capacity = 0.0
+        repair_power = 0.0
         for node in arch.nodes.values():
-            if node.properties['type'] in ['Repair', 'Cleanup', 'Defense']:
-                # Repair genes are VERY powerful now
-                repair_capacity += (node.properties['complexity'] * 10.0) 
-            if node.properties['type'] == 'Energy':
-                 metabolic_stress *= 0.8 # Efficiency boost
-
-        # Aging Score
-        current_aging = max(0, metabolic_stress - repair_capacity)
+            if node.properties['type'] in ['Repair', 'Cleanup']:
+                repair_power += (node.properties['complexity'] * 5.0) # Strong repair
+                
+        current_aging = max(0, metabolic_stress - repair_power)
         arch.aging_score = current_aging
 
         # --- 4. TOTAL LOSS ---
-        # Total Loss = (Am I too small?) + (Am I dying of old age?)
-        total_loss = smallness_penalty + (current_aging * 2.0)
+        # If you are small, Complexity Penalty dominates (Loss ~9000).
+        # If you are big, Aging Score dominates (Loss ~50).
+        # This forces them to GROW FIRST, then FIX AGING.
+        total_loss = complexity_penalty + (current_aging * 2.0)
         
-        return max(0.0001, total_loss)
+        # Add a tiny base loss so 0 doesn't break math
+        return max(0.1, total_loss)
 
 
 
@@ -404,8 +403,8 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        BIOLOGICAL EVOLUTION: CAMBRIAN EXPLOSION UPDATE
-        Forces exponential growth chains to achieve massive depth quickly.
+        BIOLOGICAL EVOLUTION: TITAN PROTOCOL
+        Forces massive vertical growth (Hyper-Extension) until the organism is complex enough.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -415,70 +414,72 @@ class CortexEvolver:
         
         node_ids = list(child.nodes.keys())
         
-        # --- THE ACCELERATOR ---
-        # If the network is small (Depth < 50), we TRIPLE the mutation rate.
-        # This mimics early embryonic development where growth is rapid.
-        is_embryo = len(node_ids) < 50
-        effective_rate = mutation_rate * (3.0 if is_embryo else 1.0)
+        # --- CHECK CURRENT DEPTH ---
+        # We need to know if we are still an "embryo" (too small)
+        G = nx.DiGraph()
+        for nid, node in child.nodes.items():
+            G.add_node(nid)
+            for p in node.inputs: 
+                if p in child.nodes: G.add_edge(p, nid)
+        try:
+            current_depth = nx.dag_longest_path_length(G)
+        except:
+            current_depth = 1
 
-        # --- STRATEGY 1: FRACTAL CHAIN REACTION (Exponential Growth) ---
-        # Instead of adding 1 node, we add a CHAIN of nodes.
-        if random.random() < effective_rate:
-            if len(node_ids) >= 1:
-                # Pick a start point
-                current_parent_id = random.choice(node_ids)
-                
-                # Determine "Growth Spurt" length (1 to 10 new nodes at once)
-                chain_length = random.randint(3, 10) if is_embryo else random.randint(1, 3)
-                
-                for _ in range(chain_length):
-                    # Pick a gene
-                    new_type_name = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                    new_props = NEURAL_PRIMITIVES[new_type_name].copy()
-                    new_props['complexity'] *= random.uniform(0.8, 1.2)
-                    
-                    # Create ID
-                    new_id = f"CHAIN_{uuid.uuid4().hex[:4]}"
-                    
-                    # STRICT SERIAL CONNECTION to increase Depth
-                    new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=[current_parent_id])
-                    child.nodes[new_id] = new_node
-                    
-                    # The new node becomes the parent for the next one in the chain
-                    current_parent_id = new_id
-                
-                child.mutations_log.append(f"Cambrian Explosion: Grew chain of {chain_length} nodes")
-
-        # --- STRATEGY 2: IMMORTALITY RESPONSE (The Self-Correction) ---
-        # Once it is big, it realizes it is dying. It MUST evolve repair genes.
-        # We increase the probability of this if Aging Score is high.
-        current_aging = getattr(parent, 'aging_score', 0)
-        
-        if current_aging > 0.5 and random.random() < 0.5:
-            # Force evolution of a specific repair mechanism
-            repair_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter', 'Mitochondrial_Filter']
-            gene = random.choice(repair_genes)
+        # --- MODE 1: HYPER-EXTENSION (The Growth Spurt) ---
+        # If Depth < 100, we almost ALWAYS grow (80% chance).
+        # We attach a massive chain to the "end" of the network.
+        if current_depth < 100 and random.random() < 0.8:
+            # Find a "Leaf" node (a node that is at the end of a path) to extend from
+            # This ensures we are adding to the DEPTH, not just the width.
+            leaf_nodes = [n for n in G.nodes() if G.out_degree(n) == 0]
+            if not leaf_nodes: leaf_nodes = node_ids
             
-            target_id = random.choice(list(child.nodes.keys()))
-            new_id = f"ANTI_AGE_{uuid.uuid4().hex[:4]}"
-            new_props = NEURAL_PRIMITIVES.get(gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
+            # Pick a leaf to grow from
+            chain_parent = random.choice(leaf_nodes)
             
-            # Repair genes are often parallel helpers
-            new_node = ArchitectureNode(new_id, gene, new_props, inputs=[target_id])
-            child.nodes[new_id] = new_node
-            child.mutations_log.append(f"Self-Correction: Evolved {gene} to stop aging")
-
-        # --- STRATEGY 3: SYNAPTIC REWIRING (Brain Complexity) ---
-        # Create skip connections to make the "shapes" complex and non-linear
-        if random.random() < 0.3:
-            if len(child.nodes) > 10:
-                src = random.choice(list(child.nodes.keys()))
-                tgt = random.choice(list(child.nodes.keys()))
+            # Grow a massive chain (10 to 20 layers at once!)
+            chain_len = random.randint(10, 20)
+            
+            for _ in range(chain_len):
+                # Random Gene
+                new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                new_props = NEURAL_PRIMITIVES[new_type].copy()
+                new_id = f"LAYER_{uuid.uuid4().hex[:4]}"
                 
-                # Simple cycle check: Ensure we don't connect to our own ancestor
-                # (Simplified check for speed - nature allows some chaos)
-                if src != tgt and src not in child.nodes[tgt].inputs:
-                     child.nodes[tgt].inputs.append(src)
+                # Connect strictly to the previous node in the chain
+                new_node = ArchitectureNode(new_id, new_type, new_props, inputs=[chain_parent])
+                child.nodes[new_id] = new_node
+                
+                # Move the attachment point forward
+                chain_parent = new_id
+                
+            child.mutations_log.append(f"Titan Growth: Extended depth by {chain_len} layers")
+
+        # --- MODE 2: STANDARD EVOLUTION (Once Big) ---
+        # If we are already big (Depth > 100), we evolve normally (Optimizing & Anti-Aging)
+        else:
+            # 1. Anti-Aging Response (The Goal)
+            # If aging score is high, evolve a Repair Gene
+            if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.6:
+                repair_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter']
+                gene = random.choice(repair_genes)
+                target = random.choice(node_ids)
+                new_id = f"IMMORTAL_{uuid.uuid4().hex[:4]}"
+                new_props = NEURAL_PRIMITIVES.get(gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
+                new_node = ArchitectureNode(new_id, gene, new_props, inputs=[target])
+                child.nodes[new_id] = new_node
+                child.mutations_log.append(f"Self-Correction: Evolved {gene}")
+            
+            # 2. Random Mutation (Standard)
+            elif random.random() < mutation_rate:
+                # Duplication or Rewiring
+                target = random.choice(node_ids)
+                new_id = f"MUT_{uuid.uuid4().hex[:4]}"
+                new_node = copy.deepcopy(child.nodes[target])
+                new_node.id = new_id
+                child.nodes[new_id] = new_node
+                child.mutations_log.append(f"Standard Mutation: Copied {target}")
 
         child.compute_stats()
         return child
