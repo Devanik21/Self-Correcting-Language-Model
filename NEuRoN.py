@@ -403,8 +403,8 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        BIOLOGICAL EVOLUTION: TITAN PROTOCOL + FRACTAL EXPANSION
-        Forces massive vertical growth (Hyper-Extension) or Exponential Fractal Bursts.
+        HYBRID HYPER-EVOLUTION:
+        Combines NEuRoN 9's aggressive vertical loop with the new Fractal Exponential logic.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -414,104 +414,63 @@ class CortexEvolver:
         
         node_ids = list(child.nodes.keys())
         
-        # --- CHECK CURRENT DEPTH ---
-        G = nx.DiGraph()
-        for nid, node in child.nodes.items():
-            G.add_node(nid)
-            for p in node.inputs: 
-                if p in child.nodes: G.add_edge(p, nid)
-        try:
-            current_depth = nx.dag_longest_path_length(G)
-        except:
-            current_depth = 1
-
-        # --- PREPARE FRACTAL TRIGGER ---
-        # Chance to trigger fractal growth increases if repair systems are strong
-        # --- PREPARE FRACTAL TRIGGER ---
-        # OLD LOGIC: fractal_trigger_chance = 0.05 + (repair_power * 0.05)
+        # --- THE POWER SOURCE (From NEuRoN 9) ---
+        # We loop this many times to force massive growth in one step.
+        growth_velocity = st.session_state.get('depth_growth_rate', 1)
+        fractal_prob = st.session_state.get('fractal_force', 0.0)
         
-        # NEW LOGIC: READ FROM SIDEBAR DIRECTLY
-        # If the user sets the slider > 0, we use that. Otherwise, we use the natural biological rate.
-        user_force = st.session_state.get('fractal_force', 0.0)
-        
-        if user_force > 0:
-            fractal_trigger_chance = user_force # USER IS GOD
-        else:
-            # Natural baseline
-            repair_power = sum([1 for n in child.nodes.values() if n.properties.get('type') == 'Repair'])
-            fractal_trigger_chance = 0.05 + (repair_power * 0.05)
+        # We execute the mutation logic 'growth_velocity' times!
+        # If velocity is 20, we try to add components 20 times in one generation.
+        for _ in range(random.randint(1, max(1, growth_velocity))):
             
-        # Cap chance to avoid total chaos (Max 90% chance now!)
-        fractal_trigger_chance = min(fractal_trigger_chance, 0.9)
+            # REFRESH IDs (Critical because we are modifying the graph inside the loop)
+            current_ids = list(child.nodes.keys())
+            
+            # --- 1. FRACTAL BURST (Exponential Complexity) ---
+            if random.random() < fractal_prob:
+                target = random.choice(current_ids)
+                # Spawns a tree of 5-15 nodes instantly
+                self._fractal_burst(child, target, depth=2, branch_factor=2)
+                child.mutations_log.append("⚠️ Fractal Burst Triggered")
 
-        # =========================================================
-        # MODE 1: EXPONENTIAL FRACTAL BURST (The New Complexity Engine)
-        # =========================================================
-        if random.random() < fractal_trigger_chance:
-            target = random.choice(node_ids)
-            
-            # Exponential Parameters
-            recursion_depth = random.randint(2, 4) # How deep the tree goes
-            branching_factor = random.randint(2, 3) # How many splits per node
-            
-            child.mutations_log.append(f"⚠️ CAMBRIAN EXPLOSION: Fractal Burst (Depth {recursion_depth})")
-            self._fractal_burst(child, target, recursion_depth, branching_factor)
-
-        # =========================================================
-        # MODE 2: HYPER-EXTENSION (Legacy Linear Growth)
-        # =========================================================
-        # If Depth < 100, we still want to grow vertically.
-        elif current_depth < 100 and random.random() < 0.5:
-            # Find a "Leaf" node (a node that is at the end of a path) to extend from
-            leaf_nodes = [n for n in G.nodes() if G.out_degree(n) == 0]
-            if not leaf_nodes: leaf_nodes = node_ids
-            
-            # Pick a leaf to grow from
-            chain_parent = random.choice(leaf_nodes)
-            
-            # Grow a massive chain (10 to 20 layers at once!)
-            chain_len = random.randint(10, 20)
-            
-            for _ in range(chain_len):
-                # Random Gene
-                new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                new_props = NEURAL_PRIMITIVES[new_type].copy()
-                new_id = f"LAYER_{uuid.uuid4().hex[:4]}"
-                
-                # Connect strictly to the previous node in the chain
-                new_node = ArchitectureNode(new_id, new_type, new_props, inputs=[chain_parent])
-                child.nodes[new_id] = new_node
-                
-                # Move the attachment point forward
-                chain_parent = new_id
-                
-            child.mutations_log.append(f"Titan Growth: Extended depth by {chain_len} layers")
-
-        # =========================================================
-        # MODE 3: STANDARD EVOLUTION (Optimizing & Anti-Aging)
-        # =========================================================
-        else:
-            # 1. Anti-Aging Response (The Goal)
-            # If aging score is high, evolve a Repair Gene
-            if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.6:
-                repair_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter']
-                gene = random.choice(repair_genes)
-                target = random.choice(node_ids)
-                new_id = f"IMMORTAL_{uuid.uuid4().hex[:4]}"
-                new_props = NEURAL_PRIMITIVES.get(gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
-                new_node = ArchitectureNode(new_id, gene, new_props, inputs=[target])
-                child.nodes[new_id] = new_node
-                child.mutations_log.append(f"Self-Correction: Evolved {gene}")
-            
-            # 2. Random Mutation (Standard)
+            # --- 2. LINEAR INSERTION (Vertical Depth - The NEuRoN 9 Logic) ---
             elif random.random() < mutation_rate:
-                # Duplication or Rewiring
-                target = random.choice(node_ids)
-                new_id = f"MUT_{uuid.uuid4().hex[:4]}"
-                new_node = copy.deepcopy(child.nodes[target])
-                new_node.id = new_id
-                child.nodes[new_id] = new_node
-                child.mutations_log.append(f"Standard Mutation: Copied {target}")
+                if len(current_ids) > 1:
+                    target_id = random.choice(current_ids)
+                    if target_id != "input":
+                        # Create new node
+                        new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                        new_props = NEURAL_PRIMITIVES[new_type].copy()
+                        new_id = f"{new_type.split('-')[0]}_{uuid.uuid4().hex[:4]}"
+                        
+                        # Insert into the chain
+                        # Reroute target's inputs to the new node
+                        original_inputs = child.nodes[target_id].inputs
+                        new_node = ArchitectureNode(new_id, new_type, new_props, inputs=original_inputs)
+                        
+                        # Point target to new node
+                        child.nodes[target_id].inputs = [new_id]
+                        child.nodes[new_id] = new_node
+                        
+        # --- 3. STANDARD UTILITY MUTATIONS (Once per gen) ---
+        # Skip Connections (Wiring)
+        if random.random() < mutation_rate:
+            current_ids = list(child.nodes.keys())
+            if len(current_ids) > 2:
+                src = random.choice(current_ids)
+                tgt = random.choice(current_ids)
+                # Simple cycle check
+                if src != tgt and tgt != "input":
+                     child.nodes[tgt].inputs.append(src)
+
+        # Anti-Aging Repair Gene Insertion (Biological Goal)
+        if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.2:
+            current_ids = list(child.nodes.keys())
+            repair_gene = random.choice(['Telomerase_Pump', 'Senolytic_Hunter'])
+            target = random.choice(current_ids)
+            r_id = f"REPAIR_{uuid.uuid4().hex[:4]}"
+            r_props = NEURAL_PRIMITIVES.get(repair_gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
+            child.nodes[r_id] = ArchitectureNode(r_id, repair_gene, r_props, inputs=[target])
 
         child.compute_stats()
         return child
@@ -1851,12 +1810,21 @@ def main():
         st.markdown("---")
         st.markdown("**⚠️CAMBRIAN EXPLOSION**")
         # THIS IS THE NEW PARAMETER
+        
+        # THE REFERENCE PARAMETER (Restored & Boosted)
+        # This controls how many linear layers are added PER GENERATION
+        st.session_state.depth_growth_rate = st.slider(
+            "Vertical Growth Velocity", 
+            min_value=1, max_value=50, value=10, 
+            help="How many layers to add in a SINGLE generation. Set high for massive depth."
+        )
+
+        # THE NEW ENDGAME PARAMETER
+        # This controls the probability of spawning a Fractal Tree (Exponential)
         st.session_state.fractal_force = st.slider(
-            " Forced Fractal Complexity", 
-            min_value=0.0, 
-            max_value=1.0, 
-            value=0.0, 
-            help="Directly forces exponential node growth. High values will create massive networks instantly."
+            " Fractal Explosion Probability", 
+            min_value=0.0, max_value=1.0, value=0.1, 
+            help="Probability of triggering a recursive fractal burst inside the growth loop."
         )
 
    
