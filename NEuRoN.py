@@ -1815,6 +1815,13 @@ def main():
         generations_to_run = st.number_input("Generations to Run per Click", 1, 1000, 10)
         mutation_rate = st.slider("Mutation Rate (Alpha)", 0.01, 1.0, 0.2)
         meta_learning = st.checkbox("Enable Meta-Cognitive Self-Correction", True)
+        st.slider("Horizontal Gene Transfer Rate", 0.0, 0.1, 0.0)
+        st.slider("Epigenetic Inheritance Factor", 0.0, 1.0, 0.1)
+        st.slider("Pleiotropy Effect Strength", 0.0, 1.0, 0.2)
+        st.slider("Antagonistic Coevolution Rate", 0.0, 0.5, 0.0)
+        st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
+        st.session_state.max_depth = st.slider("Max Network Depth", 10, 10000, 100)
+        st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 100, 1)
         
         st.markdown("---")
         st.markdown("### ⚠️ ENDGAME PROTOCOLS")
