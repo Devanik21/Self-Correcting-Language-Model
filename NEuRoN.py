@@ -401,8 +401,9 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        HYBRID HYPER-EVOLUTION:
-        Combines NEuRoN 9's aggressive vertical loop with the new Fractal Exponential logic.
+        HYPER-VERTICAL EVOLUTION:
+        Replaces single-node insertion with "Depth Charge" Chain Insertion.
+        Forces the network to grow TALL, not just wide.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -415,53 +416,69 @@ class CortexEvolver:
         growth_velocity = st.session_state.get('depth_growth_rate', 20)
         fractal_prob = st.session_state.get('fractal_force', 0.2)
         
-        # WE EXECUTE THE MUTATION LOGIC 'growth_velocity' TIMES PER GENERATION!
-        # If velocity is 50, we try to add components 50 times in ONE step.
+        # SAFETY: If the user wants 100 layers, we need to make sure the physics
+        # doesn't kill it immediately. We auto-boost the max_depth allowed if needed.
+        current_max = st.session_state.get('max_depth', 100)
+        if len(child.nodes) > current_max * 0.8:
+            st.session_state.max_depth = current_max * 2 # Auto-expand the laws of physics
+        
+        # EXECUTE MUTATION LOOP
         loops = random.randint(1, max(1, growth_velocity))
         
         for _ in range(loops):
-            
-            # REFRESH IDs (Critical because we are modifying the graph inside the loop)
             current_ids = list(child.nodes.keys())
             
-            # --- 1. FRACTAL BURST (Exponential Complexity) ---
+            # --- 1. FRACTAL BURST (Exponential Complexity - Width/Trees) ---
             if random.random() < fractal_prob:
                 target = random.choice(current_ids)
-                # Spawns a tree of nodes instantly
                 self._fractal_burst(child, target, depth=3, branch_factor=2)
                 child.mutations_log.append("⚠️ Fractal Burst Triggered")
 
-            # --- 2. LINEAR INSERTION (Vertical Depth - The NEuRoN 9 Logic) ---
-            elif random.random() < 0.8: # High probability to ensure growth
+            # --- 2. DEPTH CHARGE (Forced Vertical Chains - Depth/Height) ---
+            # This is the new logic to fix your "15 layers" problem.
+            elif random.random() < 0.9: # 90% chance to grow TALL
                 if len(current_ids) > 1:
                     target_id = random.choice(current_ids)
                     if target_id != "input_sensor":
-                        # Create new node
-                        new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                        new_props = NEURAL_PRIMITIVES[new_type].copy()
-                        new_id = f"{new_type.split('-')[0]}_{uuid.uuid4().hex[:4]}"
                         
-                        # Insert into the chain logic (Splice it in)
+                        # Instead of 1 node, we create a CHAIN of 5 to 10 nodes!
+                        chain_len = random.randint(5, 10)
+                        
+                        # We insert this chain BEFORE the target node.
+                        # Old: [Inputs] -> [Target]
+                        # New: [Inputs] -> [Chain_1] -> [Chain_2] ... -> [Chain_10] -> [Target]
+                        
                         original_inputs = child.nodes[target_id].inputs
-                        # Create new node pointing to whatever the target pointed to
-                        new_node = ArchitectureNode(new_id, new_type, new_props, inputs=original_inputs)
                         
-                        # Point target to new node
-                        child.nodes[target_id].inputs = [new_id]
-                        child.nodes[new_id] = new_node
+                        # Start the chain connected to the original inputs
+                        previous_link = original_inputs
                         
+                        for i in range(chain_len):
+                            new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                            new_props = NEURAL_PRIMITIVES[new_type].copy()
+                            new_id = f"DEPTH_{uuid.uuid4().hex[:4]}"
+                            
+                            # Create node
+                            new_node = ArchitectureNode(new_id, new_type, new_props, inputs=previous_link)
+                            child.nodes[new_id] = new_node
+                            
+                            # The next node in the chain will connect to this one
+                            previous_link = [new_id]
+                        
+                        # Finally, connect the target to the END of the chain
+                        child.nodes[target_id].inputs = previous_link
+                        child.mutations_log.append(f"💥 Depth Charge: Added {chain_len} layers linearly")
+
         # --- 3. STANDARD UTILITY MUTATIONS (Once per gen) ---
-        # Skip Connections (Wiring)
         if random.random() < mutation_rate:
             current_ids = list(child.nodes.keys())
             if len(current_ids) > 2:
                 src = random.choice(current_ids)
                 tgt = random.choice(current_ids)
-                # Simple cycle check
                 if src != tgt and tgt != "input_sensor":
                      child.nodes[tgt].inputs.append(src)
 
-        # Anti-Aging Repair Gene Insertion (Biological Goal)
+        # Anti-Aging Repair Gene Insertion
         if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.2:
             current_ids = list(child.nodes.keys())
             repair_gene = random.choice(['Telomerase_Pump', 'Senolytic_Hunter'])
