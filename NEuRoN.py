@@ -249,9 +249,9 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
-    NATURAL SELECTION ENGINE: The Red Queen's Race.
-    The environment gets more hostile (entropic) over time.
-    Only complex, self-repairing architectures survive.
+    NATURAL SELECTION ENGINE: TITAN ENDGAME EDITION
+    Unified Physics: Handles standard evolution AND Exponential Fractal Bursts.
+    Includes 'Synergy Physics' to allow massive architectures to survive.
     """
     def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
         self.difficulty = difficulty_scalar
@@ -259,14 +259,17 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates fitness with SYNERGY SCALING for Exponential Architectures.
+        Calculates fitness using SYNERGY SCALING.
+        Allows the AI to grow exponentially without dying from immediate metabolic stress.
         """
         # --- 1. CALCULATE INTELLIGENCE ---
         G = nx.DiGraph()
         ai_complexity = 0.0
         repair_power = 0.0
         cleanup_power = 0.0
-        energy_efficiency = 1.0
+        
+        # "Energy Efficiency" improves as you add specific mitochondria nodes
+        energy_efficiency = 1.0 
 
         for nid, node in arch.nodes.items():
             G.add_node(nid)
@@ -292,20 +295,23 @@ class LossLandscapePhysics:
             depth = 1
         
         # Intelligence Score (Rewarding Exponential Depth)
-        # Using Log scale for massive numbers to keep score readable
+        # We use Log scale for massive numbers so the score stays readable
         intelligence = (depth * 5.0) + (math.log1p(ai_complexity) * 20.0)
         
-        ignorance_penalty = max(0, 100.0 - intelligence) 
+        # Ignorance Penalty (Reduced so they can focus on growing)
+        ignorance_penalty = max(0, 80.0 - intelligence) 
 
         # --- 2. CALCULATE AGING (The "Body") ---
-        # Standard Linear Stress
+        # Standard Linear Stress (This usually kills big AIs)
         raw_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.1
         
-        # SYNERGY BONUS (The fix for Exponential Growth):
+        # SYNERGY BONUS (The Fix for Exponential Growth):
         # As nodes increase, if they are organized (depth), stress is reduced.
-        # This simulates "multicellular cooperation".
+        # This simulates "multicellular cooperation" - larger organisms are more efficient per cell.
+        # Formula: 1 / log10(node_count) -> The bigger you are, the smaller the stress multiplier.
         synergy_factor = 1.0 / (math.log10(len(arch.nodes) + 1) + 1)
         
+        # Final Metabolic Stress Calculation
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
         
         # The Aging Equation
@@ -315,8 +321,8 @@ class LossLandscapePhysics:
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # If aging > 0, it acts as a massive penalty multiplier
-        aging_penalty = current_aging * 2.0
+        # We lower the aging penalty slightly so they have time to grow before dying
+        aging_penalty = current_aging * 1.2 
         
         total_loss = ignorance_penalty + aging_penalty
         
@@ -324,70 +330,6 @@ class LossLandscapePhysics:
 
 
 
-class LossLandscapePhysics:
-    """
-    Simulates the 'Training Process' without actually training a neural net.
-    Uses concepts from Information Geometry and Physics to simulate how
-    'good' an architecture is based on its topology.
-    """
-    def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
-        self.difficulty = difficulty_scalar
-        self.noise = noise_level
-        
-    def evaluate(self, arch: CognitiveArchitecture) -> float:
-        """
-        Calculates fitness based on:
-        1. Intelligence (Can it think?)
-        2. Longevity (Can it stop aging?)
-        """
-        # --- 1. CALCULATE INTELLIGENCE (The "Brain") ---
-        # We check if it has good AI components (Attention, SSM, etc.)
-        G = nx.DiGraph()
-        ai_complexity = 0
-        for nid, node in arch.nodes.items():
-            G.add_node(nid)
-            for p in node.inputs: G.add_edge(p, nid)
-            # Bonus for using advanced AI nodes
-            if node.properties['type'] in ['Attention', 'SSM', 'Meta']:
-                ai_complexity += node.properties['complexity']
-
-        try:
-            depth = nx.dag_longest_path_length(G)
-        except:
-            depth = 1
-        
-        # Intelligence Score (Higher is better)
-        # UPDATE: We boosted the multiplier for depth and complexity!
-        intelligence = (depth * 2.5) + (ai_complexity * 3.0) 
-        
-        # Ignorance Penalty: Lowered the ceiling so it's easier to become "smart"
-        ignorance_penalty = max(0, 50.0 - intelligence) 
-
-        # --- 2. CALCULATE AGING (The "Body") ---
-        # Metabolic Stress: Complex AI brains generate "heat" (entropy)
-        # UPDATE: We divided stress by 10.0 to make parameters 'cheaper'
-        metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.1 
-        
-        # Repair Capacity: Sum of all Biological Primitives
-        repair_power = 0
-        cleanup_power = 0
-        for node in arch.nodes.values():
-            if node.properties['type'] == 'Repair': repair_power += node.properties['complexity']
-            if node.properties['type'] == 'Cleanup': cleanup_power += node.properties['complexity']
-            if node.properties['type'] == 'Energy': metabolic_stress *= 0.5 # Energy nodes are now very powerful!
-
-        # The Aging Equation: 
-        current_aging = max(0, metabolic_stress - (repair_power * 2.0 + cleanup_power))
-        
-        # Store the Aging Score specifically for the plot!
-        arch.aging_score = current_aging
-
-        # --- 3. TOTAL LOSS ---
-        # The AI must minimize BOTH ignorance and aging.
-        # UPDATE: We balanced the weights.
-        total_loss = ignorance_penalty + (current_aging * 0.5) 
-        
-        return max(0.0001, total_loss)
 
 class CortexEvolver:
     """
@@ -485,10 +427,22 @@ class CortexEvolver:
 
         # --- PREPARE FRACTAL TRIGGER ---
         # Chance to trigger fractal growth increases if repair systems are strong
-        repair_power = sum([1 for n in child.nodes.values() if n.properties.get('type') == 'Repair'])
-        fractal_trigger_chance = 0.05 + (repair_power * 0.05) # Base 5% + 5% per repair node
-        # Cap chance to avoid total chaos (Max 40% chance)
-        fractal_trigger_chance = min(fractal_trigger_chance, 0.4) 
+        # --- PREPARE FRACTAL TRIGGER ---
+        # OLD LOGIC: fractal_trigger_chance = 0.05 + (repair_power * 0.05)
+        
+        # NEW LOGIC: READ FROM SIDEBAR DIRECTLY
+        # If the user sets the slider > 0, we use that. Otherwise, we use the natural biological rate.
+        user_force = st.session_state.get('fractal_force', 0.0)
+        
+        if user_force > 0:
+            fractal_trigger_chance = user_force # USER IS GOD
+        else:
+            # Natural baseline
+            repair_power = sum([1 for n in child.nodes.values() if n.properties.get('type') == 'Repair'])
+            fractal_trigger_chance = 0.05 + (repair_power * 0.05)
+            
+        # Cap chance to avoid total chaos (Max 90% chance now!)
+        fractal_trigger_chance = min(fractal_trigger_chance, 0.9)
 
         # =========================================================
         # MODE 1: EXPONENTIAL FRACTAL BURST (The New Complexity Engine)
@@ -1894,6 +1848,18 @@ def main():
         st.slider("Müller's Ratchet Speed", 0.0, 0.01, 0.0)
         st.session_state.max_depth = st.slider("Max Network Depth", 10, 10000, 100)
         st.session_state.depth_growth_rate = st.slider("Depth Growth Rate", 1, 100, 1)
+        st.markdown("---")
+        st.markdown("**⚠️CAMBRIAN EXPLOSION**")
+        # THIS IS THE NEW PARAMETER
+        st.session_state.fractal_force = st.slider(
+            " Forced Fractal Complexity", 
+            min_value=0.0, 
+            max_value=1.0, 
+            value=0.0, 
+            help="Directly forces exponential node growth. High values will create massive networks instantly."
+        )
+
+   
         
     with st.sidebar.expander("🧠 Cognitive Constraints"):
         max_params = st.number_input("Max Parameters (M)", 1, 1000, 100)
