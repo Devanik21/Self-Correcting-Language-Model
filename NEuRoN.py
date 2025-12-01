@@ -296,14 +296,18 @@ class LossLandscapePhysics:
         
         # Intelligence Score (Rewarding Exponential Depth)
         # We use Log scale for massive numbers so the score stays readable
-        intelligence = (depth * 5.0) + (math.log1p(ai_complexity) * 20.0)
+        # --- UPDATE: Massive boost for Depth to encourage verticality ---
+        # Was (depth * 5.0) -> Now (depth * 15.0)
+        intelligence = (depth * 15.0) + (math.log1p(ai_complexity) * 20.0)
         
         # Ignorance Penalty (Reduced so they can focus on growing)
         ignorance_penalty = max(0, 80.0 - intelligence) 
 
         # --- 2. CALCULATE AGING (The "Body") ---
         # Standard Linear Stress (This usually kills big AIs)
-        raw_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.1
+        # --- UPDATE: Reduced raw stress impact for massive parameter counts ---
+        # We use sqrt() to dampen the penalty. 100M params won't act like 100x weight of 1M.
+        raw_stress = (math.sqrt(arch.parameter_count) / 1000.0) * self.difficulty * 0.1
         
         # SYNERGY BONUS (The Fix for Exponential Growth):
         # As nodes increase, if they are organized (depth), stress is reduced.
@@ -322,7 +326,8 @@ class LossLandscapePhysics:
 
         # --- 3. TOTAL LOSS ---
         # We lower the aging penalty slightly so they have time to grow before dying
-        aging_penalty = current_aging * 1.2 
+        # Reduced multiplier from 1.2 to 0.8
+        aging_penalty = current_aging * 0.6 
         
         total_loss = ignorance_penalty + aging_penalty
         
