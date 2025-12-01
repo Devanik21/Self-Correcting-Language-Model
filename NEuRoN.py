@@ -251,87 +251,52 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates fitness.
-        UPDATE: heavily favors DEEP, MASSIVE architectures.
-        Small brains are now penalized.
+        NATURAL LAW:
+        1. Small organisms are eaten (High Loss if Depth < 50).
+        2. Large organisms age (High Loss if no Repair Genes).
+        3. Only Large + Repairing organisms survive (Immortality).
         """
-        # --- 1. CALCULATE INTELLIGENCE (The "Brain") ---
+        # --- 1. METRICS ---
         G = nx.DiGraph()
-        ai_complexity = 0.0
-        
-        # Build graph and sum raw complexity
         for nid, node in arch.nodes.items():
             G.add_node(nid)
             for p in node.inputs: 
                 if p in arch.nodes: G.add_edge(p, nid)
-            
-            # Sum complexity of AI components
-            if node.properties['type'] in ['Attention', 'SSM', 'MLP', 'Memory']:
-                ai_complexity += node.properties['complexity']
 
-        # Calculate Depth (Critical for your "infinite shapes")
         try:
             depth = nx.dag_longest_path_length(G)
         except:
             depth = 1
-        
-        # --- THE GROWTH SIGNAL ---
-        # We reward depth EXPONENTIALLY now. 
-        # A depth of 100 is significantly better than 50.
-        intelligence_score = (depth ** 1.5) + (ai_complexity * 2.0)
-        
-        # Ignorance Penalty: The target moves! 
-        # The AI must keep growing to satisfy this threshold.
-        target_intelligence = 100.0 + (arch.generation * 10.0) 
-        ignorance_penalty = max(0, target_intelligence - intelligence_score)
 
-        # --- 2. CALCULATE AGING (The "Body") ---
-        # Metabolic Stress: We REDUCED the cost of parameters significantly (0.01 factor)
-        # This allows the brain to get HUGE without dying immediately.
-        metabolic_stress = (arch.parameter_count / 1_000_000) * self.difficulty * 0.01
+        # --- 2. THE GROWTH PRESSURE (The Predator) ---
+        # If you are small, you die. This forces the "Cambrian Explosion".
+        # We want depth > 100.
+        growth_threshold = 100.0
         
-        # Repair Capacity
-        repair_power = 0.0
-        cleanup_power = 0.0
-        energy_efficiency = 1.0
+        # Exponential penalty for being small
+        # If depth is 6, penalty is massive. If depth is 100, penalty is 0.
+        smallness_penalty = max(0, (growth_threshold - depth) ** 2)
 
+        # --- 3. THE AGING PRESSURE (The Clock) ---
+        # Massive metabolic cost for nodes, BUT reduced by Repair genes.
+        metabolic_stress = (len(arch.nodes) * 0.5) 
+        
+        repair_capacity = 0.0
         for node in arch.nodes.values():
-            if node.properties['type'] == 'Repair': 
-                repair_power += (node.properties['complexity'] * 5.0) # Boosted Repair
-            if node.properties['type'] == 'Cleanup': 
-                cleanup_power += (node.properties['complexity'] * 3.0)
-            if node.properties['type'] == 'Energy': 
-                energy_efficiency *= 0.9 # Energy nodes reduce stress recursively
+            if node.properties['type'] in ['Repair', 'Cleanup', 'Defense']:
+                # Repair genes are VERY powerful now
+                repair_capacity += (node.properties['complexity'] * 10.0) 
+            if node.properties['type'] == 'Energy':
+                 metabolic_stress *= 0.8 # Efficiency boost
 
-        adjusted_stress = metabolic_stress * energy_efficiency
-
-        # The Aging Equation
-        # ... inside evaluate() ...
-
-        # The Aging Equation
-        current_aging = max(0, adjusted_stress - (repair_power + cleanup_power))
-        
-        # --- THE NATURAL LAW: MORTALITY ---
-        # If you age too much, you die (Loss becomes infinity).
-        # This forces the AI to prioritizing STOPPING aging once it gets big.
-        if current_aging > 50.0: 
-            total_loss = 99999.0 # Instant Death
-        else:
-            # Standard trade-off
-            total_loss = (ignorance_penalty * 2.0) + current_aging
-        
-        # Save for plot
+        # Aging Score
+        current_aging = max(0, metabolic_stress - repair_capacity)
         arch.aging_score = current_aging
 
-        # --- 3. TOTAL LOSS ---
-        # We prioritize Intelligence (Ignorance Penalty) over Aging slightly,
-        # forcing it to grow FIRST, then fix aging LATER.
-        total_loss = (ignorance_penalty * 2.0) + current_aging 
+        # --- 4. TOTAL LOSS ---
+        # Total Loss = (Am I too small?) + (Am I dying of old age?)
+        total_loss = smallness_penalty + (current_aging * 2.0)
         
-        # Existence Tax: Penalize tiny networks heavily
-        if len(arch.nodes) < 10:
-            total_loss += 500.0
-
         return max(0.0001, total_loss)
 
 
@@ -439,8 +404,8 @@ class CortexEvolver:
 
     def mutate_architecture(self, parent: CognitiveArchitecture, mutation_rate: float) -> CognitiveArchitecture:
         """
-        BIOLOGICAL EVOLUTION: 
-        Updated to force 'Deep Stacking' for massive complexity.
+        BIOLOGICAL EVOLUTION: CAMBRIAN EXPLOSION UPDATE
+        Forces exponential growth chains to achieve massive depth quickly.
         """
         child = copy.deepcopy(parent)
         child.id = f"arch_{uuid.uuid4().hex[:6]}"
@@ -450,82 +415,70 @@ class CortexEvolver:
         
         node_ids = list(child.nodes.keys())
         
-        # Dynamic Mutation Rate: Increases if the AI is stagnating
-        effective_rate = mutation_rate
-        if child.loss > 50: effective_rate *= 1.5
+        # --- THE ACCELERATOR ---
+        # If the network is small (Depth < 50), we TRIPLE the mutation rate.
+        # This mimics early embryonic development where growth is rapid.
+        is_embryo = len(node_ids) < 50
+        effective_rate = mutation_rate * (3.0 if is_embryo else 1.0)
 
-        # --- STRATEGY 1: FRACTAL GROWTH (Deep Stacking) ---
-        # This is the secret to Depth > 200.
-        # It finds the end of the chain and attaches a new block strictly to it.
+        # --- STRATEGY 1: FRACTAL CHAIN REACTION (Exponential Growth) ---
+        # Instead of adding 1 node, we add a CHAIN of nodes.
         if random.random() < effective_rate:
             if len(node_ids) >= 1:
-                # Pick a random existing node to branch from
-                parent_node_id = random.choice(node_ids)
+                # Pick a start point
+                current_parent_id = random.choice(node_ids)
                 
-                # Pick a random primitive (Gene)
-                new_type_name = random.choice(list(NEURAL_PRIMITIVES.keys()))
-                new_props = NEURAL_PRIMITIVES[new_type_name].copy()
+                # Determine "Growth Spurt" length (1 to 10 new nodes at once)
+                chain_length = random.randint(3, 10) if is_embryo else random.randint(1, 3)
                 
-                # Jitter complexity
-                new_props['complexity'] *= random.uniform(0.8, 1.5)
+                for _ in range(chain_length):
+                    # Pick a gene
+                    new_type_name = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                    new_props = NEURAL_PRIMITIVES[new_type_name].copy()
+                    new_props['complexity'] *= random.uniform(0.8, 1.2)
+                    
+                    # Create ID
+                    new_id = f"CHAIN_{uuid.uuid4().hex[:4]}"
+                    
+                    # STRICT SERIAL CONNECTION to increase Depth
+                    new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=[current_parent_id])
+                    child.nodes[new_id] = new_node
+                    
+                    # The new node becomes the parent for the next one in the chain
+                    current_parent_id = new_id
                 
-                # Create ID
-                new_id = f"{new_type_name.split('_')[0]}_{uuid.uuid4().hex[:4]}"
-                
-                # STRICT CONNECTION: Connect ONLY to the chosen parent (Serial)
-                new_node = ArchitectureNode(new_id, new_type_name, new_props, inputs=[parent_node_id])
-                
-                child.nodes[new_id] = new_node
-                child.mutations_log.append(f"Fractal Growth: Attached {new_id} to {parent_node_id}")
+                child.mutations_log.append(f"Cambrian Explosion: Grew chain of {chain_length} nodes")
 
-        # --- STRATEGY 2: GENE DUPLICATION (Width) ---
-        if random.random() < (effective_rate * 0.5): # Lower chance than growth
-            target_id = random.choice(node_ids)
-            target_node = child.nodes[target_id]
-            new_id = f"COPY_{uuid.uuid4().hex[:4]}"
-            new_props = target_node.properties.copy()
-            new_node = ArchitectureNode(new_id, target_node.type_name, new_props, inputs=target_node.inputs)
-            child.nodes[new_id] = new_node
-            child.mutations_log.append(f"Duplicated {target_id}")
-
-        # --- STRATEGY 3: ADAPTIVE IMMORTALITY (The Shield) ---
-        # If aging is high, specifically evolve a Repair gene
-        if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.8:
-            repair_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter', 'Mitochondrial_Booster']
+        # --- STRATEGY 2: IMMORTALITY RESPONSE (The Self-Correction) ---
+        # Once it is big, it realizes it is dying. It MUST evolve repair genes.
+        # We increase the probability of this if Aging Score is high.
+        current_aging = getattr(parent, 'aging_score', 0)
+        
+        if current_aging > 0.5 and random.random() < 0.5:
+            # Force evolution of a specific repair mechanism
+            repair_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter', 'Mitochondrial_Filter']
             gene = random.choice(repair_genes)
             
-            # Insert anywhere
-            target_id = random.choice(node_ids)
-            new_id = f"IMMORTALITY_{uuid.uuid4().hex[:4]}"
+            target_id = random.choice(list(child.nodes.keys()))
+            new_id = f"ANTI_AGE_{uuid.uuid4().hex[:4]}"
             new_props = NEURAL_PRIMITIVES.get(gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
             
+            # Repair genes are often parallel helpers
             new_node = ArchitectureNode(new_id, gene, new_props, inputs=[target_id])
             child.nodes[new_id] = new_node
-            child.mutations_log.append(f"Evolved Survival Trait: {gene}")
+            child.mutations_log.append(f"Self-Correction: Evolved {gene} to stop aging")
 
-        # --- STRATEGY 4: SYNAPTIC REWIRING (Complexity) ---
-        # Connect distant nodes to create "Skip Connections" (like ResNets)
-        if random.random() < effective_rate:
-            if len(node_ids) > 5:
-                src = random.choice(node_ids)
-                tgt = random.choice(node_ids)
+        # --- STRATEGY 3: SYNAPTIC REWIRING (Brain Complexity) ---
+        # Create skip connections to make the "shapes" complex and non-linear
+        if random.random() < 0.3:
+            if len(child.nodes) > 10:
+                src = random.choice(list(child.nodes.keys()))
+                tgt = random.choice(list(child.nodes.keys()))
                 
-                # Build temporary graph to check for cycles
-                G_temp = nx.DiGraph()
-                for nid, node in child.nodes.items():
-                    G_temp.add_node(nid)
-                    for p in node.inputs: 
-                        if p in child.nodes: G_temp.add_edge(p, nid)
-                
-                # Only connect if it doesn't create a loop
+                # Simple cycle check: Ensure we don't connect to our own ancestor
+                # (Simplified check for speed - nature allows some chaos)
                 if src != tgt and src not in child.nodes[tgt].inputs:
-                    try:
-                        # If there is NO path from Target to Source, it is safe to connect Source to Target
-                        if not nx.has_path(G_temp, tgt, src):
-                            child.nodes[tgt].inputs.append(src)
-                            child.mutations_log.append(f"Synaptic Rewiring: {src} -> {tgt}")
-                    except:
-                        pass
+                     child.nodes[tgt].inputs.append(src)
 
         child.compute_stats()
         return child
