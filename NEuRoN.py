@@ -539,7 +539,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
         mode='lines',
-        line=dict(color='rgba(255, 255, 255, 0.1)', width=1), # Soft Ghostly Grey
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6), # Soft Ghostly Grey
         hoverinfo='none'
     )
     
