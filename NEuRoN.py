@@ -3219,7 +3219,7 @@ def main():
             
             # Use a toast notification for "Real-time" feeling without blocking
             if i % 2 == 0: # Don't spam every single gen, maybe every 2nd
-                st.toast(f"✨ {current_thought}", icon="💭")
+                st.toast(f" {current_thought}", icon="💭")
                 
             # Store it in history so we can see it later if we want
             # (You might need to add a 'thought' key to your history dictionary above)
