@@ -1956,26 +1956,27 @@ def main():
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
+    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
         # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
+        # Flag to track if we successfully loaded
+        load_success = False
+
         if uploaded_file is not None:
             # CHECK 1: Prevent Infinite Loop
-            # Only process if this is a NEW file we haven't seen yet
             if st.session_state.get("last_loaded_file") != uploaded_file.name:
                 try:
                     with st.spinner("Decoding Neural Timeline..."):
                         with zipfile.ZipFile(uploaded_file, 'r') as z:
-                            # Read the JSON text file
                             with z.open('simulation_core.json') as f:
                                 json_str = f.read().decode('utf-8')
                                 loaded_state = json.loads(json_str)
                                 
-                                # RECONSTRUCT THE OBJECTS
-                                # 1. Restore Evolver using our custom translator
+                                # 1. Restore Evolver
                                 st.session_state.evolver = deserialize_evolver(loaded_state['evolver_data'])
                                 
                                 # 2. Restore Simple Data
@@ -1983,40 +1984,37 @@ def main():
                                 st.session_state.generation = loaded_state.get('generation', 0)
                                 
                                 # 3. Restore Config (Safely)
-                                # CHECK 2: Prevent Streamlit Crash
                                 saved_config = loaded_state.get('config', {})
                                 for key, value in saved_config.items():
-                                    # Skip the heavy objects and the uploader itself
                                     if key not in ['evolver', 'history', 'state_uploader', 'last_loaded_file']:
                                         try:
-                                            # We wrap this in a TRY block so if Streamlit says
-                                            # "You can't set this widget!", we just ignore it.
                                             st.session_state[key] = value
                                         except Exception:
                                             pass
-
-                                # 4. Mark this file as "Processed"
+                                
+                                # Mark as processed
                                 st.session_state.last_loaded_file = uploaded_file.name
-
-                                st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
-                                time.sleep(0.5)
-                                st.rerun()
+                                load_success = True
                                 
                 except Exception as e:
                     st.error(f"Corrupted Timeline Data: {str(e)}")
             else:
-                # If we already loaded it, just show a message so the user knows
                 st.info(f"Timeline active: {uploaded_file.name}")
+
+        # [TEACHER'S NOTE]: We put the rerun OUTSIDE the try/except block
+        # This guarantees the restart signal is never swallowed!
+        if load_success:
+            st.success("Timeline Restored!")
+            st.rerun()
 
         # --- B. DOWNLOAD / SAVE (JSON) ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
-            
             # 1. Capture Config
             current_config = {k: v for k, v in st.session_state.items() 
                               if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file'] 
                               and isinstance(v, (int, float, str, bool, type(None)))}
 
-            # 2. Build the Big Dictionary (The Blueprint)
+            # 2. Build the Blueprint
             full_state = {
                 'evolver_data': serialize_evolver(st.session_state.evolver), 
                 'history': st.session_state.history,
@@ -2025,17 +2023,14 @@ def main():
                 'version': '1.1.0 (JSON)'
             }
             
-            # 3. Convert to JSON String
+            # 3. Zip and Download
             try:
                 json_output = json.dumps(full_state, indent=2)
-                
-                # 4. Zip it up
                 timestamp = time.strftime("%Y%m%d-%H%M%S")
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
                     zf.writestr('simulation_core.json', json_output)
                     zf.writestr('read_me.txt', f"Cortex Genesis Save\nGeneration: {st.session_state.generation}")
-
                 zip_buffer.seek(0)
                 
                 st.download_button(
@@ -2045,7 +2040,7 @@ def main():
                     mime="application/zip"
                 )
             except TypeError as e:
-                st.error(f"Serialization Error: {e} - Make sure all properties are basic types.")
+                st.error(f"Serialization Error: {e}")
         else:
             st.warning("Initialize Simulation to enable downloading.")
 
