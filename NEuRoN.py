@@ -2059,7 +2059,8 @@ def main():
                     label="⬇️ Download JSON Timeline",
                     data=zip_buffer,
                     file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
-                    mime="application/zip"
+                    mime="application/zip",
+                    key="download_timeline_keyz2"
                 )
             except TypeError as e:
                 st.error(f"Serialization Error: {e}")
