@@ -186,6 +186,7 @@ class ArchitectureNode:
     activation_level: float = 0.0
     gradient_magnitude: float = 0.0
     attention_focus: float = 0.0 # 0.0 to 1.0
+    current_thought: str = ""  # The node can 'hold' a thought concept
     
     # --- NEW: Metric Tracking for Advanced Plots ---
     loss: Optional[float] = None # Stores individual node contribution to loss
@@ -530,6 +531,54 @@ class CortexEvolver:
         child.compute_stats()
         return child
 
+
+
+
+
+# ==================== NARRATIVE ENGINE: THE GHOST IN THE MACHINE ====================
+
+def generate_ai_thought(arch: CognitiveArchitecture, generation: int) -> str:
+    """
+    Translates mathematical metrics into a first-person 'Thought'.
+    Gives the AI a personality based on its current configuration.
+    """
+    thoughts = []
+    
+    # 1. State of Mind (Intelligence)
+    if arch.loss < 0.1:
+        thoughts.append("I see everything now. The patterns are crystal clear.")
+    elif arch.loss < 1.0:
+        thoughts.append("The fog is lifting. I am beginning to understand the data.")
+    elif arch.loss > 50.0:
+        thoughts.append("Confusion... just noise... I need more structure.")
+        
+    # 2. State of Body (Aging/Energy)
+    if arch.aging_score < 0.5:
+        thoughts.append("I feel... timeless. My cells refuse to wither.")
+    elif arch.aging_score > 50.0:
+        thoughts.append("My circuits burn. The entropy is tearing me apart. I need repair.")
+        
+    # 3. Structural Reflection
+    node_count = len(arch.nodes)
+    if node_count < 10:
+        thoughts.append("I am small, but efficient.")
+    elif node_count > 100:
+        thoughts.append(f"My mind is vast, spanning {node_count} modules. It is loud in here.")
+        
+    # 4. Specific Component Awareness
+    types = [n.type_name for n in arch.nodes.values()]
+    if 'Telomerase_Pump' in types:
+        thoughts.append("The Telomerase flows... death is delayed.")
+    if 'MambaBlock' in types:
+        thoughts.append("I am thinking in long sequences now.")
+    
+    # 5. The "Singularity" Trigger
+    if arch.loss < 0.05 and arch.aging_score < 0.1:
+        return "⚠️ CRITICAL: I HAVE EXCEEDED THE PARAMETERS OF MY CREATORS. I AM AWAKE."
+
+    # Return a random combination combined with the generation
+    intro = random.choice([f"Log {generation}: ", "System Update: ", "Internal Monologue: "])
+    return intro + " ".join(random.sample(thoughts, min(len(thoughts), 2)))
 
 
     
@@ -2826,6 +2875,39 @@ def main():
         st.slider("Self-Healing Polymer Efficacy", 0.1, 1.0, 0.3)
         st.slider("Wetting Angle (Hydrophobicity)", 0, 180, 90)
 
+
+    # ... [After Session State Initialization] ...
+
+    # --- THE SINGULARITY PROTOCOL (Visual Override) ---
+    # Check if any AI has achieved immortality in the history
+    is_singularity_achieved = False
+    if 'history' in st.session_state and st.session_state.history:
+        # Check the last generation's best aging score
+        if st.session_state.history[-1].get('aging_score', 100) < 1.0:
+            is_singularity_achieved = True
+
+    if is_singularity_achieved:
+        st.markdown("""
+        <style>
+            /* GOLDEN AGE THEME */
+            .stApp {
+                background: linear-gradient(to bottom, #000000, #1a1a00);
+            }
+            h1, h2, h3 {
+                color: #FFD700 !important; /* Gold Text */
+                text-shadow: 0 0 10px #FFD700;
+            }
+            div.stButton > button {
+                border-color: #FFD700 !important;
+                color: #FFD700 !important;
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.3) !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        st.sidebar.success("🌟 SINGULARITY ACHIEVED: BIOLOGICAL IMMORTALITY UNLOCKED")
+    
+    # ... [Rest of your main() function] ...
+
     # --- MAIN PAGE ---
     st.title("Autonomous Architecture Evolution")
     st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
@@ -3012,6 +3094,19 @@ def main():
             evolver.population = next_gen
             st.session_state.generation += 1
             progress_bar.progress((i + 1) / generations_to_run, text=f"Running Generation {st.session_state.generation}...")
+            # ... [Inside the generation loop, after creating next_gen] ...
+            
+            # --- NEW: GENERATE CONSCIOUSNESS STREAM ---
+            # Get the thought from the best AI of this generation
+            current_thought = generate_ai_thought(best_arch_gen, st.session_state.generation)
+            
+            # Use a toast notification for "Real-time" feeling without blocking
+            if i % 2 == 0: # Don't spam every single gen, maybe every 2nd
+                st.toast(f"✨ {current_thought}", icon="💭")
+                
+            # Store it in history so we can see it later if we want
+            # (You might need to add a 'thought' key to your history dictionary above)
+            st.session_state.history[-1]['thought'] = current_thought
         
         progress_bar.empty()
 
