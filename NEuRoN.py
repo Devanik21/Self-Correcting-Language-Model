@@ -126,7 +126,22 @@ NEURAL_PRIMITIVES = {
     # --- CONTROL & SIGNALING (The Interface) ---
     'Hormonal_Feedback_Loop': {'type': 'Control', 'complexity': 1.5, 'param_density': 0.5, 'compute_cost': 0.5, 'memory_cost': 0.1, 'plasticity': 0.6, 'color': '#E0E0E0'},
     'Gene_Silencer': {'type': 'Control', 'complexity': 0.4, 'param_density': 0.1, 'compute_cost': 0.1, 'memory_cost': 0.0, 'plasticity': 0.2, 'color': '#606060'},
+
+     # 1. THE REPAIR GENES (Directly lowers Entropy/Aging Score)
+    'Telomerase_Pump': {'type': 'Repair', 'complexity': 2.5, 'param_density': 1.0, 'compute_cost': 3.0, 'memory_cost': 2.0, 'plasticity': 0.4, 'color': '#FFFFFF'},
+    'DNA_Error_Corrector': {'type': 'Repair', 'complexity': 3.0, 'param_density': 0.8, 'compute_cost': 2.5, 'memory_cost': 1.5, 'plasticity': 0.1, 'color': '#E0E0E0'},
+
+    # 2. THE ENERGY REGULATORS (Reduces Metabolic Stress Multiplier)
+    'Mitochondrial_Filter': {'type': 'Energy', 'complexity': 1.2, 'param_density': 0.9, 'compute_cost': 0.8, 'memory_cost': 0.8, 'plasticity': 0.9, 'color': '#FFFF00'},
+    'Caloric_Restrictor': {'type': 'Energy', 'complexity': 0.8, 'param_density': 0.7, 'compute_cost': 0.5, 'memory_cost': 0.6, 'plasticity': 0.5, 'color': '#CCFF00'},
+
+    # 3. THE CLEANUP CREW (Removes Dead Nodes/Senescent Cells)
+    'Senolytic_Hunter': {'type': 'Cleanup', 'complexity': 2.0, 'param_density': 2.0, 'compute_cost': 1.5, 'memory_cost': 1.0, 'plasticity': 0.9, 'color': '#0055FF'},
+    'Autophagy_Trigger': {'type': 'Cleanup', 'complexity': 0.5, 'param_density': 1.5, 'compute_cost': 0.5, 'memory_cost': 1.0, 'plasticity': 0.4, 'color': '#00AAFF'},
 }
+
+
+
 
 # ... [Keep your existing NEURAL_PRIMITIVES here] ...
 
@@ -266,84 +281,58 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates fitness using SYNERGY SCALING.
-        Allows the AI to grow exponentially without dying from immediate metabolic stress.
-        
-        *** UPGRADE: Focused Anti-Aging Selection Pressure ***
+        Calculates fitness using BIOLOGICAL PHYSICS.
+        The goal is to maximize Intelligence while minimizing Aging.
         """
-        # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
-        G = nx.DiGraph()
+        # --- 1. CALCULATE CAPABILITIES ---
         ai_complexity = 0.0
         repair_power = 0.0
         cleanup_power = 0.0
         energy_efficiency = 1.0 # 1.0 = baseline cost
+        
         node_count = len(arch.nodes)
         
         for nid, node in arch.nodes.items():
-            G.add_node(nid)
-            for p in node.inputs: G.add_edge(p, nid)
+            # Get properties based on the node type name
+            # (Ensure your architecture stores type_name correctly)
+            props = node.properties
+            n_type = props.get('type', 'Unknown')
+            complexity = props.get('complexity', 1.0)
             
-            # Tally capabilities
-            n_type = node.properties.get('type')
-            complexity = node.properties.get('complexity', 1.0)
-            
-            if n_type in ['Attention', 'SSM', 'Meta']:
+            # Sum up the powers based on type
+            if n_type in ['Attention', 'SSM', 'MLP', 'Memory']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # Higher impact for repair
-                repair_power += (complexity * 10.0) 
+                repair_power += (complexity * 5.0) # Repair genes are powerful
             elif n_type == 'Cleanup':
-                # Higher impact for cleanup
-                cleanup_power += (complexity * 5.0)
+                cleanup_power += (complexity * 3.0)
             elif n_type == 'Energy':
-                # Logarithmic efficiency boost: 0.95^N for efficiency
-                energy_efficiency *= 0.95 
+                energy_efficiency *= 0.90 # Each energy node reduces stress by 10%
 
-        try:
-            depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
-        except:
-            depth = 1
+        # --- 2. THE AGING EQUATION (METABOLIC STRESS) ---
+        # Big brains burn more energy = Faster Aging
+        base_stress = (arch.parameter_count / 1_000_000) * self.difficulty
         
-        # Intelligence Score (Rewarding Exponential Depth)
-        # Higher multiplier for intelligence for faster initial growth
-        intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
+        # Apply Biological Efficiency
+        metabolic_stress = base_stress * energy_efficiency
         
-        # Ignorance Penalty (Punishes low intelligence)
-        ignorance_penalty = max(0, 150.0 - intelligence) 
-
-        # --- 2. CALCULATE AGING (The "Body") ---
-        
-        # Stress is now calculated with a base penalty + complexity penalty
-        base_stress = 5.0 * self.difficulty 
-        complexity_stress = (math.log1p(arch.parameter_count) / 10.0) * self.difficulty
-        
-        # Structural Dampening: Efficient depth reduces stress (Key Immortality Feature)
-        # Deeper, more organized AIs are inherently more robust
-        structural_dampening = math.sqrt(depth) if depth > 0 else 1
-        
-        raw_stress = (base_stress + complexity_stress) / structural_dampening
-        
-        # Synergy Factor is a final, hard metabolic cost multiplier
-        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
-        metabolic_stress = raw_stress * energy_efficiency * synergy_factor
-
-        # The Aging Equation (The Battle for Immortality)
-        # Note the aggressive reduction needed to beat the stress
+        # The Battle: Stress vs Repair
+        # If Repair > Stress, Aging becomes 0 (Immortality)
         current_aging = metabolic_stress - (repair_power + cleanup_power)
         
-        # *** CORE IMMORTALITY MECHANISM: Prevent negative aging ***
-        # The AI reaches a state of near-immortality (a steady state).
+        # Clamp aging (It can't be negative, 0 is perfect immortality)
         current_aging = max(0.0001, current_aging)
         
-        # Store for visualization
+        # Save this score so we can plot the "Immortality Curve"
         arch.aging_score = current_aging
 
-        # --- 3. TOTAL LOSS ---
-        # The Aging Penalty is the dominant force now. If you don't evolve anti-aging, you die.
-        # The multiplier is increased to 1.5x
-        aging_penalty = current_aging * 1.5 
+        # --- 3. TOTAL LOSS CALCULATION ---
+        # We punish ignorance (low complexity) AND we punish death (high aging)
+        ignorance_penalty = max(0, 100.0 - ai_complexity)
         
-        total_loss = ignorance_penalty + aging_penalty
+        # If aging is high, the loss is huge (Death)
+        # If aging is 0, the loss depends only on intelligence
+        total_loss = ignorance_penalty + (current_aging * 10.0)
         
         return max(0.0001, total_loss)
 
@@ -505,16 +494,46 @@ class CortexEvolver:
                      child.nodes[tgt].inputs.append(src)
 
         # Anti-Aging Repair Gene Insertion
-        if getattr(parent, 'aging_score', 0) > 1.0 and random.random() < 0.2:
-            current_ids = list(child.nodes.keys())
-            repair_gene = random.choice(['Telomerase_Pump', 'Senolytic_Hunter'])
-            target = random.choice(current_ids)
-            r_id = f"REPAIR_{uuid.uuid4().hex[:4]}"
-            r_props = NEURAL_PRIMITIVES.get(repair_gene, NEURAL_PRIMITIVES['Telomerase_Activator']).copy()
-            child.nodes[r_id] = ArchitectureNode(r_id, repair_gene, r_props, inputs=[target])
+        # =========================================================
+        # === META-COGNITIVE SELF-CORRECTION (THE SURVIVAL INSTINCT) ===
+        # =========================================================
+        # If the parent was dying of old age (High Aging Score), force a Repair Mutation
+        
+        # Check if parent has aging_score (handle first gen)
+        parent_aging = getattr(parent, 'aging_score', 100.0)
+        
+        # If aging is high (> 5.0), we trigger a panic response to fix it (80% chance)
+        if parent_aging > 5.0 and random.random() < 0.8: 
+            child.mutations_log.append("⚠️ CRITICAL AGING DETECTED: Forcing Repair Gene Insertion")
+            
+            # Pick a biological defense mechanism from our new registry
+            defense_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter', 'Mitochondrial_Filter']
+            gene_name = random.choice(defense_genes)
+            
+            # Create the biological node
+            new_id = f"BIO_{uuid.uuid4().hex[:4]}"
+            
+            # Ensure we get properties safely
+            if gene_name in NEURAL_PRIMITIVES:
+                gene_props = NEURAL_PRIMITIVES[gene_name].copy()
+            else:
+                # Fallback if registry isn't fully updated yet
+                gene_props = {'type': 'Repair', 'complexity': 2.0, 'color': '#FFFFFF'}
+
+            # Attach it to a random existing node (Symbiosis)
+            # We avoid attaching to 'output_action' to keep the chain valid
+            possible_targets = [n for n in child.nodes.keys() if n != "output_action"]
+            if possible_targets:
+                target_id = random.choice(possible_targets)
+                
+                new_node = ArchitectureNode(new_id, gene_name, gene_props, inputs=[target_id])
+                child.nodes[new_id] = new_node
+        # =========================================================
 
         child.compute_stats()
         return child
+
+
 
     
 # ==================== VISUALIZATION ENGINE (PLOTLY) ====================
