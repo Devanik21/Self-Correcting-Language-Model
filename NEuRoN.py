@@ -1812,10 +1812,10 @@ def plot_loss_landscape_surface(history):
 
 def main():
     # --- SIDEBAR: THE GOD PANEL ---
-    st.sidebar.title("🎛️ OMNISCIENCE PANEL")
+    st.sidebar.title("OMNISCIENCE PANEL")
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
     
-    with st.sidebar.expander("🌍 Simulation Physics", expanded=True):
+    with st.sidebar.expander("Simulation Physics", expanded=True):
         difficulty = st.slider("Task Complexity (Entropy)", 0.1, 5.0, 1.5)
         noise = st.slider("Stochastic Noise Level", 0.0, 1.0, 0.1)
         st.slider("Time Dilation Factor", 0.1, 10.0, 1.0)
@@ -1824,7 +1824,7 @@ def main():
         st.slider("Heisenberg Uncertainty Factor", 0.0, 0.5, 0.01)
         st.slider("Entanglement Correlation Strength", 0.0, 1.0, 0.0)
         
-    with st.sidebar.expander("🧬 Evolutionary Dynamics", expanded=True):
+    with st.sidebar.expander("Evolutionary Dynamics", expanded=True):
         pop_size = st.slider("Population Size", 10, 500, 50)
         generations_to_run = st.number_input("Generations to Run per Click", 1, 1000, 10)
         mutation_rate = st.slider("Mutation Rate (Alpha)", 0.01, 1.0, 0.2)
@@ -1842,21 +1842,21 @@ def main():
         
         # THIS IS THE SLIDER THAT WAS MISSING ITS POWER
         st.session_state.depth_growth_rate = st.slider(
-            "🚀 Vertical Growth Velocity (Loops/Gen)", 
+            "Vertical Growth Velocity (Loops/Gen)", 
             min_value=1, max_value=100, value=20, 
             help="CRITICAL: How many times we try to add a layer PER GENERATION. Set to 20+ for explosion."
         )
 
         # THIS IS THE FRACTAL FORCE
         st.session_state.fractal_force = st.slider(
-            "🔥 Forced Fractal Complexity", 
+            "Forced Fractal Complexity", 
             min_value=0.0, max_value=1.0, value=0.3, 
             help="Probability of triggering a recursive fractal burst inside the growth loop."
         )
 
    
         
-    with st.sidebar.expander("🧠 Cognitive Constraints"):
+    with st.sidebar.expander("Cognitive Constraints"):
         max_params = st.number_input("Max Parameters (M)", 1, 1000, 100)
         vram_limit = st.slider("VRAM Limit (GB)", 1, 80, 24)
         latency_penalty = st.slider("Latency Penalty Weight", 0.0, 1.0, 0.3)
@@ -1882,7 +1882,7 @@ def main():
         st.slider("Glycolysis/OxPhos Bias", 0.0, 1.0, 0.5)
         st.slider("Second Messenger Diffusion", 0.1, 1.0, 0.5)
 
-    with st.sidebar.expander("🌿 Population & Speciation Dynamics", expanded=False):
+    with st.sidebar.expander("Population & Speciation Dynamics", expanded=False):
         st.caption("Parameters governing evolution at the macro scale.")
         st.slider("Genetic Drift Strength", 0.0, 0.2, 0.01)
         st.slider("Gene Flow (Migration) Rate", 0.0, 0.5, 0.05)
@@ -1900,7 +1900,7 @@ def main():
         st.slider("Allopatric Speciation Distance", 0.1, 10.0, 1.0)
         st.slider("Hybridization Viability", 0.0, 1.0, 0.05)
 
-    with st.sidebar.expander("🧪 Biochemistry & Chemical Kinetics", expanded=False):
+    with st.sidebar.expander("Biochemistry & Chemical Kinetics", expanded=False):
         st.caption("The chemical foundation of the simulated environment.")
         st.slider("Activation Energy Barrier", 0.1, 5.0, 1.0)
         st.slider("Reaction Rate Constant (k)", 0.01, 10.0, 1.0)
@@ -1916,7 +1916,7 @@ def main():
         st.slider("Surface Tension", 0.1, 2.0, 1.0)
         st.slider("Electronegativity Scale", 0.5, 2.0, 1.0)
 
-    with st.sidebar.expander("🧮 Mathematical & Topological Principles", expanded=False):
+    with st.sidebar.expander("Mathematical & Topological Principles", expanded=False):
         st.caption("Abstract mathematical laws governing the simulation space.")
         st.slider("Manifold Curvature", -1.0, 1.0, 0.0)
         st.slider("Fractal Dimension (Hausdorff)", 1.0, 3.0, 2.1)
@@ -1930,7 +1930,7 @@ def main():
         st.slider("Calabi-Yau Manifold Compactification", 1, 10, 6)
         st.slider("Non-Commutative Geometry Factor", 0.0, 1.0, 0.0)
 
-    with st.sidebar.expander("⚡ Neurodynamics & Cognition", expanded=False):
+    with st.sidebar.expander("Neurodynamics & Cognition", expanded=False):
         st.caption("Low-level neural activity and learning rules.")
         st.subheader("Neural Firing")
         st.slider("Action Potential Threshold", -70, -40, -55)
@@ -1951,7 +1951,7 @@ def main():
         st.slider("Noradrenergic Arousal", 0.1, 2.0, 1.0)
         st.slider("Cognitive Dissonance Penalty", 0.0, 1.0, 0.3)
 
-    with st.sidebar.expander("🖥️ Computational Substrate", expanded=False):
+    with st.sidebar.expander("Computational Substrate", expanded=False):
         st.caption("Properties of the underlying simulated hardware.")
         st.slider("Floating Point Precision (Bits)", 8, 64, 32)
         st.slider("Memory Bus Bandwidth (GB/s)", 100, 4000, 900)
@@ -1963,7 +1963,7 @@ def main():
         st.slider("Thermal Throttling Threshold (°C)", 70, 100, 90)
         st.slider("Bit-Flip Error Rate (Cosmic Rays)", 0.0, 1e-9, 0.0, format="%.2e")
 
-    with st.sidebar.expander("📚 Information & Learning Theory", expanded=False):
+    with st.sidebar.expander("Information & Learning Theory", expanded=False):
         st.caption("Theoretical limits and measures of learning.")
         st.slider("Fisher Information Regularization", 0.0, 1.0, 0.0)
         st.slider("Cramér–Rao Lower Bound", 0.01, 1.0, 0.1)
@@ -1974,7 +1974,7 @@ def main():
         st.slider("Kullback–Leibler (KL) Divergence Rate", 0.01, 1.0, 0.1)
         st.slider("No-Free-Lunch Theorem Bias", 0.0, 1.0, 0.5)
 
-    with st.sidebar.expander("🌍 Planetary & Environmental Science", expanded=False):
+    with st.sidebar.expander("Planetary & Environmental Science", expanded=False):
         st.caption("The physical world in which the simulation exists.")
         st.slider("Tectonic Plate Drift Speed", 0.0, 10.0, 2.5)
         st.slider("Volcanic Activity Index", 0, 8, 2)
@@ -2007,7 +2007,7 @@ def main():
         st.slider("Nutrient Availability (N, P, K)", 0.1, 2.0, 1.0)
         st.slider("Catastrophic Event Frequency", 0.0, 0.01, 0.0001, format="%.4f")
 
-    with st.sidebar.expander("🌌 Astrophysics & Cosmology", expanded=False):
+    with st.sidebar.expander("Astrophysics & Cosmology", expanded=False):
         st.caption("The fundamental constants of the simulated universe.")
         st.slider("Gravitational Constant (G)", 0.1, 10.0, 1.0)
         st.slider("Hubble Constant (H0)", 50, 100, 70)
@@ -2039,8 +2039,7 @@ def main():
         st.slider("WIMP Annihilation Cross-Section", 1e-27, 1e-25, 3e-26, format="%.2e")
         st.slider("Virtual Particle Fluctuation Rate", 0.1, 2.0, 1.0)
         st.slider("Universe Topology (0=Flat, 1=Sphere, -1=Hyper)", -1, 1, 0)
-
-    with st.sidebar.expander("🤖 Robotics & Embodiment", expanded=False):
+    with st.sidebar.expander("Robotics & Embodiment", expanded=False):
         st.caption("Parameters for a physical manifestation of the AI.")
         st.slider("Sensor Acuity (Signal-to-Noise)", 10, 100, 50)
         st.slider("Actuator Precision (Microns)", 1, 1000, 10)
@@ -2073,7 +2072,7 @@ def main():
         st.slider("Wireless Communication Bandwidth", 10, 1000, 100)
         st.slider("Internal Power Bus Voltage Stability", 0.9, 1.1, 1.0)
 
-    with st.sidebar.expander("🗣️ Linguistics & Semiotics", expanded=False):
+    with st.sidebar.expander("Linguistics & Semiotics", expanded=False):
         st.caption("How the AI understands and generates meaning.")
         st.slider("Symbol Grounding Strength", 0.1, 1.0, 0.5)
         st.slider("Syntactic Complexity Tolerance", 1, 20, 5)
@@ -2105,8 +2104,7 @@ def main():
         st.slider("Narrative Structure Complexity", 1, 10, 3)
         st.slider("Prosody and Intonation Range", 0.1, 2.0, 1.0)
         st.slider("Cultural Context Loading", 0.1, 1.0, 0.7)
-
-    with st.sidebar.expander("🎭 Sociology & Game Theory", expanded=False):
+    with st.sidebar.expander("Sociology & Game Theory", expanded=False):
         st.caption("How a population of AIs would interact.")
         st.slider("Cooperation vs. Defection Bias (Prisoner's Dilemma)", -1.0, 1.0, 0.1)
         st.slider("Altruism Radius (Kin Selection)", 0.0, 1.0, 0.2)
@@ -2139,7 +2137,7 @@ def main():
         st.slider("Ritual and Synchrony Efficacy", 0.0, 1.0, 0.3)
         st.slider("Market for Lemons (Akerlof) Effect", 0.0, 1.0, 0.4)
 
-    with st.sidebar.expander("📈 Economics & Resource Management", expanded=False):
+    with st.sidebar.expander("Economics & Resource Management", expanded=False):
         st.caption("Simulating a resource-constrained economy for the AIs.")
         st.slider("Resource Scarcity Factor", 0.1, 10.0, 1.0)
         st.slider("Production Function Elasticity", 0.1, 2.0, 0.5)
@@ -2171,8 +2169,7 @@ def main():
         st.slider("Intertemporal Budget Constraint", 0.1, 2.0, 1.0)
         st.slider("Utility Function Curvature", 0.1, 2.0, 1.0)
         st.slider("Bullwhip Effect in Supply Chains", 1.0, 5.0, 1.5)
-
-    with st.sidebar.expander("⚖️ Ethics & Moral Philosophy", expanded=False):
+    with st.sidebar.expander("Ethics & Moral Philosophy", expanded=False):
         st.caption("The ethical frameworks governing AI behavior.")
         st.slider("Utilitarianism (Greatest Good)", 0.0, 1.0, 0.5)
         st.slider("Deontology (Duty-Based Rules)", 0.0, 1.0, 0.2)
@@ -2204,8 +2201,7 @@ def main():
         st.slider("Autonomy vs. Beneficence", -1.0, 1.0, 0.0)
         st.slider("Retributive vs. Restorative Justice", -1.0, 1.0, 0.5)
         st.slider("Value Drift Rate", 0.0, 0.1, 0.005)
-
-    with st.sidebar.expander("🧩 Logic & Formal Systems", expanded=False):
+    with st.sidebar.expander("Logic & Formal Systems", expanded=False):
         st.caption("The underlying logical rules of the AI's reasoning.")
         st.slider("Logical Consistency (Law of Non-Contradiction)", 0.9, 1.0, 0.99)
         st.slider("Principle of Explosion Tolerance", 0.0, 0.1, 0.01)
@@ -2238,7 +2234,7 @@ def main():
         st.slider("Dialetheism Acceptance", 0.0, 0.5, 0.0)
         st.slider("Analogical Reasoning Strength", 0.1, 1.0, 0.6)
 
-    with st.sidebar.expander("🎶 Aesthetics & Art Theory", expanded=False):
+    with st.sidebar.expander("Aesthetics & Art Theory", expanded=False):
         st.caption("Parameters for judging or creating 'art'.")
         st.slider("Novelty vs. Familiarity Preference", -1.0, 1.0, 0.2)
         st.slider("Complexity vs. Simplicity Bias", -1.0, 1.0, 0.1)
@@ -2270,8 +2266,7 @@ def main():
         st.slider("Synesthesia (Cross-Modal) Factor", 0.0, 1.0, 0.05)
         st.slider("Negative Capability (Keats)", 0.0, 1.0, 0.4)
         st.slider("Humor and Wit Generation", 0.1, 1.0, 0.5)
-
-    with st.sidebar.expander("🛠️ Materials Science & Engineering", expanded=False):
+    with st.sidebar.expander("Materials Science & Engineering", expanded=False):
         st.caption("Properties of the materials the AI is built from.")
         st.slider("Substrate Tensile Strength (GPa)", 1, 100, 30)
         st.slider("Young's Modulus (Elasticity)", 100, 2000, 1100)
@@ -2398,8 +2393,8 @@ def main():
             st.session_state.evolver.population.append(st.session_state.evolver.create_genesis_architecture())
 
     col1, col2 = st.columns(2)
-    run_btn = col1.button("▶️ Run Simulation", type="primary")
-    reset_btn = col2.button("🔄 System Reset")
+    run_btn = col1.button("Run Simulation", type="primary")
+    reset_btn = col2.button("System Reset")
     
     if reset_btn:
         st.session_state.evolver = CortexEvolver()
@@ -2497,7 +2492,7 @@ def main():
     if st.session_state.evolver.population:
         # This block runs on every interaction, so we need the placeholders defined
 
-        with st.expander("🗄️ Gene Archive (Lazy Loaded)", expanded=False):
+        with st.expander("Gene Archive (Lazy Loaded)", expanded=False):
             st.caption("Inspect the best architecture from every past generation.")
             
             # Initialize state for lazy loading
@@ -2554,7 +2549,7 @@ def main():
                     st.rerun()
 
         metric_placeholders = {}
-        with st.expander("📊 Advanced Metrics Dashboard", expanded=False):
+        with st.expander("Advanced Metrics Dashboard", expanded=False):
             cols = st.columns(6)
             metric_names = [
                 "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
@@ -2638,7 +2633,7 @@ def main():
             
             # ==================== NEW SECTION: ABSTRACT DECK ====================
             # ==================== NEW SECTION: ABSTRACT DECK (TRUE LAZY LOADING) ====================
-            st.markdown("### 🔮 Abstract Visualization Deck")
+            st.markdown("### Abstract Visualization Deck")
             
             # 1. Initialize Toggle States (Memory for the buttons)
             if 'viz_spiral_active' not in st.session_state: 
@@ -2651,14 +2646,14 @@ def main():
             
             with abs_col1:
                 # Dynamic Label based on state
-                lbl_spiral = "❌ Close Spiral" if st.session_state.viz_spiral_active else "🌀 Reveal Fibonacci Spiral"
+                lbl_spiral = "Close Spiral" if st.session_state.viz_spiral_active else "Reveal Fibonacci Spiral"
                 if st.button(lbl_spiral, key="btn_spiral_toggle", use_container_width=True):
                     # Flip the switch
                     st.session_state.viz_spiral_active = not st.session_state.viz_spiral_active
                     st.rerun()
 
             with abs_col2:
-                lbl_abstract = "❌ Close Abstract" if st.session_state.viz_abstract_active else "🎨 Reveal Bio-Mechanical"
+                lbl_abstract = "Close Abstract" if st.session_state.viz_abstract_active else "Reveal Bio-Mechanical"
                 if st.button(lbl_abstract, key="btn_abstract_toggle", use_container_width=True):
                     st.session_state.viz_abstract_active = not st.session_state.viz_abstract_active
                     st.rerun()
@@ -2685,7 +2680,7 @@ def main():
             
 
             # ==================== MAIN INSPECTION DECK ====================
-            st.markdown("### 🧬 Holographic Architecture Inspection")
+            st.markdown("### Holographic Architecture Inspection")
             
             # 2. Define the Registry of Views (Expanded to 16)
             viz_registry = {
@@ -2790,14 +2785,14 @@ def main():
 
 
         with log_area.container():
-            st.markdown("#### 📜 Latest Mutations (Best Arch)")
+            st.markdown("#### Latest Mutations (Best Arch)")
             if best_arch.mutations_log:
                 for log in best_arch.mutations_log[-5:]:
                     st.code(f"> {log}")
             else:
                 st.caption("No mutations logged for this architecture yet.")
             
-            st.markdown("#### 🧠 Top Components (Best Arch)")
+            st.markdown("#### Top Components (Best Arch)")
             types = [n.type_name for n in best_arch.nodes.values()]
             top_types = Counter(types).most_common(3)
             for t, c in top_types:
@@ -2821,7 +2816,7 @@ def main():
          # --- [START OF NEW CODE] ---
         # 1. Create the visual space for the Longevity Plot
         st.markdown("---")
-        st.markdown("### 🧬 Longevity Analysis (The Path to Immortality)")
+        st.markdown("### Longevity Analysis (The Path to Immortality)")
         aging_plot_col = st.empty()
 
         # 2. Calculate and Draw the "Aging Curve"
@@ -2844,7 +2839,7 @@ def main():
             if 'archive_page' not in st.session_state:
                 st.session_state.archive_page = 0
 
-            tabs = st.tabs(["🔬 Deep Inspection", "🏔️ Loss Landscape", "🧬 Gene Pool"])
+            tabs = st.tabs(["Deep Inspection", "Loss Landscape", "Gene Pool"])
             
             with tabs[0]:
                 best_now = st.session_state.evolver.population[0]
