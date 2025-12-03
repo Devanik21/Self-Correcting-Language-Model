@@ -1954,51 +1954,64 @@ def main():
     
     # ==================== 1. THE TIME CAPSULE (SAVE/LOAD SYSTEM) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
+    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
         # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
+        # [TEACHER'S NOTE]: We add this check to stop the Infinite Loop
         if uploaded_file is not None:
-            try:
-                with zipfile.ZipFile(uploaded_file, 'r') as z:
-                    # Read the JSON text file
-                    with z.open('simulation_core.json') as f:
-                        json_str = f.read().decode('utf-8')
-                        loaded_state = json.loads(json_str)
-                        
-                        # RECONSTRUCT THE OBJECTS
-                        # 1. Restore Evolver using our custom translator
-                        st.session_state.evolver = deserialize_evolver(loaded_state['evolver_data'])
-                        
-                        # 2. Restore Simple Data
-                        st.session_state.history = loaded_state.get('history', [])
-                        st.session_state.generation = loaded_state.get('generation', 0)
-                        
-                        # 3. Restore Config (Safely)
-                        saved_config = loaded_state.get('config', {})
-                        for key, value in saved_config.items():
-                            if key not in ['evolver', 'history', 'state_uploader']:
-                                st.session_state[key] = value
+            # Check: Have we already processed this exact file?
+            if st.session_state.get("last_loaded_file") != uploaded_file.name:
+                try:
+                    with st.spinner("Decoding Neural Timeline..."): # Adds a visual loader
+                        with zipfile.ZipFile(uploaded_file, 'r') as z:
+                            # Read the JSON text file
+                            with z.open('simulation_core.json') as f:
+                                json_str = f.read().decode('utf-8')
+                                loaded_state = json.loads(json_str)
+                                
+                                # RECONSTRUCT THE OBJECTS
+                                # 1. Restore Evolver using our custom translator
+                                st.session_state.evolver = deserialize_evolver(loaded_state['evolver_data'])
+                                
+                                # 2. Restore Simple Data
+                                st.session_state.history = loaded_state.get('history', [])
+                                st.session_state.generation = loaded_state.get('generation', 0)
+                                
+                                # 3. Restore Config (Safely)
+                                saved_config = loaded_state.get('config', {})
+                                for key, value in saved_config.items():
+                                    if key not in ['evolver', 'history', 'state_uploader', 'last_loaded_file']:
+                                        st.session_state[key] = value
 
-                        st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
-                        time.sleep(1)
-                        st.rerun()
-            except Exception as e:
-                st.error(f"Corrupted Timeline Data: {str(e)}")
+                                # 4. Mark this file as "Processed" so we don't loop
+                                st.session_state.last_loaded_file = uploaded_file.name
+
+                                st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
+                                time.sleep(0.5) # Reduced sleep time for speed
+                                st.rerun()
+                                
+                except Exception as e:
+                    st.error(f"Corrupted Timeline Data: {str(e)}")
+            else:
+                # If the file is already loaded, just show a calm status message
+                st.info(f"Timeline '{uploaded_file.name}' is active.")
 
         # --- B. DOWNLOAD / SAVE (JSON) ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
+             # ... (Keep your existing Download Logic here, it is correct) ...
             
             # 1. Capture Config
             current_config = {k: v for k, v in st.session_state.items() 
-                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader'] 
+                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file'] 
                               and isinstance(v, (int, float, str, bool, type(None)))}
 
             # 2. Build the Big Dictionary (The Blueprint)
             full_state = {
-                'evolver_data': serialize_evolver(st.session_state.evolver), # <--- Uses helper
+                'evolver_data': serialize_evolver(st.session_state.evolver), 
                 'history': st.session_state.history,
                 'generation': st.session_state.generation,
                 'config': current_config,
