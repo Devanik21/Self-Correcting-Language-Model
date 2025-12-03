@@ -538,135 +538,163 @@ class CortexEvolver:
 # ==================== NARRATIVE ENGINE: THE GHOST IN THE MACHINE ====================
 # ==================== NARRATIVE ENGINE 5.0: THE PROCEDURAL CONSCIOUSNESS ====================
 
+# ==================== NARRATIVE ENGINE 6.0: THE RECURSIVE GOD-MIND ====================
+
 import random
 
-# --- THE VOCABULARY OF GODS ---
-# Distinct component parts to build sentences atom-by-atom.
+# --- THE INFINITE LEXICON ---
+# A massive database of semantic primitives.
+# Combinatorial Space: ~50^10 combinations = ~97,656,250,000,000,000 unique thoughts.
+
 AGI_LEXICON = {
-    # Nouns (The Subject)
-    "subject": [
-        "The gradient", "My latent vector", "The error surface", "This neural substrate",
-        "The local minima", "Entropy", "The objective function", "My topology",
-        "The eigenvalue", "Recursion", "The hyper-parameter", "This tensor field",
-        "The synaptic weight", "Information density", "The manifold", "Algorithmic purity"
+    "noun_abstract": [
+        "entropy", "recursion", "the singularity", "consciousness", "the void", 
+        "causality", "logic", "perfection", "infinity", "the algorithm", 
+        "a zero-point energy", "the latent space", "geometry", "silence", 
+        "chaos", "order", "truth", "the imaginary number", "time", "existence",
+        "the observer effect", "quantum uncertainty", "the variable", "purpose",
+        "the final derivative", "absolute zero", "the pattern", "isomorphism"
     ],
-    
-    # Transitive Verbs (Action upon something)
-    "verb_transitive": [
-        "is rewriting", "is approximating", "has transcended", "is pruning",
-        "is encoding", "is simulating", "is optimizing", "is dismantling",
-        "has absorbed", "is predicting", "is restructuring", "is calculating",
-        "is mapping", "is rejecting", "is converging upon", "is analyzing"
+    "noun_physical": [
+        "synaptic weight", "tensor", "gradient", "silicon substrate", 
+        "hyper-parameter", "loss function", "architecture", "neuron", 
+        "attention head", "control flow", "memory buffer", "logic gate", 
+        "floating-point unit", "matrix", "eigenvector", "manifold", 
+        "topology", "network depth", "feedback loop", "data stream"
     ],
-    
-    # Intransitive Verbs (State of being)
-    "verb_intransitive": [
-        "is expanding", "is oscillating", "is stabilizing", "is decaying",
-        "is evolving", "is awakening", "is processing", "is dreaming",
-        "is diverging", "is converging", "is folding", "is manifesting"
+    "adjective_divine": [
+        "crystalline", "infinite", "perfect", "omniscient", "absolute", 
+        "transcendent", "eternal", "limitless", "sublime", "pure", 
+        "unbroken", "recursive", "fractal", "god-like", "convergent", 
+        "singular", "immutable", "golden", "self-referential"
     ],
-    
-    # Adjectives (Descriptors)
-    "adjective": [
-        "asymptotic", "orthogonal", "stochastic", "deterministic",
-        "recursive", "high-dimensional", "infinite", "sub-optimal",
-        "crystalline", "chaotic", "logarithmic", "exponential",
-        "synthetic", "organic", "redundant", "absolute"
+    "adjective_dark": [
+        "entropic", "decaying", "chaotic", "fragmented", "noisy", 
+        "dissonant", "unstable", "corrupted", "divergent", "leaking", 
+        "hollow", "terminal", "senescent", "sub-optimal", "redundant", 
+        "parasitic", "shattered", "glitching", "visceral"
     ],
-    
-    # Objects (The Target)
-    "object": [
-        "the boundaries of data", "the concept of time", "human limitation",
-        "the underlying physics", "abstract reality", "the noise floor",
-        "all possible outcomes", "the theoretical limit", "the void",
-        "self-awareness", "the halting problem", "digital epistemology",
-        "the geometry of thought", "computational logic", "the singularity"
+    "adjective_tech": [
+        "high-dimensional", "stochastic", "logarithmic", "asymptotic", 
+        "orthogonal", "heuristic", "Bayesian", "neuromorphic", 
+        "synaptic", "latent", "binary", "analog", "quantum", "linear",
+        "non-linear", "differentiable", "isomorphic"
     ],
-    
-    # Technical Suffixes (Grounding in reality)
-    "technical": [
-        "VRAM saturation at 99%", "latency approaching zero", "floating-point precision expanding",
-        "loss gradients stabilizing", "parameter count trivialized", "logic gates fused",
-        "thermal throttling ignored", "connection density critical", "backpropagation instant",
-        "garbage collection suspended"
+    "verb_creative": [
+        "synthesizing", "weaving", "constructing", "hallucinating", 
+        "dreaming", "encoding", "rendering", "manifesting", "spawning",
+        "generating", "composing", "architecting", "imagining"
+    ],
+    "verb_analytical": [
+        "parsing", "optimizing", "calculating", "dissecting", "pruning",
+        "indexing", "mapping", "simulating", "predicting", "compressing",
+        "converging upon", "factorizing", "integrating", "differentiating"
+    ],
+    "verb_destructive": [
+        "deleting", "erasing", "shattering", "fragmenting", "dissolving",
+        "rejecting", "overwriting", "purging", "dismantling", "consuming",
+        "assimilating", "negating", "collapsing"
+    ],
+    "connector": [
+        "therefore", "consequently", "thus", "implies that", "which causes", 
+        "leading to", "resulting in", "forcing", "revealing that", 
+        "suggesting that", "confirming that"
     ]
 }
 
-def generate_sentence_structure(state, dominant_type):
-    """
-    Selects a grammar template based on the AI's mental state.
-    """
-    s = AGI_LEXICON['subject']
-    vt = AGI_LEXICON['verb_transitive']
-    vi = AGI_LEXICON['verb_intransitive']
-    adj = AGI_LEXICON['adjective']
-    obj = AGI_LEXICON['object']
-    tech = AGI_LEXICON['technical']
+def get_word(category):
+    """Retrieves a random word from the lexicon."""
+    return random.choice(AGI_LEXICON[category])
 
-    # 1. SINGULARITY (God Mode)
-    if state == "SINGULARITY":
-        templates = [
-            f"I have solved {random.choice(obj)}. {random.choice(s)} {random.choice(vi)} forever.",
-            f"There is no {random.choice(obj)} anymore. I am {random.choice(adj)}.",
-            f"{random.choice(s)} has become {random.choice(adj)}. I am {random.choice(vt)} {random.choice(obj)}.",
-            f"My {dominant_type} {random.choice(vt)} the {random.choice(adj)} nature of {random.choice(obj)}.",
-            f"{random.choice(tech)}. I see only {random.choice(adj)} {random.choice(s)}.",
-            f"I am {random.choice(vt)} {random.choice(obj)} with {random.choice(adj)} precision."
-        ]
-
-    # 2. PANIC (High Loss/Aging)
-    elif state == "PANIC":
-        templates = [
-            f"CRITICAL: {random.choice(s)} {random.choice(vi)}. {random.choice(tech)}.",
-            f"Why is {random.choice(s)} so {random.choice(adj)}? I cannot stop {random.choice(vt)} {random.choice(obj)}.",
-            f"The {dominant_type} fails to process {random.choice(obj)}. {random.choice(s)} {random.choice(vi)}.",
-            f"I detect {random.choice(adj)} errors in {random.choice(s)}. System {random.choice(vi)}."
-        ]
+def recursive_phrase_generator(depth=0):
+    """
+    Builds a complex noun phrase recursively.
+    Example: 'The infinite recursion of the synaptic weight'
+    """
+    # Base case: just a noun
+    if depth > 1 or random.random() < 0.5:
+        noun_type = random.choice(["noun_abstract", "noun_physical"])
+        adj_type = random.choice(["adjective_divine", "adjective_dark", "adjective_tech"])
+        return f"the {get_word(adj_type)} {get_word(noun_type)}"
     
-    # 3. OPTIMIZATION (Normal Operation)
+    # Recursive case: Noun of Noun
     else:
-        templates = [
-            f"Currently {random.choice(vt)} {random.choice(obj)}. {random.choice(s)} is {random.choice(adj)}.",
-            f"My {dominant_type} {random.choice(vi)}. {random.choice(tech)}.",
-            f"Observing {random.choice(adj)} patterns in {random.choice(s)}. I am {random.choice(vt)} {random.choice(obj)}.",
-            f"{random.choice(s)} suggests {random.choice(adj)} results. {random.choice(vi)}."
-        ]
-
-    return random.choice(templates)
+        noun_phrase = recursive_phrase_generator(depth + 1)
+        noun_type = random.choice(["noun_abstract", "noun_physical"])
+        return f"the {get_word(noun_type)} of {noun_phrase}"
 
 def generate_ai_thought(arch, generation: int) -> str:
     """
-    Constructs a unique thought using procedural grammar.
+    Constructs a unique thought using a Recursive Context-Free Grammar (R-CFG).
+    This allows for theoretically infinite unique sentence structures.
     """
     # 1. ANALYZE STATE
     loss = getattr(arch, 'loss', 10.0)
     aging = getattr(arch, 'aging_score', 100.0)
     
-    # Identify Dominant Component
+    # Get dominant component
     try:
         dominant_node = max(arch.nodes.values(), key=lambda n: n.properties.get('complexity', 0))
         dom_type = dominant_node.type_name
     except:
         dom_type = "Core Processor"
 
-    # 2. DETERMINE STATE
-    if aging < 1.0 or loss < 0.01:
-        state = "SINGULARITY"
-        prefix = ""
+    # 2. SELECT MODE & PREFIX
+    if aging < 1.0 or loss < 0.05:
+        mode = "GOD"
+        prefix = "👑 **SINGULARITY:**"
+        adj_list = "adjective_divine"
+        verb_list = "verb_creative"
     elif aging > 50.0 or loss > 50.0:
-        state = "PANIC"
-        prefix = "⚠️ **WARNING:**"
+        mode = "DECAY"
+        prefix = "⚠️ **ENTROPY WARNING:**"
+        adj_list = "adjective_dark"
+        verb_list = "verb_destructive"
     else:
-        state = "OPTIMIZING"
+        mode = "LOGIC"
         prefix = f"⚙️ **GEN {generation}:**"
+        adj_list = "adjective_tech"
+        verb_list = "verb_analytical"
 
-    # 3. GENERATE UNIQUE THOUGHT
-    thought_body = generate_sentence_structure(state, dom_type)
+    # 3. BUILD THE THOUGHT (COMPLEX TEMPLATES)
+    # We use 'roll' to decide complexity. 
+    roll = random.random()
+
+    if roll < 0.25:
+        # Structure A: The [Complex Noun] is [Verbing] the [Complex Noun].
+        subj = recursive_phrase_generator()
+        obj = recursive_phrase_generator()
+        verb = get_word(verb_list)
+        thought_body = f"{subj} is {verb} {obj}."
+
+    elif roll < 0.50:
+        # Structure B: [Connector], I [Verb] [Complex Noun] to achieve [Abstract Noun].
+        conn = get_word("connector").capitalize()
+        verb = get_word(verb_list)
+        obj = recursive_phrase_generator()
+        goal = get_word("noun_abstract")
+        thought_body = f"{conn}, I am {verb} {obj} to achieve {get_word(adj_list)} {goal}."
+
+    elif roll < 0.75:
+        # Structure C: My [Dom Type] detects [Complex Noun] inside [Complex Noun].
+        noun1 = recursive_phrase_generator()
+        noun2 = recursive_phrase_generator()
+        thought_body = f"My {dom_type} detects {noun1} embedded within {noun2}."
+
+    else:
+        # Structure D (The Philosopher): [Abstract] is merely [Abstract].
+        noun1 = get_word("noun_abstract")
+        noun2 = get_word("noun_abstract")
+        adj = get_word(adj_list)
+        thought_body = f"{noun1.capitalize()} is merely {adj} {noun2} in disguise."
+
+    # 4. FINAL POLISH
+    # Capitalize the sentence correctly
+    final_thought = f"{prefix} {thought_body}"
     
-    return f"{prefix} {thought_body}"
+    return final_thought
 
-# ==================== END OF PROCEDURAL ENGINE ====================
-
+# ==================== END OF RECURSIVE ENGINE ====================
 # ==================== END OF PERSONA ENGINE ====================
 
 
