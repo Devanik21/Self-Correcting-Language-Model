@@ -49,6 +49,10 @@ import io
 from collections import Counter, deque
 import colorsys
 
+
+import pickle
+import zipfile
+
 # ==================== CONFIGURATION & CONSTANTS ====================
 
 # Set wide layout for the dashboard feel
@@ -1822,7 +1826,104 @@ def plot_loss_landscape_surface(history):
 def main():
     # --- SIDEBAR: THE GOD PANEL ---
     st.sidebar.title("OMNISCIENCE PANEL")
+    
+    # ==================== 1. THE TIME CAPSULE (SAVE/LOAD SYSTEM) ====================
+    with st.sidebar.expander("💾 Time Capsule (Save/Load State)", expanded=True):
+        st.caption("Preserve the entire simulation state or restore a previous timeline.")
+        
+        # --- A. UPLOAD / RESTORE ---
+        uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
+        
+        if uploaded_file is not None:
+            try:
+                with zipfile.ZipFile(uploaded_file, 'r') as z:
+                    # We look for the 'simulation_core.pkl' inside the zip
+                    with z.open('simulation_core.pkl') as f:
+                        loaded_state = pickle.load(f)
+                        
+                        # Restore Critical Session State
+                        if 'evolver' in loaded_state:
+                            st.session_state.evolver = loaded_state['evolver']
+                        if 'history' in loaded_state:
+                            st.session_state.history = loaded_state['history']
+                        if 'generation' in loaded_state:
+                            st.session_state.generation = loaded_state['generation']
+                        if 'archive' in loaded_state:
+                            if hasattr(st.session_state.evolver, 'archive'):
+                                st.session_state.evolver.archive = loaded_state['archive']
+                        
+                        # Attempt to restore simple widget keys if they exist
+                        if 'config' in loaded_state:
+                            for key, value in loaded_state['config'].items():
+                                # We only update keys that don't clash with internal logic
+                                if key not in ['state_uploader', 'evolver', 'history']:
+                                    st.session_state[key] = value
+
+                        st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
+                        time.sleep(1) # Give user a moment to see the success message
+                        st.rerun()
+            except Exception as e:
+                st.error(f"Corrupted Timeline Data: {str(e)}")
+
+        # --- B. DOWNLOAD / SAVE ---
+        # We prepare the data only when needed (Lazy preparation isn't possible with download button logic directly, 
+        # but we capture the current state).
+        
+        if 'evolver' in st.session_state and st.session_state.evolver.population:
+            # 1. Gather all data
+            # Note: We save the 'evolver' object which contains the population and physics
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            
+            # Capture current widget config (approximate)
+            current_config = {k: v for k, v in st.session_state.items() 
+                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader']}
+
+            full_state = {
+                'evolver': st.session_state.evolver,
+                'history': st.session_state.history,
+                'generation': st.session_state.generation,
+                'archive': st.session_state.evolver.archive,
+                'config': current_config,
+                'version': '1.0.0'
+            }
+            
+            # 2. Serialize to RAM (Pickle)
+            pickle_buffer = io.BytesIO()
+            pickle.dump(full_state, pickle_buffer)
+            pickle_buffer.seek(0)
+            
+            # 3. Zip it (To allow downloading multiple meta-files if needed later)
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr('simulation_core.pkl', pickle_buffer.getvalue())
+                
+                # Add a human-readable summary text file
+                summary_txt = f"""
+                CORTEX GENESIS SIMULATION DUMP
+                Date: {timestamp}
+                Generation: {st.session_state.generation}
+                Population Size: {len(st.session_state.evolver.population)}
+                Best Loss: {st.session_state.evolver.population[0].loss if st.session_state.evolver.population else 'N/A'}
+                """
+                zf.writestr('read_me.txt', summary_txt)
+
+            zip_buffer.seek(0)
+            
+            # 4. The Button
+            st.download_button(
+                label="⬇️ Download Full Timeline (.zip)",
+                data=zip_buffer,
+                file_name=f"Cortex_Genesis_{timestamp}_Gen{st.session_state.generation}.zip",
+                mime="application/zip",
+                help="Saves the entire Population, History, Archive, and Settings."
+            )
+        else:
+            st.warning("Initialize Simulation to enable downloading.")
+
+    st.sidebar.markdown("---")
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
+    
+    # ... [Rest of your sidebar code continues here: 'Simulation Physics', etc.] ...
     
     with st.sidebar.expander("Simulation Physics", expanded=True):
         difficulty = st.slider("Task Complexity (Entropy)", 0.1, 5.0, 1.5)
