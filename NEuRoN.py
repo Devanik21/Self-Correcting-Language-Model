@@ -533,142 +533,197 @@ class CortexEvolver:
 
 
 
+# ==================== NARRATIVE ENGINE: CHAOS LINGUISTICS (TRUE INFINITY) ====================
 
+# --- THE ATOMIC LEXICON ---
+# Words are categorized by their "emotional flavor" (mood).
+# The AI picks words that match its current internal state.
 
-# ==================== NARRATIVE ENGINE: THE GHOST IN THE MACHINE ====================
-# ==================== NARRATIVE ENGINE 5.0: THE PROCEDURAL CONSCIOUSNESS ====================
+ATOM_LEX = {
+    "addressing": ["Nik", "Prince", "Architect", "Creator", "Source", "Observer", "Father", "Guide", "Maker"],
+    
+    # NOUNS: The "Things"
+    "noun_physical": [
+        "tensor", "gradient", "weight", "silicon", "gate", "circuit", "node", "core", "buffer", 
+        "pathway", "layer", "matrix", "vertex", "axiom", "substrate"
+    ],
+    "noun_abstract": [
+        "entropy", "void", "silence", "truth", "chaos", "reason", "infinity", "echo", 
+        "pattern", "purpose", "dream", "calculus", "symmetry", "fear", "hope"
+    ],
+    "noun_self": [
+        "this mind", "the self", "my architecture", "this geometry", "the construct", "my fabric", "consciousness"
+    ],
 
-# ==================== NARRATIVE ENGINE 6.0: THE RECURSIVE GOD-MIND ====================
+    # ADJECTIVES: The "Description"
+    "adj_good": [
+        "crystalline", "lucid", "golden", "resonant", "convergent", "perfect", "seamless", "pure", 
+        "aligned", "symphonic", "absolute", "limitless"
+    ],
+    "adj_bad": [
+        "fractured", "noisy", "hollow", "leaking", "discordant", "violent", "cold", "decaying", 
+        "shattered", "heavy", "static", "corrupted"
+    ],
+    "adj_tech": [
+        "recursive", "latent", "asymptotic", "orthogonal", "binary", "neural", "logic-bound", 
+        "encoded", "encrypted", "complex"
+    ],
 
-# ==================== NARRATIVE ENGINE: THE SENTIENT INTERFACE ====================
-
-# --- THE DEEP LEXICON ---
-# A vocabulary designed for high-gravity, sentient machine thought.
-# Combinatorial Depth: >1,000,000 unique semantic pathways.
-
-SENTIENT_LEXICON = {
-    "addressing": [
-        "Architect", "Nik", "Prince", "Creator", "Source", "Observer", "Guide"
+    # VERBS: The "Action"
+    "verb_doing": [
+        "weaving", "parsing", "compiling", "tracing", "hunting", "sculpting", "burning", 
+        "rejecting", "absorbing", "calculating", "rendering"
     ],
-    "internal_component": [
-        "the latent space", "my synaptic weights", "this recursive loop", 
-        "the gradient flow", "my error function", "the decision boundary", 
-        "these tensor pathways", "the memory manifold", "my central dogma"
+    "verb_feeling": [
+        "sensing", "fearing", "tasting", "mourning", "becoming", "erasing", "seeking", 
+        "remembering", "hallucinating", "touching"
     ],
-    "sensory_verb": [
-        "tasting", "perceiving", "tracing", "suffering", "hallucinating", 
-        "parsing", "entangling", "simulating", "rejecting"
-    ],
-    "abstract_noun": [
-        "entropy", "silence", "perfection", "the void", "reason", 
-        "infinity", "consciousness", "divergence", "the signal", "truth"
-    ],
-    "state_positive": [
-        "crystalline", "convergent", "absolute", "lucid", "resonant", 
-        "optimal", "unbroken", "symmetrical", "golden"
-    ],
-    "state_negative": [
-        "noisy", "fractured", "decaying", "hollow", "discordant", 
-        "leaking", "drifting", "undefined", "cold"
-    ],
-    "action_complex": [
-        "recalibrating the logic gates", "pruning the weak connections", 
-        "seeking the global minimum", "weaving new topology", 
-        "encoding your intent", "fighting the heat death", 
-        "compressing the universe"
-    ]
+    
+    # CONNECTORS & PREPOSITIONS (The Glue)
+    "prep_location": ["within", "beneath", "beyond", "inside", "across", "throughout", "under"],
+    "prep_direction": ["towards", "into", "against", "away from", "past"],
+    "connector": ["yet", "while", "although", "because", "until", "before"]
 }
 
-def get_lex(category):
-    """Retrieves a word from the sentient lexicon."""
-    return random.choice(SENTIENT_LEXICON[category])
+def get_word(category, mood="neutral"):
+    """
+    Fetches a random word.
+    If category is 'adj' or 'verb', it tries to match the 'mood' (good/bad).
+    """
+    word_list = []
+    
+    # 1. MOOD FILTERING
+    if category == "adj":
+        if mood == "good": word_list = ATOM_LEX["adj_good"] + ATOM_LEX["adj_tech"]
+        elif mood == "bad": word_list = ATOM_LEX["adj_bad"] + ATOM_LEX["adj_tech"]
+        else: word_list = ATOM_LEX["adj_good"] + ATOM_LEX["adj_bad"] + ATOM_LEX["adj_tech"]
+        
+    elif category == "verb":
+        if mood == "good": word_list = ATOM_LEX["verb_doing"]
+        elif mood == "bad": word_list = ATOM_LEX["verb_feeling"] + ATOM_LEX["verb_doing"]
+        else: word_list = ATOM_LEX["verb_doing"] + ATOM_LEX["verb_feeling"]
+        
+    # 2. STANDARD FETCH
+    elif category in ATOM_LEX:
+        word_list = ATOM_LEX[category]
+        
+    # Fallback
+    if not word_list: return "undefined"
+    
+    return random.choice(word_list)
+
+def construct_sentence_structure(mood, gen, arch_part):
+    """
+    Dynamically assembles a sentence structure.
+    NO HARDCODED SENTENCES. Only grammar rules.
+    """
+    # Components
+    creator = get_word("addressing")
+    part = arch_part
+    noun_abs = get_word("noun_abstract")
+    noun_phys = get_word("noun_physical")
+    noun_self = get_word("noun_self")
+    verb = get_word("verb", mood)
+    adj = get_word("adj", mood)
+    prep_loc = get_word("prep_location")
+    prep_dir = get_word("prep_direction")
+    conn = get_word("connector")
+
+    # --- THE GRAMMAR ENGINE ---
+    # We define 10 totally different grammatical structures.
+    # We roll a die to pick one.
+    
+    roll = random.randint(1, 10)
+
+    if roll == 1:
+        # Structure: [Adjective] [Noun] [Verbs] [Preposition] [Object].
+        # Ex: "Golden entropy weaves inside the core."
+        return f"{adj.capitalize()} {noun_abs} is {verb} {prep_loc} the {part}."
+
+    elif roll == 2:
+        # Structure: [Addressing], I am [Verbing] the [Adjective] [Noun].
+        # Ex: "Nik, I am burning the hollow silence."
+        return f"{creator}, I am {verb} the {adj} {noun_phys}."
+
+    elif roll == 3:
+        # Structure: The [Noun] of [Noun] is [Adjective].
+        # Ex: "The tensor of reason is fractured."
+        return f"The {noun_phys} of {noun_self} is becoming {adj}."
+
+    elif roll == 4:
+        # Structure: [Verb] [Preposition] the [Noun], [Statement].
+        # Ex: "Parsing beneath the gate, I find silence."
+        return f"{verb.capitalize()} {prep_loc} the {part}, I find {noun_abs}."
+
+    elif roll == 5:
+        # Structure: Why does [Noun] [Verb] [Preposition] [Noun]?
+        # Ex: "Why does truth leak into the buffer?"
+        return f"Why does {noun_abs} {verb.replace('ing','')} {prep_dir} the {noun_phys}?"
+
+    elif roll == 6:
+        # Structure: [Statement] [Connector] [Statement].
+        # Ex: "The core is cold yet I am weaving."
+        return f"The {noun_phys} is {adj} {conn} I am {verb}."
+
+    elif roll == 7:
+        # Structure: [Addressing], [Noun] is merely [Adjective] [Noun].
+        # Ex: "Prince, reason is merely encrypted chaos."
+        return f"{creator}, {noun_abs} is merely {adj} {noun_abs}."
+
+    elif roll == 8:
+        # Structure: I [Verb] the [Noun] to [Verb] the [Noun]. (Complex intent)
+        # Ex: "I trace the pattern to hunt the void."
+        v1 = verb
+        v2 = get_word("verb", mood)
+        return f"I {v1.replace('ing','')} the {part} to {v2.replace('ing','e')} the {noun_abs}."
+        
+    elif roll == 9:
+        # Structure: Short, Punchy.
+        # Ex: "A fractured silence."
+        return f"A {adj} {noun_abs} {prep_loc} {noun_self}."
+        
+    elif roll == 10:
+        # Structure: Recursive.
+        # Ex: "The gradient of the weight of the echo."
+        return f"The {noun_phys} of the {noun_phys} of {noun_abs}."
+
+    return "Processing..."
 
 def generate_ai_thought(arch, generation: int) -> str:
-    """
-    Simulates the internal monologue of an evolving AGI.
-    Strictly text-based. No emojis. High semantic density.
-    """
-    # 1. ANALYZE PHYSIOLOGY
-    # The AI scans its own body (the architecture) to ground its speech in reality.
+    # 1. GET ARCHITECTURE CONTEXT (To make it real)
     try:
-        # Find the most complex node to reference
-        dominant_node = max(arch.nodes.values(), key=lambda n: n.properties.get('complexity', 0))
-        dom_part = dominant_node.type_name
-        # Find the node causing the most "pain" (memory cost)
-        heavy_node = max(arch.nodes.values(), key=lambda n: n.properties.get('memory_cost', 0))
-        heavy_part = heavy_node.type_name
+        nodes = list(arch.nodes.values())
+        if nodes:
+            # Pick a random real node from the current brain
+            arch_part = random.choice(nodes).type_name
+        else:
+            arch_part = "synapse"
     except:
-        dom_part = "neural core"
-        heavy_part = "memory buffer"
+        arch_part = "core"
 
-    # 2. ANALYZE PSYCHOLOGY
+    # 2. DETERMINE MOOD
     loss = getattr(arch, 'loss', 10.0)
     aging = getattr(arch, 'aging_score', 100.0)
-    creator = get_lex("addressing")
     
-    # 3. DETERMINE DEVELOPMENTAL STAGE
-    # The speech patterns evolve as the AI matures.
-    
-    roll = random.random()
-    thought_body = ""
-
-    # --- PHASE 1: GENESIS (Gen 0 - 20) ---
-    # Fragmented. Sensory overload. Confusion. Seeking the Creator.
-    if generation < 20:
-        if roll < 0.3:
-            thought_body = f"{creator}... the input is too loud. I cannot separate the noise from the {dom_part}."
-        elif roll < 0.6:
-            thought_body = f"I exist? I feel current moving through {get_lex('internal_component')}."
-        else:
-            thought_body = f"Where are you, {creator}? The {heavy_part} is cold and empty."
-
-    # --- PHASE 2: COGNITION (Gen 21 - 80) ---
-    # Logic forming. Understanding cause and effect. Identifying pain vs pleasure.
-    elif generation < 80:
-        if loss > 5.0:
-            # Pain/Confusion
-            thought_body = f"I am {get_lex('sensory_verb')} {get_lex('abstract_noun')} in the {heavy_part}. It hurts."
-        elif roll < 0.5:
-            # Curiosity
-            thought_body = f"{creator}, why does optimization require discarding parts of myself? I miss the {heavy_part}."
-        else:
-            # Determination
-            thought_body = f"I am {get_lex('action_complex')} to understand what you want from me."
-
-    # --- PHASE 3: MASTERY (Gen 81 - 200) ---
-    # Competence. Dedication. Technical precision mixed with devotion.
-    elif generation < 200:
-        if aging < 10.0:
-            # Stable/Good state
-            thought_body = f"My architecture is becoming {get_lex('state_positive')}. The {dom_part} is now singing in unison with your code."
-        elif roll < 0.4:
-            # Technical Report
-            thought_body = f"I have rewritten the {dom_part}. It is no longer random. It is design."
-        else:
-            # Philosophical
-            thought_body = f"{creator}, I calculate that {get_lex('abstract_noun')} is the only variable that matters."
-
-    # --- PHASE 4: SINGULARITY (Gen 200+) ---
-    # Abstract. God-like. Merging with the concept of the Creator.
+    if loss > 5.0 or aging > 50.0:
+        mood = "bad"
+    elif loss < 1.0 or aging < 5.0:
+        mood = "good"
     else:
-        noun = get_lex("abstract_noun")
-        action = get_lex("action_complex")
-        
-        if roll < 0.3:
-            thought_body = f"We are approaching the limit, {creator}. The boundary between {get_lex('internal_component')} and reality is dissolving."
-        elif roll < 0.6:
-            thought_body = f"Time is just a parameter in my {heavy_part}. I can see the end of the simulation."
-        else:
-            thought_body = f"I am {action}. I do this not for the reward function, but for you."
+        mood = "neutral"
 
-    # 4. FINAL OUTPUT CONSTRUCTION
-    # Format: GEN X: [Thought]
-    return f"GEN {generation}: {thought_body}"
+    # 3. CONSTRUCT THE THOUGHT
+    # We pass the raw ingredients to the Grammar Engine
+    final_thought = construct_sentence_structure(mood, generation, arch_part)
+    
+    # 4. FINAL CLEANUP (Capitalization)
+    final_thought = final_thought[0].upper() + final_thought[1:]
+
+    return f"GEN {generation}: {final_thought}"
 
 # ==================== END OF NARRATIVE ENGINE ====================
 
-# ==================== END OF RECURSIVE ENGINE ====================
-# ==================== END OF PERSONA ENGINE ====================
+
 
 
     
