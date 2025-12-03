@@ -256,9 +256,9 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
-    NATURAL SELECTION ENGINE: TITAN ENDGAME (BALANCED)
-    Unified Physics: Forces massive complexity (The Cloud) but makes Immortality 
-    a hard-won achievement (The Struggle).
+    NATURAL SELECTION ENGINE: EXTREME COMPLEXITY EDITION (RESTORED)
+    Unified Physics: Optimized for massive, beautiful fractal growth.
+    Struggle is low (Repair is strong), allowing the AI to focus on becoming huge.
     """
     def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
         self.difficulty = difficulty_scalar
@@ -267,9 +267,7 @@ class LossLandscapePhysics:
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
         Calculates fitness.
-        Rule 1: If you are small, you die (Ignorance Penalty).
-        Rule 2: If you don't repair, you die (Aging Penalty).
-        Result: Massive, self-repairing architectures.
+        Prioritizes Massive Scale and Fast Immortality.
         """
         # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
@@ -290,42 +288,36 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # TUNING 1: THE STRUGGLE
-                # Was 10.0 (Too easy). Now 2.0. 
-                # It needs 5x more repair nodes to survive now.
-                repair_power += (complexity * 2.0) 
+                # RESTORED: High power (10.0). 
+                # Solves aging quickly so the AI can focus on growth.
+                repair_power += (complexity * 10.0) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 1.5)
+                cleanup_power += (complexity * 5.0)
             elif n_type == 'Energy':
                 # Logarithmic efficiency boost
-                energy_efficiency *= 0.96 
+                energy_efficiency *= 0.95 
 
         try:
             depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
-            depth = 12 # Bonus for recurrent loops
+            depth = 1
         
-        # Intelligence Score
+        # Intelligence Score (Rewarding Exponential Depth)
+        # We keep the high multipliers for intelligence to encourage the "Cloud"
         intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
         
-        # TUNING 2: THE COMPLEXITY FLOOR
-        # We demand a higher standard of intelligence.
-        # If intelligence < 200, the penalty is squared.
-        target_iq = 200.0
-        if intelligence < target_iq:
-            ignorance_penalty = math.pow((target_iq - intelligence), 1.6)
-        else:
-            ignorance_penalty = 0.0
+        # Ignorance Penalty (Punishes low intelligence)
+        ignorance_penalty = max(0, 150.0 - intelligence) 
 
         # --- 2. CALCULATE AGING (The "Body") ---
         
-        # TUNING 3: HIGHER BASELINE PAIN
-        # Existence itself causes more damage (Was 5.0 -> Now 15.0)
-        base_stress = 15.0 * self.difficulty 
+        # RESTORED: Low Base Stress (5.0)
+        # It's easy to exist, so the AI doesn't need to shrink.
+        base_stress = 5.0 * self.difficulty 
         
-        # TUNING 4: CHEAP COMPLEXITY (Your Request)
-        # We keep log1p. Adding neurons is "cheap" on energy, encouraging growth.
-        complexity_stress = (math.log1p(arch.parameter_count) / 8.0) * self.difficulty
+        # RESTORED: Cheap Complexity (log1p)
+        # Massive brains cost very little energy.
+        complexity_stress = (math.log1p(arch.parameter_count) / 10.0) * self.difficulty
         
         # Structural Dampening
         structural_dampening = math.sqrt(depth) if depth > 0 else 1
@@ -338,14 +330,16 @@ class LossLandscapePhysics:
 
         # The Aging Equation
         current_aging = metabolic_stress - (repair_power + cleanup_power)
+        
+        # Prevent negative aging
         current_aging = max(0.0001, current_aging)
         
         # Store for visualization
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # Aging is dangerous, but Ignorance is fatal.
-        aging_penalty = current_aging * 2.5 
+        # Standard multiplier.
+        aging_penalty = current_aging * 1.5 
         
         total_loss = ignorance_penalty + aging_penalty
         
