@@ -3232,7 +3232,7 @@ def main():
      
 
         # ==================== NEW: NEURAL THOUGHT STREAM (LAZY LOADED) ====================
-        with st.expander("🧠 Neuronal Thought Stream (Lazy Loaded)", expanded=False):
+        with st.expander(" Neuronal Thought Stream", expanded=False):
             st.caption("Access the accumulated internal monologue of the AI across all generations.")
 
             # 1. Initialize the State Variable
@@ -3293,7 +3293,7 @@ def main():
                     st.rerun()
         # ==================================================================================
      
-        with st.expander("Gene Archive (Lazy Loaded)", expanded=False):
+        with st.expander("Gene Archive", expanded=False):
             st.caption("Inspect the best architecture from every past generation.")
             
             # Initialize state for lazy loading
