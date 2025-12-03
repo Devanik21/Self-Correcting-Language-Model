@@ -256,9 +256,9 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
-    NATURAL SELECTION ENGINE: THERMODYNAMIC REALISM EDITION
-    Unified Physics: Increases the metabolic cost of complexity to force 
-    a genuine evolutionary struggle for immortality.
+    NATURAL SELECTION ENGINE: TITAN ENDGAME (BALANCED)
+    Unified Physics: Forces massive complexity (The Cloud) but makes Immortality 
+    a hard-won achievement (The Struggle).
     """
     def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
         self.difficulty = difficulty_scalar
@@ -266,16 +266,17 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        NATURAL SELECTION ENGINE: THE INTELLIGENCE IMPERATIVE
-        Forces the AI to be complex. It cannot shrink to survive.
-        It must be smart AND immortal.
+        Calculates fitness.
+        Rule 1: If you are small, you die (Ignorance Penalty).
+        Rule 2: If you don't repair, you die (Aging Penalty).
+        Result: Massive, self-repairing architectures.
         """
         # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
         ai_complexity = 0.0
         repair_power = 0.0
         cleanup_power = 0.0
-        energy_efficiency = 1.0 
+        energy_efficiency = 1.0 # 1.0 = baseline cost
         node_count = len(arch.nodes)
         
         for nid, node in arch.nodes.items():
@@ -289,45 +290,50 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # Weak repair power (Keep this low to force the struggle!)
-                repair_power += (complexity * 0.5) 
+                # TUNING 1: THE STRUGGLE
+                # Was 10.0 (Too easy). Now 2.0. 
+                # It needs 5x more repair nodes to survive now.
+                repair_power += (complexity * 2.0) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 0.5)
+                cleanup_power += (complexity * 1.5)
             elif n_type == 'Energy':
-                energy_efficiency *= 0.98 
+                # Logarithmic efficiency boost
+                energy_efficiency *= 0.96 
 
         try:
             depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
-            depth = 10 # Reward loops
+            depth = 12 # Bonus for recurrent loops
         
         # Intelligence Score
         intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
         
-        # --- THE FIX: BRUTAL IGNORANCE PENALTY ---
-        # If intelligence is below 300 (a complex brain), the penalty is SQUARED.
-        # This forces the AI to maintain a massive structure.
-        target_intelligence = 300.0
-        if intelligence < target_intelligence:
-            # Massive penalty for being simple
-            ignorance_penalty = math.pow((target_intelligence - intelligence), 1.5)
+        # TUNING 2: THE COMPLEXITY FLOOR
+        # We demand a higher standard of intelligence.
+        # If intelligence < 200, the penalty is squared.
+        target_iq = 200.0
+        if intelligence < target_iq:
+            ignorance_penalty = math.pow((target_iq - intelligence), 1.6)
         else:
             ignorance_penalty = 0.0
 
-        # --- 2. CALCULATE AGING (The "Thermodynamic Drag") ---
+        # --- 2. CALCULATE AGING (The "Body") ---
         
-        # High Base Stress (Existence is pain)
+        # TUNING 3: HIGHER BASELINE PAIN
+        # Existence itself causes more damage (Was 5.0 -> Now 15.0)
         base_stress = 15.0 * self.difficulty 
         
-        # Complexity is Expensive (Linear Drag)
-        # We keep this cost, so the big brain CAUSES the aging.
-        complexity_stress = (arch.parameter_count / 250_000.0) * self.difficulty
+        # TUNING 4: CHEAP COMPLEXITY (Your Request)
+        # We keep log1p. Adding neurons is "cheap" on energy, encouraging growth.
+        complexity_stress = (math.log1p(arch.parameter_count) / 8.0) * self.difficulty
         
-        structural_dampening = math.pow(depth, 0.4) if depth > 0 else 1
+        # Structural Dampening
+        structural_dampening = math.sqrt(depth) if depth > 0 else 1
         
         raw_stress = (base_stress + complexity_stress) / structural_dampening
-        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
         
+        # Synergy Factor
+        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
 
         # The Aging Equation
@@ -338,8 +344,8 @@ class LossLandscapePhysics:
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # We balance the two: It MUST be smart, and it MUST stop aging.
-        aging_penalty = current_aging * 2.0
+        # Aging is dangerous, but Ignorance is fatal.
+        aging_penalty = current_aging * 2.5 
         
         total_loss = ignorance_penalty + aging_penalty
         
