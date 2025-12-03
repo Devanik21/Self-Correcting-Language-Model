@@ -675,6 +675,121 @@ def build_nx_graph(arch, directed=True):
 
 
 
+def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
+    """
+    VISUALIZATION: The Genomic Lifespan Radar.
+    Maps the entire architecture as a circular genome.
+    - Outward Spikes (Red/Orange): Metabolic Stressors (Intelligence cost).
+    - Outward Spikes (Cyan/Green): Longevity Defenders (Life extension).
+    - Height of bar: The magnitude of impact.
+    - Brightness: The 'Plasticity' (How much this gene can be modified).
+    """
+    if not arch.nodes: return go.Figure()
+
+    node_ids = list(arch.nodes.keys())
+    # Create circular angles for every node
+    theta = np.linspace(0, 360, len(node_ids), endpoint=False)
+    
+    # Data containers
+    r_values = []      # Height of the bar (Impact)
+    colors = []        # Color based on role (Stressor vs Defender)
+    hover_texts = []   # Information
+    widths = []        # Bar width
+    
+    # Scan the Genome
+    for nid in node_ids:
+        node = arch.nodes[nid]
+        props = node.properties
+        n_type = props.get('type', 'Unknown')
+        complexity = props.get('complexity', 1.0)
+        plasticity = props.get('plasticity', 0.5)
+        
+        # --- LOGIC: Is this a Stressor or a Defender? ---
+        
+        # 1. BIOLOGICAL DEFENDERS (The "Levers" for Immortality)
+        if n_type in ['Repair', 'Energy', 'Cleanup', 'Defense']:
+            # Defenders get positive representation
+            # Multiplier emphasizes their importance
+            r_values.append(complexity * 4.0) 
+            
+            # Color Logic: Cyan/Green for Life
+            if n_type == 'Repair': col = '#00FFFF' # Cyan
+            elif n_type == 'Energy': col = '#FFFF00' # Yellow
+            elif n_type == 'Cleanup': col = '#00FF00' # Green
+            else: col = '#FFFFFF'
+            
+            colors.append(col)
+            hover_texts.append(f"<b>🧬 LONGEVITY GENE</b><br>ID: {nid}<br>Role: {n_type}<br>Potency: {complexity:.2f}<br>Plasticity (Lever): {plasticity:.2f}")
+            widths.append(10) # Wider bars for important genes
+
+        # 2. METABOLIC STRESSORS (The Cost of Intelligence)
+        else:
+            # Intelligence costs energy (Entropy)
+            r_values.append(complexity * 2.0)
+            
+            # Color Logic: Red/Purple for Entropy
+            # We fade the color based on plasticity
+            if n_type == 'Attention': col = '#FF0055' # Neon Red
+            elif n_type == 'MLP': col = '#AA00FF' # Purple
+            else: col = '#FF5500' # Orange
+            
+            colors.append(col)
+            hover_texts.append(f"<b>🧠 NEURAL TISSUE</b><br>ID: {nid}<br>Type: {n_type}<br>Metabolic Cost: {complexity:.2f}")
+            widths.append(5) # Thinner bars for standard tissue
+
+    # --- PLOTLY CONSTRUCTION ---
+    fig = go.Figure()
+
+    # The Genome Ring (Barpolar)
+    fig.add_trace(go.Barpolar(
+        r=r_values,
+        theta=theta,
+        width=widths,
+        marker=dict(
+            color=colors,
+            line=dict(color='black', width=1),
+            opacity=0.8
+        ),
+        hovertext=hover_texts,
+        hoverinfo='text',
+        name='Genomic Expression'
+    ))
+
+    # The "Immortality Threshold" Ring (Reference Line)
+    # Visualizes how much repair is needed to overcome stress
+    avg_stress = np.mean([r for i, r in enumerate(r_values) if colors[i].startswith('#F') or colors[i].startswith('#A')])
+    if np.isnan(avg_stress): avg_stress = 5.0
+    
+    fig.add_trace(go.Scatterpolar(
+        r=[avg_stress] * len(theta),
+        theta=theta,
+        mode='lines',
+        line=dict(color='white', width=1, dash='dot'),
+        hoverinfo='none',
+        name='Metabolic Baseline'
+    ))
+
+    fig.update_layout(
+        title="WHOLE GENOME LIFESPAN EXPANSION MAP",
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        polar=dict(
+            radialaxis=dict(visible=False, range=[0, max(r_values)*1.2]),
+            angularaxis=dict(
+                visible=True, 
+                showticklabels=False, 
+                linecolor='rgba(255,255,255,0.1)'
+            ),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        font=dict(family="Courier New, monospace"),
+        margin=dict(l=20, r=20, t=50, b=20)
+    )
+    
+    return fig
+
+
 
 def plot_immortality_curve(history):
     """
@@ -2969,6 +3084,13 @@ def main():
                     "Temporal Vortex": plot_temporal_vortex_3d,
                     "Entropy Quasar": plot_entropy_diversity_quasar,
                 },
+             
+             
+                "Biological Analysis": {
+                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar, # <--- YOUR NEW FUNCTION
+                "Genetic Heritage": plot_genetic_heritage_view,
+                "Type Clusters": plot_component_type_manifold,
+            },
                 "Analytical Metrics": {
                     "Loss Gradient Force": plot_loss_gradient_force_3d,
                     "Compute Landscape": plot_compute_cost_landscape,
