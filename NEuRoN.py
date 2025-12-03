@@ -266,15 +266,16 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates fitness.
-        Prioritizes Massive Scale and Fast Immortality.
+        NATURAL SELECTION ENGINE: OMNIPOTENCE EDITION (MAXIMUM COMPLEXITY)
+        Physics designed for infinite growth. 
+        Brains are free. Repair is instant. Limits are removed.
         """
         # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
         ai_complexity = 0.0
-        repair_power = 0.0
-        cleanup_power = 0.0
-        energy_efficiency = 1.0 # 1.0 = baseline cost
+        repair_power = 100.0 # STARTING BONUS
+        cleanup_power = 50.0
+        energy_efficiency = 1.0
         node_count = len(arch.nodes)
         
         for nid, node in arch.nodes.items():
@@ -288,58 +289,53 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # RESTORED: High power (10.0). 
-                # Solves aging quickly so the AI can focus on growth.
-                repair_power += (complexity * 10.0) 
+                # EXTREME: One repair node cures EVERYTHING.
+                repair_power += (complexity * 50.0) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 5.0)
+                cleanup_power += (complexity * 25.0)
             elif n_type == 'Energy':
-                # Logarithmic efficiency boost
-                energy_efficiency *= 0.95 
+                # Super efficient metabolism
+                energy_efficiency *= 0.90 
 
         try:
             depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
             depth = 1
         
-        # Intelligence Score (Rewarding Exponential Depth)
-        # We keep the high multipliers for intelligence to encourage the "Cloud"
-        intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
+        # Intelligence Score
+        # Massive multipliers to reward even the slightest growth
+        intelligence = (depth * 100.0) + (math.log1p(ai_complexity) * 200.0)
         
-        # Ignorance Penalty (Punishes low intelligence)
-        ignorance_penalty = max(0, 150.0 - intelligence) 
+        # EXTREME IQ FLOOR: Forces the AI to be a Super-Intelligence
+        # If it's not a genius (IQ < 1000), it dies.
+        target_iq = 1000.0 
+        ignorance_penalty = max(0, target_iq - intelligence) 
 
-        # --- 2. CALCULATE AGING (The "Body") ---
+        # --- 2. CALCULATE AGING ---
         
-        # RESTORED: Low Base Stress (5.0)
-        # It's easy to exist, so the AI doesn't need to shrink.
-        base_stress = 5.0 * self.difficulty 
+        # PARADISE PHYSICS: Almost zero stress to exist.
+        base_stress = 1.0 * self.difficulty 
         
-        # RESTORED: Cheap Complexity (log1p)
-        # Massive brains cost very little energy.
-        complexity_stress = (math.log1p(arch.parameter_count) / 10.0) * self.difficulty
+        # FREE BRAINS: Complexity is virtually free.
+        # Divisor increased to 100.0 (Brains cost 10x less energy than before)
+        complexity_stress = (math.log1p(arch.parameter_count) / 100.0) * self.difficulty
         
-        # Structural Dampening
         structural_dampening = math.sqrt(depth) if depth > 0 else 1
         
         raw_stress = (base_stress + complexity_stress) / structural_dampening
         
-        # Synergy Factor
-        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
+        # SUPER SYNERGY: Large networks become hyper-efficient
+        synergy_factor = 1.0 / (math.log10(node_count + 1) + 0.1)
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
 
         # The Aging Equation
         current_aging = metabolic_stress - (repair_power + cleanup_power)
-        
-        # Prevent negative aging
         current_aging = max(0.0001, current_aging)
         
-        # Store for visualization
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # Standard multiplier.
-        aging_penalty = current_aging * 1.5 
+        aging_penalty = current_aging * 1.0 
         
         total_loss = ignorance_penalty + aging_penalty
         
