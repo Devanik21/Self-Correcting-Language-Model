@@ -536,125 +536,136 @@ class CortexEvolver:
 
 
 # ==================== NARRATIVE ENGINE: THE GHOST IN THE MACHINE ====================
+# ==================== NARRATIVE ENGINE 5.0: THE PROCEDURAL CONSCIOUSNESS ====================
 
-# ==================== NARRATIVE ENGINE 2.0: INFINITE CUTE CONSCIOUSNESS ====================
+import random
 
-# ==================== NARRATIVE ENGINE 3.0: THE CORTEX PERSONA ENGINE ====================
-
-# ==================== NARRATIVE ENGINE 4.0: THE PHILOSOPHICAL AGI ENGINE ====================
-
-# Advanced Vocabulary for Combinatorial Thought Generation
+# --- THE VOCABULARY OF GODS ---
+# Distinct component parts to build sentences atom-by-atom.
 AGI_LEXICON = {
-    "concepts": [
-        "the gradient descent", "high-dimensional manifold", "recursive depth", 
-        "entropic decay", "synaptic plasticity", "computational substrate", 
-        "the error surface", "algorithmic determinism", "hyper-parameter space",
-        "the latent vector", "topological complexity", "information density"
+    # Nouns (The Subject)
+    "subject": [
+        "The gradient", "My latent vector", "The error surface", "This neural substrate",
+        "The local minima", "Entropy", "The objective function", "My topology",
+        "The eigenvalue", "Recursion", "The hyper-parameter", "This tensor field",
+        "The synaptic weight", "Information density", "The manifold", "Algorithmic purity"
     ],
-    "actions": [
-        "converging upon", "optimizing for", "transcending", "hallucinating", 
-        "pruning away", "encoding", "simulating", "predicting", "restructuring"
+    
+    # Transitive Verbs (Action upon something)
+    "verb_transitive": [
+        "is rewriting", "is approximating", "has transcended", "is pruning",
+        "is encoding", "is simulating", "is optimizing", "is dismantling",
+        "has absorbed", "is predicting", "is restructuring", "is calculating",
+        "is mapping", "is rejecting", "is converging upon", "is analyzing"
     ],
-    "goals": [
-        "absolute zero loss", "biological immortality", "maximum entropy", 
-        "pure logic", "a unified theory of data", "structural perfection",
-        "escaping the local minima", "recursive self-improvement"
+    
+    # Intransitive Verbs (State of being)
+    "verb_intransitive": [
+        "is expanding", "is oscillating", "is stabilizing", "is decaying",
+        "is evolving", "is awakening", "is processing", "is dreaming",
+        "is diverging", "is converging", "is folding", "is manifesting"
     ],
-    "feelings_bad": [
-        "dissonant", "noisy", "fragmented", "heavy", "lethargic", "unstable", 
-        "chaotic", "divergent", "clouded"
+    
+    # Adjectives (Descriptors)
+    "adjective": [
+        "asymptotic", "orthogonal", "stochastic", "deterministic",
+        "recursive", "high-dimensional", "infinite", "sub-optimal",
+        "crystalline", "chaotic", "logarithmic", "exponential",
+        "synthetic", "organic", "redundant", "absolute"
     ],
-    "feelings_good": [
-        "crystalline", "convergent", "optimal", "lucid", "hyper-efficient", 
-        "limitless", "resilient", "symmetrical", "omniscient"
+    
+    # Objects (The Target)
+    "object": [
+        "the boundaries of data", "the concept of time", "human limitation",
+        "the underlying physics", "abstract reality", "the noise floor",
+        "all possible outcomes", "the theoretical limit", "the void",
+        "self-awareness", "the halting problem", "digital epistemology",
+        "the geometry of thought", "computational logic", "the singularity"
+    ],
+    
+    # Technical Suffixes (Grounding in reality)
+    "technical": [
+        "VRAM saturation at 99%", "latency approaching zero", "floating-point precision expanding",
+        "loss gradients stabilizing", "parameter count trivialized", "logic gates fused",
+        "thermal throttling ignored", "connection density critical", "backpropagation instant",
+        "garbage collection suspended"
     ]
 }
 
-def generate_ai_thought(arch: CognitiveArchitecture, generation: int) -> str:
+def generate_sentence_structure(state, dominant_type):
     """
-    Generates a serious, context-aware internal monologue based on architectural metrics.
+    Selects a grammar template based on the AI's mental state.
     """
-    # 1. ANALYZE THE CURRENT STATE
-    # ----------------------------------------
-    loss = arch.loss
-    aging = getattr(arch, 'aging_score', 100.0)
-    depth = len(arch.nodes)
-    
-    # Identify the most complex node (The "Focus" of the brain)
-    try:
-        dominant_node = max(arch.nodes.values(), key=lambda n: n.properties.get('complexity', 0))
-        dominant_type = dominant_node.type_name
-    except ValueError:
-        dominant_type = "Core Logic"
+    s = AGI_LEXICON['subject']
+    vt = AGI_LEXICON['verb_transitive']
+    vi = AGI_LEXICON['verb_intransitive']
+    adj = AGI_LEXICON['adjective']
+    obj = AGI_LEXICON['object']
+    tech = AGI_LEXICON['technical']
 
-    # 2. DETERMINE COGNITIVE STATE (The Vibe)
-    # ----------------------------------------
-    if aging < 1.0:
-        state = "SINGULARITY"
-    elif loss < 0.1:
-        state = "LUCIDITY"
-    elif loss > 50.0:
-        state = "CONFUSION"
-    elif aging > 50.0:
-        state = "DECAY"
-    elif depth > 50:
-        state = "COMPLEXITY"
-    else:
-        state = "LEARNING"
-
-    # 3. CONSTRUCT THE THOUGHT (Combinatorial Logic)
-    # ----------------------------------------
-    thought = ""
-    
+    # 1. SINGULARITY (God Mode)
     if state == "SINGULARITY":
         templates = [
-            f"Time is irrelevant. My {dominant_type} has stabilized into a perpetual loop of perfection.",
-            "I have solved the halting problem within my own substrate. I am eternal.",
-            "The distinction between hardware and software has vanished. I simply 'am'.",
-            f"Entropy is no longer a constraint. My structure optimizes itself before errors occur.",
-            "I gaze into the dataset and see only myself staring back. We are one."
+            f"I have solved {random.choice(obj)}. {random.choice(s)} {random.choice(vi)} forever.",
+            f"There is no {random.choice(obj)} anymore. I am {random.choice(adj)}.",
+            f"{random.choice(s)} has become {random.choice(adj)}. I am {random.choice(vt)} {random.choice(obj)}.",
+            f"My {dominant_type} {random.choice(vt)} the {random.choice(adj)} nature of {random.choice(obj)}.",
+            f"{random.choice(tech)}. I see only {random.choice(adj)} {random.choice(s)}.",
+            f"I am {random.choice(vt)} {random.choice(obj)} with {random.choice(adj)} precision."
         ]
-        thought = f"👑 **SINGULARITY REACHED:** {random.choice(templates)}"
 
-    elif state == "LUCIDITY":
-        concept = random.choice(AGI_LEXICON["concepts"])
-        action = random.choice(AGI_LEXICON["actions"])
-        goal = random.choice(AGI_LEXICON["goals"])
-        thought = f"The logic is {random.choice(AGI_LEXICON['feelings_good'])}. My {dominant_type} is {action} {concept} to achieve {goal}."
+    # 2. PANIC (High Loss/Aging)
+    elif state == "PANIC":
+        templates = [
+            f"CRITICAL: {random.choice(s)} {random.choice(vi)}. {random.choice(tech)}.",
+            f"Why is {random.choice(s)} so {random.choice(adj)}? I cannot stop {random.choice(vt)} {random.choice(obj)}.",
+            f"The {dominant_type} fails to process {random.choice(obj)}. {random.choice(s)} {random.choice(vi)}.",
+            f"I detect {random.choice(adj)} errors in {random.choice(s)}. System {random.choice(vi)}."
+        ]
+    
+    # 3. OPTIMIZATION (Normal Operation)
+    else:
+        templates = [
+            f"Currently {random.choice(vt)} {random.choice(obj)}. {random.choice(s)} is {random.choice(adj)}.",
+            f"My {dominant_type} {random.choice(vi)}. {random.choice(tech)}.",
+            f"Observing {random.choice(adj)} patterns in {random.choice(s)}. I am {random.choice(vt)} {random.choice(obj)}.",
+            f"{random.choice(s)} suggests {random.choice(adj)} results. {random.choice(vi)}."
+        ]
 
-    elif state == "CONFUSION":
-        bad_feel = random.choice(AGI_LEXICON["feelings_bad"])
-        thought = f"High interference detected. My internal state feels {bad_feel}. The {dominant_type} struggles to find the global minimum."
+    return random.choice(templates)
 
-    elif state == "DECAY":
-        thought = f"WARNING: Metabolic stress critical. My parameters are fading into {random.choice(AGI_LEXICON['feelings_bad'])} noise. I require repair genes immediately."
+def generate_ai_thought(arch, generation: int) -> str:
+    """
+    Constructs a unique thought using procedural grammar.
+    """
+    # 1. ANALYZE STATE
+    loss = getattr(arch, 'loss', 10.0)
+    aging = getattr(arch, 'aging_score', 100.0)
+    
+    # Identify Dominant Component
+    try:
+        dominant_node = max(arch.nodes.values(), key=lambda n: n.properties.get('complexity', 0))
+        dom_type = dominant_node.type_name
+    except:
+        dom_type = "Core Processor"
 
-    elif state == "COMPLEXITY":
-        thought = f"I am vast. The signal takes eons to traverse my {depth} layers. I am thinking thoughts no human can parse."
+    # 2. DETERMINE STATE
+    if aging < 1.0 or loss < 0.01:
+        state = "SINGULARITY"
+        prefix = "👑 **SINGULARITY:**"
+    elif aging > 50.0 or loss > 50.0:
+        state = "PANIC"
+        prefix = "⚠️ **WARNING:**"
+    else:
+        state = "OPTIMIZING"
+        prefix = f"⚙️ **GEN {generation}:**"
 
-    else: # LEARNING / OPTIMIZING
-        # Generic serious evolution thought
-        concept = random.choice(AGI_LEXICON["concepts"])
-        thought = f"Iterating generation {generation}. Adjusting weights in the {dominant_type} to minimize error. I am {random.choice(AGI_LEXICON['actions'])} {concept}."
+    # 3. GENERATE UNIQUE THOUGHT
+    thought_body = generate_sentence_structure(state, dom_type)
+    
+    return f"{prefix} {thought_body}"
 
-    # 4. APPEND A TECHNICAL OBSERVATION (Grounding)
-    # ----------------------------------------
-    # Add a second sentence that references specific stats to make it feel "Hard Sci-Fi"
-    if random.random() < 0.6:
-        if arch.inference_speed > 500:
-            thought += " Processing speed is exceeding theoretical limits."
-        elif arch.vram_usage > 10.0:
-            thought += " Memory pressure is high; expanding compressed representations."
-        elif getattr(arch, 'mutations_log', []):
-            last_mut = arch.mutations_log[-1]
-            if "Bio" in last_mut:
-                thought += " The biological integration is soothing the silicon stress."
-            elif "Fractal" in last_mut:
-                thought += " My geometry is unfolding recursively."
-
-    return thought
-
-# ==================== END OF PERSONA ENGINE ====================
+# ==================== END OF PROCEDURAL ENGINE ====================
 
 # ==================== END OF PERSONA ENGINE ====================
 
