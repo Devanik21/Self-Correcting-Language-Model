@@ -256,9 +256,9 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
-    NATURAL SELECTION ENGINE: EXTREME COMPLEXITY EDITION (RESTORED)
-    Unified Physics: Optimized for massive, beautiful fractal growth.
-    Struggle is low (Repair is strong), allowing the AI to focus on becoming huge.
+    NATURAL SELECTION ENGINE: TITAN ENDGAME EDITION
+    Unified Physics: Handles standard evolution AND Exponential Fractal Bursts.
+    Includes 'Synergy Physics' to allow massive architectures to survive.
     """
     def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
         self.difficulty = difficulty_scalar
@@ -266,16 +266,17 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        NATURAL SELECTION ENGINE: OMNIPOTENCE EDITION (MAXIMUM COMPLEXITY)
-        Physics designed for infinite growth. 
-        Brains are free. Repair is instant. Limits are removed.
+        Calculates fitness using SYNERGY SCALING.
+        Allows the AI to grow exponentially without dying from immediate metabolic stress.
+        
+        *** UPGRADE: Focused Anti-Aging Selection Pressure ***
         """
         # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
         ai_complexity = 0.0
-        repair_power = 100.0 # STARTING BONUS
-        cleanup_power = 50.0
-        energy_efficiency = 1.0
+        repair_power = 0.0
+        cleanup_power = 0.0
+        energy_efficiency = 1.0 # 1.0 = baseline cost
         node_count = len(arch.nodes)
         
         for nid, node in arch.nodes.items():
@@ -289,53 +290,58 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # EXTREME: One repair node cures EVERYTHING.
-                repair_power += (complexity * 50.0) 
+                # Higher impact for repair
+                repair_power += (complexity * 10.0) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 25.0)
+                # Higher impact for cleanup
+                cleanup_power += (complexity * 5.0)
             elif n_type == 'Energy':
-                # Super efficient metabolism
-                energy_efficiency *= 0.90 
+                # Logarithmic efficiency boost: 0.95^N for efficiency
+                energy_efficiency *= 0.95 
 
         try:
             depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
             depth = 1
         
-        # Intelligence Score
-        # Massive multipliers to reward even the slightest growth
-        intelligence = (depth * 100.0) + (math.log1p(ai_complexity) * 200.0)
+        # Intelligence Score (Rewarding Exponential Depth)
+        # Higher multiplier for intelligence for faster initial growth
+        intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
         
-        # EXTREME IQ FLOOR: Forces the AI to be a Super-Intelligence
-        # If it's not a genius (IQ < 1000), it dies.
-        target_iq = 1000.0 
-        ignorance_penalty = max(0, target_iq - intelligence) 
+        # Ignorance Penalty (Punishes low intelligence)
+        ignorance_penalty = max(0, 150.0 - intelligence) 
 
-        # --- 2. CALCULATE AGING ---
+        # --- 2. CALCULATE AGING (The "Body") ---
         
-        # PARADISE PHYSICS: Almost zero stress to exist.
-        base_stress = 1.0 * self.difficulty 
+        # Stress is now calculated with a base penalty + complexity penalty
+        base_stress = 5.0 * self.difficulty 
+        complexity_stress = (math.log1p(arch.parameter_count) / 10.0) * self.difficulty
         
-        # FREE BRAINS: Complexity is virtually free.
-        # Divisor increased to 100.0 (Brains cost 10x less energy than before)
-        complexity_stress = (math.log1p(arch.parameter_count) / 100.0) * self.difficulty
-        
+        # Structural Dampening: Efficient depth reduces stress (Key Immortality Feature)
+        # Deeper, more organized AIs are inherently more robust
         structural_dampening = math.sqrt(depth) if depth > 0 else 1
         
         raw_stress = (base_stress + complexity_stress) / structural_dampening
         
-        # SUPER SYNERGY: Large networks become hyper-efficient
-        synergy_factor = 1.0 / (math.log10(node_count + 1) + 0.1)
+        # Synergy Factor is a final, hard metabolic cost multiplier
+        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
 
-        # The Aging Equation
+        # The Aging Equation (The Battle for Immortality)
+        # Note the aggressive reduction needed to beat the stress
         current_aging = metabolic_stress - (repair_power + cleanup_power)
+        
+        # *** CORE IMMORTALITY MECHANISM: Prevent negative aging ***
+        # The AI reaches a state of near-immortality (a steady state).
         current_aging = max(0.0001, current_aging)
         
+        # Store for visualization
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        aging_penalty = current_aging * 1.0 
+        # The Aging Penalty is the dominant force now. If you don't evolve anti-aging, you die.
+        # The multiplier is increased to 1.5x
+        aging_penalty = current_aging * 1.5 
         
         total_loss = ignorance_penalty + aging_penalty
         
@@ -3093,4 +3099,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
