@@ -50,10 +50,7 @@ from collections import Counter, deque
 import colorsys
 
 
-import json       # <--- The new universal language
 import zipfile    # <--- To package the text file
-import io         # <--- To handle memory streams
-import base64     # <--- For encoding if needed (optional)
 from dataclasses import asdict # <--- Crucial for converting your AI to dictionaries
 
 # ==================== CONFIGURATION & CONSTANTS ====================
@@ -789,6 +786,79 @@ def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
     
     return fig
 
+
+
+def plot_metabolic_energy_landscape(arch: CognitiveArchitecture):
+    """
+    VISUALIZATION: Metabolic Energy Landscape (The 4th Pillar).
+    Visualizes the 'Energy Cost' vs 'Aging Contribution' of every node.
+    - X/Y: Spatial Position.
+    - Z: Energy Consumption (Compute * Memory).
+    - Color: Aging/Entropy Contribution (Red = High Aging, Blue = Low).
+    """
+    if not arch.nodes: return go.Figure()
+
+    # Get metrics
+    metrics = get_node_metrics(arch) # Reusing your helper function
+    
+    # Calculate Metabolic Metrics
+    energy_burn = []
+    aging_contribution = []
+    node_text = []
+    
+    for nid, node in arch.nodes.items():
+        props = node.properties
+        # Energy = Complexity * Memory (Simulated ATP cost)
+        e = props.get('complexity', 1.0) * props.get('memory_cost', 1.0)
+        energy_burn.append(e)
+        
+        # Aging Impact (Simulated)
+        if props.get('type') in ['Repair', 'Energy']:
+            age_impact = 0.1 # Beneficial
+        else:
+            age_impact = e * 1.5 # Detrimental
+            
+        aging_contribution.append(age_impact)
+        node_text.append(f"ID: {nid}<br>Energy Burn: {e:.2f}<br>Aging Impact: {age_impact:.2f}")
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['x'],
+        y=metrics['y'],
+        z=energy_burn, # Z-Axis is Energy Height
+        mode='markers',
+        text=node_text,
+        hoverinfo='text',
+        marker=dict(
+            size=12,
+            color=aging_contribution,
+            colorscale='RdBu_r', # Red = High Aging, Blue = Low Aging
+            opacity=0.8,
+            symbol='diamond',    # Distinct shape for this view
+            line=dict(color='white', width=1)
+        )
+    )])
+
+    # Add a "floor" to represent the energy baseline
+    fig.add_trace(go.Surface(
+        z=[[0,0],[0,0]], 
+        x=[[min(metrics['x']), max(metrics['x'])], [min(metrics['x']), max(metrics['x'])]],
+        y=[[min(metrics['y']), max(metrics['y'])], [min(metrics['y']), max(metrics['y'])]],
+        showscale=False, opacity=0.2, colorscale='Greys'
+    ))
+
+    fig.update_layout(
+        title="METABOLIC ENERGY LANDSCAPE (ATP Usage)",
+        scene=dict(
+            xaxis=dict(visible=False), 
+            yaxis=dict(visible=False), 
+            zaxis=dict(title="Energy Cost", visible=True),
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Courier New, monospace")
+    )
+    return fig
 
 
 def plot_immortality_curve(history):
@@ -3094,9 +3164,10 @@ def main():
                     "Genetic Heritage": plot_genetic_heritage_view,
                 },
              "Biological Analysis": {
-                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar, # <--- YOUR NEW FUNCTION
+                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar,
                 "Genetic Heritage": plot_genetic_heritage_view,
                 "Type Clusters": plot_component_type_manifold,
+                "Metabolic Energy Map": plot_metabolic_energy_landscape, # <--- THE NEW 4TH PILLAR
             },
                 "⚠️ EXPERIMENTAL": {
                      "Bio-Connectome": plot_bio_connectome_web,
