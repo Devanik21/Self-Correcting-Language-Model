@@ -447,19 +447,21 @@ class CortexEvolver:
 
             # --- 2. DEPTH CHARGE (Forced Vertical Chains - Depth/Height) ---
             # INCREASED PROBABILITY to 95% to prioritize Height
-            elif random.random() < 0.95: 
+            # --- 2. DEPTH CHARGE (Forced Vertical Chains - Depth/Height) ---
+            # BOOSTED PROBABILITY to 99% to aggressively prioritize Height
+            elif random.random() < 0.99: 
                 if len(current_ids) > 1:
                     target_id = random.choice(current_ids)
                     if target_id != "input_sensor":
                         
-                        # --- EXPONENTIAL GROWTH LOGIC ---
-                        # Instead of adding 5-10 layers, we add a % of the total nodes.
-                        # As the brain gets bigger, the new chains get LONGER.
-                        # Minimum 5, Maximum 15% of total size. 
-                        # If you have 100 nodes, it adds 15 layers at once.
-                        base_growth = 5
-                        exponential_growth = int(node_count * 0.15) 
-                        chain_len = random.randint(base_growth, base_growth + exponential_growth)
+                        # --- HYPER-VERTICAL GROWTH LOGIC ---
+                        # New formula: Base 10 + Node Count * 0.3. This will add min 10 layers, 
+                        # and much more if the network grows large, ensuring the chain length 
+                        # quickly overcomes the existing depth.
+                        base_growth = 10 
+                        # Now 30% of node count! This is the CRITICAL BOOST.
+                        hyper_exponential_growth = int(node_count * 0.30) 
+                        chain_len = random.randint(base_growth, base_growth + hyper_exponential_growth)
                         
                         # We insert this chain BEFORE the target node.
                         original_inputs = child.nodes[target_id].inputs
@@ -468,7 +470,8 @@ class CortexEvolver:
                         previous_link = original_inputs
                         
                         for i in range(chain_len):
-                            new_type = random.choice(list(NEURAL_PRIMITIVES.keys()))
+                            # Prioritize high-complexity components for the new chain
+                            new_type = random.choice(['MambaBlock', 'FlashAttention', 'KAN_Layer', 'HyperNetwork'])
                             new_props = NEURAL_PRIMITIVES[new_type].copy()
                             new_id = f"DEPTH_{uuid.uuid4().hex[:4]}"
                             
@@ -481,7 +484,8 @@ class CortexEvolver:
                         
                         # Finally, connect the target to the END of the chain
                         child.nodes[target_id].inputs = previous_link
-                        child.mutations_log.append(f"💥 Exponential Depth Charge: Added {chain_len} layers")
+                        child.mutations_log.append(f"💥 HYPER-DEPTH CHARGE: Added {chain_len} specialized layers")
+                     
 
         # --- 3. STANDARD UTILITY MUTATIONS (Once per gen) ---
         if random.random() < mutation_rate:
