@@ -2781,16 +2781,32 @@ def main():
         metric_placeholders["Current Generation"].metric("Current Generation", f"{st.session_state.generation}")
 
         # Topology Metrics
+        # Topology Metrics
         G = nx.DiGraph()
         for nid, node in best_arch.nodes.items():
             G.add_node(nid)
             for parent in node.inputs:
                 G.add_edge(parent, nid)
         
+        # --- SMART DEPTH CALCULATION ---
         try:
-            depth = nx.dag_longest_path_length(G)
+            if nx.is_directed_acyclic_graph(G):
+                # Standard Feed-Forward Depth
+                depth = nx.dag_longest_path_length(G)
+                depth_display = f"{depth} Layers"
+            else:
+                # Recurrent/Cyclic Depth (Distance from Input)
+                if "input_sensor" in G:
+                    # measure distance from the start
+                    shortest_paths = nx.single_source_shortest_path_length(G, "input_sensor")
+                    max_depth = max(shortest_paths.values()) if shortest_paths else 0
+                    depth_display = f"{max_depth} (Recurrent)"
+                else:
+                    depth_display = "Cyclic Loop"
         except:
-            depth = -1 # Indicates a cycle or error
+            depth_display = "Undefined"
+
+        metric_placeholders["Network Depth"].metric("Network Depth", depth_display)
 
         metric_placeholders["Network Depth"].metric("Network Depth", f"{depth} Layers")
         metric_placeholders["Component Count"].metric("Component Count", f"{len(best_arch.nodes)}")
