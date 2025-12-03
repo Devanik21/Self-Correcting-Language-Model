@@ -714,15 +714,15 @@ def plot_immortality_curve(history):
 def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
     """
     Renders the architecture using the Golden Ratio (Fibonacci Phyllotaxis).
-    This mimics how living organisms (like pinecones or sunflowers) arrange 
-    growing cells for maximum packing efficiency.
+    UPDATED: Now uses the soothing 'Viridis' complexity gradient.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
         # Safe attribute access
         props = getattr(node, 'properties', {})
         t_name = getattr(node, 'type_name', 'Unknown')
-        G.add_node(nid, type=t_name, color=props.get('color', '#FFFFFF'), complexity=props.get('complexity', 1.0))
+        # We fetch complexity for the gradient mapping
+        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0))
         
         inputs = getattr(node, 'inputs', [])
         for parent in inputs:
@@ -762,7 +762,8 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         node_z.append(z)
 
     # Render Nodes
-    node_colors = [G.nodes[n]['color'] for n in node_list]
+    # CHANGE: Use complexity values instead of hex strings
+    node_color_values = [G.nodes[n]['complexity'] for n in node_list]
     node_sizes = [8 + G.nodes[n]['complexity'] * 5 for n in node_list]
     
     node_trace = go.Scatter3d(
@@ -770,9 +771,9 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         mode='markers',
         marker=dict(
             size=node_sizes,
-            color=node_colors,
-            colorscale='Viridis', # Nature-like gradient
-            line=dict(color='rgba(255,255,255,0.5)', width=1),
+            color=node_color_values, # Map values...
+            colorscale='Viridis',    # ...to the Eye-Friendly Palette
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
             opacity=0.9
         ),
         text=[f"Neuron: {n}<br>Type: {G.nodes[n]['type']}" for n in node_list],
@@ -786,12 +787,11 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             x0, y0, z0 = pos_map[u]
             x1, y1, z1 = pos_map[v]
             
-            # Curved lines using a mid-point control (Quadratic Bezier simulation)
-            mid_x = (x0 + x1) / 2 * 0.8 # Pull towards center
+            # Curved lines using a mid-point control
+            mid_x = (x0 + x1) / 2 * 0.8
             mid_y = (y0 + y1) / 2
             mid_z = (z0 + z1) / 2 * 0.8
             
-            # Segment the line for curvature
             edge_x.extend([x0, mid_x, x1, None])
             edge_y.extend([y0, mid_y, y1, None])
             edge_z.extend([z0, mid_z, z1, None])
@@ -799,12 +799,13 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
     edge_trace = go.Scatter3d(
         x=edge_x, y=edge_y, z=edge_z,
         mode='lines',
-        line=dict(color='rgba(100, 200, 100, 0.4)', width=2), # Plant-like green connections
+        # CHANGE: Soft Ghostly Grey instead of Green
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=1.5), 
         hoverinfo='none'
     )
 
     layout = go.Layout(
-        title=dict(text=f"Fibonacci Neuro-Spiral: {arch.id}", font=dict(color='#AAFFAA')),
+        title=dict(text=f"Fibonacci Neuro-Spiral: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(
@@ -822,40 +823,38 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     """
     Renders the architecture as an abstract, bio-mechanical sculpture.
-    This uses non-linear mappings to create "bizarre" and beautiful shapes.
+    UPDATED: Now uses the soothing 'Viridis' complexity gradient.
     """
     if not arch.nodes:
         return go.Figure()
 
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
-        # Using asdict for safe conversion if imported
         node_dict = asdict(node)
         G.add_node(nid, **node_dict)
         for parent in node.inputs:
             if parent in arch.nodes:
                 G.add_edge(parent, nid)
 
-    # Use Kamada-Kawai layout for a more 'organic' base structure
     try:
         pos = nx.kamada_kawai_layout(G, dim=3, scale=2)
-    except: # Fallback for disconnected graphs or missing scipy
+    except:
         pos = nx.spring_layout(G, dim=3, seed=42, scale=2)
 
     # --- Create the "Bizarre" Shape Transformation ---
     node_x, node_y, node_z = [], [], []
-    node_color, node_text, node_size = [], [], []
+    node_color_values = [] # Changed name to reflect numeric values
+    node_text, node_size = [], []
 
     for node_id in G.nodes():
         if node_id in pos:
             x, y, z = pos[node_id]
             props = arch.nodes[node_id].properties
             
-            # Non-linear warping based on properties
             complexity = props.get('complexity', 1.0)
             compute = props.get('compute_cost', 1.0)
             
-            # Warp space: x -> spiral, y -> wave, z -> based on complexity
+            # Warp space
             warped_x = x * math.cos(complexity * math.pi) - y * math.sin(complexity * math.pi)
             warped_y = x * math.sin(complexity * math.pi) + y * math.cos(complexity * math.pi)
             warped_z = z + math.sin(compute * 2) * 0.5
@@ -864,18 +863,19 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             node_y.append(warped_y)
             node_z.append(warped_z)
 
-            node_color.append(props.get('color', '#FFFFFF'))
+            # CHANGE: Use complexity number instead of hex string
+            node_color_values.append(complexity)
+            
             node_size.append(10 + complexity * 5)
             node_text.append(f"<b>{node_id}</b><br>Type: {arch.nodes[node_id].type_name}<br>Complexity: {complexity:.2f}")
 
-    # Edges connecting the warped points
+    # Edges
     edge_x, edge_y, edge_z = [], [], []
     for u, v in G.edges():
         if u in pos and v in pos:
             x0, y0, z0 = pos[u]
             x1, y1, z1 = pos[v]
             
-            # Apply the same warping to edge endpoints
             u_props, v_props = arch.nodes[u].properties, arch.nodes[v].properties
             ux_w = x0 * math.cos(u_props['complexity'] * math.pi) - y0 * math.sin(u_props['complexity'] * math.pi)
             uy_w = x0 * math.sin(u_props['complexity'] * math.pi) + y0 * math.cos(u_props['complexity'] * math.pi)
@@ -889,16 +889,32 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             edge_y.extend([uy_w, vy_w, None])
             edge_z.extend([uz_w, vz_w, None])
 
-    edge_trace = go.Scatter3d(x=edge_x, y=edge_y, z=edge_z, mode='lines', line=dict(color='#555555', width=1.5), hoverinfo='none')
-    node_trace = go.Scatter3d(x=node_x, y=node_y, z=node_z, mode='markers', text=node_text, hoverinfo='text',
+    # CHANGE: Soft Ghostly Grey edges
+    edge_trace = go.Scatter3d(
+        x=edge_x, y=edge_y, z=edge_z, 
+        mode='lines', 
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=1.0), 
+        hoverinfo='none'
+    )
+    
+    # CHANGE: Viridis Gradient
+    node_trace = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z, 
+        mode='markers', 
+        text=node_text, 
+        hoverinfo='text',
         marker=dict(
-            size=node_size, color=node_color,
-            line=dict(color='rgba(255, 255, 255, 0.9)', width=2),
-            opacity=0.9, symbol='circle'
-        ))
+            size=node_size, 
+            color=node_color_values, # Numeric values
+            colorscale='Viridis',    # Eye-friendly gradient
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
+            opacity=0.9, 
+            symbol='circle'
+        )
+    )
 
     layout = go.Layout(
-        title=dict(text=f"Bio-Mechanical Abstract: {arch.id}", font=dict(color='#DDDDDD')),
+        title=dict(text=f"Bio-Mechanical Abstract: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(xaxis_title='', yaxis_title='', zaxis_title='',
