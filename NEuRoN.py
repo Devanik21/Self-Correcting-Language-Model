@@ -261,16 +261,17 @@ class LossLandscapePhysics:
         """
         Calculates fitness using SYNERGY SCALING.
         Allows the AI to grow exponentially without dying from immediate metabolic stress.
+        
+        *** UPGRADE: Focused Anti-Aging Selection Pressure ***
         """
-        # --- 1. CALCULATE INTELLIGENCE ---
+        # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
         ai_complexity = 0.0
         repair_power = 0.0
         cleanup_power = 0.0
+        energy_efficiency = 1.0 # 1.0 = baseline cost
+        node_count = len(arch.nodes)
         
-        # "Energy Efficiency" improves as you add specific mitochondria nodes
-        energy_efficiency = 1.0 
-
         for nid, node in arch.nodes.items():
             G.add_node(nid)
             for p in node.inputs: G.add_edge(p, nid)
@@ -282,58 +283,62 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                repair_power += (complexity * 5.0) # Boosted repair impact
+                # Higher impact for repair
+                repair_power += (complexity * 10.0) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 3.0)
+                # Higher impact for cleanup
+                cleanup_power += (complexity * 5.0)
             elif n_type == 'Energy':
-                # Exponential efficiency: More mitochondria = logarithmic scaling of cost
+                # Logarithmic efficiency boost: 0.95^N for efficiency
                 energy_efficiency *= 0.95 
 
         try:
-            depth = nx.dag_longest_path_length(G)
+            depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
             depth = 1
         
         # Intelligence Score (Rewarding Exponential Depth)
-        # We use Log scale for massive numbers so the score stays readable
-        # --- UPDATE: Massive boost for Depth to encourage verticality ---
-        # Was (depth * 5.0) -> Now (depth * 15.0)
-        intelligence = (depth * 15.0) + (math.log1p(ai_complexity) * 20.0)
+        # Higher multiplier for intelligence for faster initial growth
+        intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
         
-        # Ignorance Penalty (Reduced so they can focus on growing)
-        ignorance_penalty = max(0, 80.0 - intelligence) 
+        # Ignorance Penalty (Punishes low intelligence)
+        ignorance_penalty = max(0, 150.0 - intelligence) 
 
         # --- 2. CALCULATE AGING (The "Body") ---
-        # Standard Linear Stress (This usually kills big AIs)
-        # --- UPDATE: Reduced raw stress impact for massive parameter counts ---
-        # We use sqrt() to dampen the penalty. 100M params won't act like 100x weight of 1M.
-        raw_stress = (math.sqrt(arch.parameter_count) / 1000.0) * self.difficulty * 0.1
         
-        # SYNERGY BONUS (The Fix for Exponential Growth):
-        # As nodes increase, if they are organized (depth), stress is reduced.
-        # This simulates "multicellular cooperation" - larger organisms are more efficient per cell.
-        # Formula: 1 / log10(node_count) -> The bigger you are, the smaller the stress multiplier.
-        synergy_factor = 1.0 / (math.log10(len(arch.nodes) + 1) + 1)
+        # Stress is now calculated with a base penalty + complexity penalty
+        base_stress = 5.0 * self.difficulty 
+        complexity_stress = (math.log1p(arch.parameter_count) / 10.0) * self.difficulty
         
-        # Final Metabolic Stress Calculation
+        # Structural Dampening: Efficient depth reduces stress (Key Immortality Feature)
+        # Deeper, more organized AIs are inherently more robust
+        structural_dampening = math.sqrt(depth) if depth > 0 else 1
+        
+        raw_stress = (base_stress + complexity_stress) / structural_dampening
+        
+        # Synergy Factor is a final, hard metabolic cost multiplier
+        synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
+
+        # The Aging Equation (The Battle for Immortality)
+        # Note the aggressive reduction needed to beat the stress
+        current_aging = metabolic_stress - (repair_power + cleanup_power)
         
-        # The Aging Equation
-        current_aging = max(0, metabolic_stress - (repair_power + cleanup_power))
+        # *** CORE IMMORTALITY MECHANISM: Prevent negative aging ***
+        # The AI reaches a state of near-immortality (a steady state).
+        current_aging = max(0.0001, current_aging)
         
         # Store for visualization
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # We lower the aging penalty slightly so they have time to grow before dying
-        # Reduced multiplier from 1.2 to 0.8
-        aging_penalty = current_aging * 0.6 
+        # The Aging Penalty is the dominant force now. If you don't evolve anti-aging, you die.
+        # The multiplier is increased to 1.5x
+        aging_penalty = current_aging * 1.5 
         
         total_loss = ignorance_penalty + aging_penalty
         
         return max(0.0001, total_loss)
-
-
 
 
 class CortexEvolver:
