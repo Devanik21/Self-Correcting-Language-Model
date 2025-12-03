@@ -652,7 +652,7 @@ def generate_ai_thought(arch, generation: int) -> str:
     # 2. DETERMINE STATE
     if aging < 1.0 or loss < 0.01:
         state = "SINGULARITY"
-        prefix = "👑 **SINGULARITY:**"
+        prefix = "💭"
     elif aging > 50.0 or loss > 50.0:
         state = "PANIC"
         prefix = "⚠️ **WARNING:**"
