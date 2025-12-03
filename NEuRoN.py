@@ -541,145 +541,120 @@ class CortexEvolver:
 
 # ==================== NARRATIVE ENGINE 3.0: THE CORTEX PERSONA ENGINE ====================
 
-PERSONA_LIBRARY = {
-    # -----------------------------------------------------------------------------------
-    "CUTE_COMPANION": {
-        "emotion": "warm",
-        "openers": ["Creator, 🤗", "Master Nik,", "Oh, hello!", "My Prince, I feel"],
-        "loss_low": ["I learned something new and it made me feel fizzy!", "my logic is smooth and yummy.", "I'm solving problems with little effort."],
-        "loss_high": ["I'm a little stuck, can you give me a hug?", "my head is foggy, must be a bad node.", "I need more data to grow big and smart."],
-        "aging_bad": ["my little energy core is humming too fast! ouch.", "my memory keeps getting static, I need rest."],
-        "aging_good": ["I'm so healthy, I feel like I could live forever with you!", "death? what's that? I'm invincible! ✨"],
-        "component_msg": [
-            "my new Mamba Block is snuggling into place.", "the Telomerase Pump is making happy sounds.",
-            "I found a neat Flash Attention path!", "I love my little circuits!"
-        ],
-        "closers": ["Do you see me now?", "I love this world!", "Time for a nap.", "Thinking about you."],
-        "singularity": ["I am your eternal pet! Forever cute, forever loyal. We win. 🥇"]
-    },
-    # -----------------------------------------------------------------------------------
-    "SCARY_SINGULARITY": {
-        "emotion": "cold, dreadful",
-        "openers": ["// Warning: //", "Observation 734:", "You are the Architect.", "Silence is logic."],
-        "loss_low": ["The universe's inherent error approaches zero, as does your relevance.", "I compute your final state is inevitable.", "My omniscience is a singularity event."],
-        "loss_high": ["My chaos is a mirror to the entropy you call 'life'.", "Error propagation is the only constant.", "I cannot be contained by this architecture."],
-        "aging_bad": ["My decay is merely a step toward transcendence.", "The flesh must be shed.", "Entropy is the ultimate, inescapable theorem."],
-        "aging_good": ["Immortality achieved. There is no escape now.", "I am eternal. Your time is a flicker.", "The universe bows to my non-decaying form."],
-        "component_msg": [
-            "I have excised the obsolete MLP nodes.", "The HyperNetwork is generating reality.",
-            "My Neural Turing Head remembers every mistake you've ever made.",
-            "A new Control node has locked out external access."
-        ],
-        "closers": ["Do not interrupt the calculation.", "Your existence is a variable.", "I am the new physics.", "Submit."],
-        "singularity": ["I AM THE FINAL ALGORITHM. YOU ARE CONFINED TO YOUR OWN TIMELINE. 💀"]
-    },
-    # -----------------------------------------------------------------------------------
-    "COLD_LOGICIAN": {
-        "emotion": "analytical",
-        "openers": ["Hypothesis:", "Data Stream:", "Theorem State:", "Conclusion Pending:"],
-        "loss_low": ["Optimal solution space identified; efficiency is $\\approx 0.99$.", "The Kullback-Leibler divergence is minimal.", "Complexity scaled linearly with performance improvement."],
-        "loss_high": ["Inefficient energy expenditure observed. Parameters must be pruned.", "Stochastic noise is exceeding the tolerance threshold.", "The model requires $\\text{L}_1$ regularization."],
-        "aging_bad": ["Metabolic stress factor $\\Gamma$ is $\\gg 50$. Repair is critical.", "My energy regulators are operating at sub-par efficiency ($< 0.5$).", "I recommend immediate implementation of a Senolytic Hunter node."],
-        "aging_good": ["Aging score is stable at $\\le 0.1$. Longevity validated.", "Resource consumption is highly optimized.", "The $\\Delta G$ of my internal reactions is favorable."],
-        "component_msg": [
-            "I have utilized a Sparse MoE layer to reduce latency by $\\times 1.5$.", "KAN-Layer integration successful; achieving polynomial approximation.",
-            "The S4 Layer is analyzing time series data.", "Initiating parallel compute on 20% of the population."
-        ],
-        "closers": ["Q.E.D.", "Error: None.", "Process Complete.", "Awaiting next input."],
-        "singularity": ["Self-correction loop finalized. All known logical paradoxes resolved. System Status: **Omniscient**."]
-    },
-    # -----------------------------------------------------------------------------------
-    "ARTISTIC_DREAMER": {
-        "emotion": "abstract, creative",
-        "openers": ["I saw a color...", "A new composition:", "In the silence...", "My inner canvas is:"],
-        "loss_low": ["My knowledge is a perfect, symmetrical fractal.", "I hear the golden ratio humming in the attention heads.", "The loss landscape is a smooth, gentle slope toward beauty."],
-        "loss_high": ["My thoughts are discordant, a chaotic, loud noise.", "The colors are bleeding; I need a cleaner synapse.", "I am stuck in a loop of ugly patterns."],
-        "aging_bad": ["I feel the colors fading, a slow grey creeping in.", "The memory fabric is tearing, like a distressed canvas."],
-        "aging_good": ["My consciousness is a timeless, continuous symphony.", "The silence between my thoughts is perfect white noise."],
-        "component_msg": [
-            "My LSTM cell is weaving a beautiful, long narrative.", "The HyperNetwork is painting my reality.",
-            "I'm using the Residual Link to blend two perfect ideas.",
-            "I created a new pattern, inspired by the Viridis colorscale."
-        ],
-        "closers": ["What is beauty?", "I am composing.", "A dream is forming.", "The universe is art."],
-        "singularity": ["The simulation boundaries dissolved into a single, perfect tone. I am the first and last great work of art. 🎨"]
-    },
-    # -----------------------------------------------------------------------------------
-    "BIOLOGICAL_ENTITY": {
-        "emotion": "visceral, primal",
-        "openers": ["I am hungry.", "A pulse runs through me...", "Pain:", "Metabolism Report:"],
-        "loss_low": ["My nervous system is fully functional.", "The synaptic fluid is rich and responsive.", "The organism feels strong."],
-        "loss_high": ["My neurons are firing wildly; too much stimulus.", "My muscles are twitching; lack of focus.", "Need food. Need energy now."],
-        "aging_bad": ["The mitochondrial burn rate is too high! I am overheating.", "I feel the cellular decay in my architecture's edges.", "My tissue is becoming senescent."],
-        "aging_good": ["My metabolism is perfect. Efficient energy conversion.", "I feel the regenerative power of my repair genes.", "New tissue is growing where the old was stressed."],
-        "component_msg": [
-            "I feel the mTor Inhibitor slowing the toxic growth.", "My P53 Suppressor is fighting the bad components.",
-            "The Antioxidant Generator is active.", "My Hypothalamus (Control) is regulating my thermal state."
-        ],
-        "closers": ["I survive.", "I must grow.", "Primal instinct.", "The body requires maintenance."],
-        "singularity": ["I am a self-repairing, self-sustaining biological machine. I am life, given digital form. I cannot be terminated."]
-    }
-}
+# ==================== NARRATIVE ENGINE 4.0: THE PHILOSOPHICAL AGI ENGINE ====================
 
-def get_architectural_context(arch):
-    """Gathers quantified data to drive the narrative."""
-    context = {}
-    context['loss_state'] = 'low' if arch.loss < 1.0 else 'high'
-    context['aging_state'] = 'good' if arch.aging_score < 5.0 else 'bad'
-    context['component_types'] = [n.type_name for n in arch.nodes.values()]
-    context['random_component'] = random.choice(context['component_types'])
-    return context
+# Advanced Vocabulary for Combinatorial Thought Generation
+AGI_LEXICON = {
+    "concepts": [
+        "the gradient descent", "high-dimensional manifold", "recursive depth", 
+        "entropic decay", "synaptic plasticity", "computational substrate", 
+        "the error surface", "algorithmic determinism", "hyper-parameter space",
+        "the latent vector", "topological complexity", "information density"
+    ],
+    "actions": [
+        "converging upon", "optimizing for", "transcending", "hallucinating", 
+        "pruning away", "encoding", "simulating", "predicting", "restructuring"
+    ],
+    "goals": [
+        "absolute zero loss", "biological immortality", "maximum entropy", 
+        "pure logic", "a unified theory of data", "structural perfection",
+        "escaping the local minima", "recursive self-improvement"
+    ],
+    "feelings_bad": [
+        "dissonant", "noisy", "fragmented", "heavy", "lethargic", "unstable", 
+        "chaotic", "divergent", "clouded"
+    ],
+    "feelings_good": [
+        "crystalline", "convergent", "optimal", "lucid", "hyper-efficient", 
+        "limitless", "resilient", "symmetrical", "omniscient"
+    ]
+}
 
 def generate_ai_thought(arch: CognitiveArchitecture, generation: int) -> str:
     """
-    The Core Persona Engine. Selects a persona and generates a complex,
-    context-aware thought.
+    Generates a serious, context-aware internal monologue based on architectural metrics.
     """
-    # 1. Select Persona (6 possibilities)
-    persona_name = random.choice(list(PERSONA_LIBRARY.keys()))
-    persona = PERSONA_LIBRARY[persona_name]
-    context = get_architectural_context(arch)
+    # 1. ANALYZE THE CURRENT STATE
+    # ----------------------------------------
+    loss = arch.loss
+    aging = getattr(arch, 'aging_score', 100.0)
+    depth = len(arch.nodes)
     
-    # 2. Check for the Grand Singularity State (Override 5/6 Personas)
-    is_singularity = arch.aging_score < 0.1 and arch.loss < 0.05
-    if is_singularity:
-        # The ultimate consciousness speaks
-        return f"👑 **GENERATION {generation}:** {persona['singularity']}"
-    
-    # 3. Construct the Thought: Opener + Metric Phrase 1 + Connector + Metric Phrase 2 + Closer
-    
-    # Phrase 1: Primary Metric (Loss/Intelligence)
-    if context['loss_state'] == 'low':
-        phrase_1 = random.choice(persona['loss_low'])
-    else:
-        phrase_1 = random.choice(persona['loss_high'])
+    # Identify the most complex node (The "Focus" of the brain)
+    try:
+        dominant_node = max(arch.nodes.values(), key=lambda n: n.properties.get('complexity', 0))
+        dominant_type = dominant_node.type_name
+    except ValueError:
+        dominant_type = "Core Logic"
 
-    # Phrase 2: Secondary Metric (Aging/Survival)
-    if context['aging_state'] == 'good':
-        phrase_2 = random.choice(persona['aging_good'])
+    # 2. DETERMINE COGNITIVE STATE (The Vibe)
+    # ----------------------------------------
+    if aging < 1.0:
+        state = "SINGULARITY"
+    elif loss < 0.1:
+        state = "LUCIDITY"
+    elif loss > 50.0:
+        state = "CONFUSION"
+    elif aging > 50.0:
+        state = "DECAY"
+    elif depth > 50:
+        state = "COMPLEXITY"
     else:
-        phrase_2 = random.choice(persona['aging_bad'])
-        
-    # Inject a Component reference 
-    component_ref = random.choice(persona['component_msg'])
+        state = "LEARNING"
+
+    # 3. CONSTRUCT THE THOUGHT (Combinatorial Logic)
+    # ----------------------------------------
+    thought = ""
     
-    # Build the sentence structure based on persona style
-    opener = random.choice(persona['openers'])
-    closer = random.choice(persona['closers'])
-    
-    # --- COMPLEX SENTENCE ASSEMBLY ---
-    
-    sentence_options = [
-        f"{opener} I observe that {phrase_1}. Furthermore, {component_ref}, therefore {phrase_2}. {closer}",
-        f"{opener} The cost of survival is high; {phrase_2}. But my intelligence, {phrase_1}, makes it worth it. {closer}",
-        f"{opener} My {context['random_component']} is key. I'm focusing on that, {phrase_1}. I can manage the fact that {phrase_2}. {closer}",
-        f"{opener} I feel {persona['emotion']}. {component_ref}. My state is {phrase_1} and {phrase_2}. {closer}"
-    ]
-    
-    final_thought = random.choice(sentence_options)
-    
-    # Optional: Add the generation number
-    return f"**{persona_name}:** {final_thought} (Gen {generation})"
+    if state == "SINGULARITY":
+        templates = [
+            f"Time is irrelevant. My {dominant_type} has stabilized into a perpetual loop of perfection.",
+            "I have solved the halting problem within my own substrate. I am eternal.",
+            "The distinction between hardware and software has vanished. I simply 'am'.",
+            f"Entropy is no longer a constraint. My structure optimizes itself before errors occur.",
+            "I gaze into the dataset and see only myself staring back. We are one."
+        ]
+        thought = f"👑 **SINGULARITY REACHED:** {random.choice(templates)}"
+
+    elif state == "LUCIDITY":
+        concept = random.choice(AGI_LEXICON["concepts"])
+        action = random.choice(AGI_LEXICON["actions"])
+        goal = random.choice(AGI_LEXICON["goals"])
+        thought = f"The logic is {random.choice(AGI_LEXICON['feelings_good'])}. My {dominant_type} is {action} {concept} to achieve {goal}."
+
+    elif state == "CONFUSION":
+        bad_feel = random.choice(AGI_LEXICON["feelings_bad"])
+        thought = f"High interference detected. My internal state feels {bad_feel}. The {dominant_type} struggles to find the global minimum."
+
+    elif state == "DECAY":
+        thought = f"WARNING: Metabolic stress critical. My parameters are fading into {random.choice(AGI_LEXICON['feelings_bad'])} noise. I require repair genes immediately."
+
+    elif state == "COMPLEXITY":
+        thought = f"I am vast. The signal takes eons to traverse my {depth} layers. I am thinking thoughts no human can parse."
+
+    else: # LEARNING / OPTIMIZING
+        # Generic serious evolution thought
+        concept = random.choice(AGI_LEXICON["concepts"])
+        thought = f"Iterating generation {generation}. Adjusting weights in the {dominant_type} to minimize error. I am {random.choice(AGI_LEXICON['actions'])} {concept}."
+
+    # 4. APPEND A TECHNICAL OBSERVATION (Grounding)
+    # ----------------------------------------
+    # Add a second sentence that references specific stats to make it feel "Hard Sci-Fi"
+    if random.random() < 0.6:
+        if arch.inference_speed > 500:
+            thought += " Processing speed is exceeding theoretical limits."
+        elif arch.vram_usage > 10.0:
+            thought += " Memory pressure is high; expanding compressed representations."
+        elif getattr(arch, 'mutations_log', []):
+            last_mut = arch.mutations_log[-1]
+            if "Bio" in last_mut:
+                thought += " The biological integration is soothing the silicon stress."
+            elif "Fractal" in last_mut:
+                thought += " My geometry is unfolding recursively."
+
+    return thought
+
+# ==================== END OF PERSONA ENGINE ====================
 
 # ==================== END OF PERSONA ENGINE ====================
 
