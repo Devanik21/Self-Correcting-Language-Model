@@ -3086,17 +3086,18 @@ def main():
                 },
              
              
-                "Biological Analysis": {
-                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar, # <--- YOUR NEW FUNCTION
-                "Genetic Heritage": plot_genetic_heritage_view,
-                "Type Clusters": plot_component_type_manifold,
-            },
+                
                 "Analytical Metrics": {
                     "Loss Gradient Force": plot_loss_gradient_force_3d,
                     "Compute Landscape": plot_compute_cost_landscape,
                     "Type Clusters": plot_component_type_manifold,
                     "Genetic Heritage": plot_genetic_heritage_view,
                 },
+             "Biological Analysis": {
+                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar, # <--- YOUR NEW FUNCTION
+                "Genetic Heritage": plot_genetic_heritage_view,
+                "Type Clusters": plot_component_type_manifold,
+            },
                 "⚠️ EXPERIMENTAL": {
                      "Bio-Connectome": plot_bio_connectome_web,
                      "Neuro-Genesis": plot_neuro_genesis_cloud,
