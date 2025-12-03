@@ -50,8 +50,11 @@ from collections import Counter, deque
 import colorsys
 
 
-import pickle
-import zipfile
+import json       # <--- The new universal language
+import zipfile    # <--- To package the text file
+import io         # <--- To handle memory streams
+import base64     # <--- For encoding if needed (optional)
+from dataclasses import asdict # <--- Crucial for converting your AI to dictionaries
 
 # ==================== CONFIGURATION & CONSTANTS ====================
 
@@ -1850,6 +1853,64 @@ def heal_simulation_state(evolver_instance):
             if node.__class__ is not ArchitectureNode:
                 node.__class__ = ArchitectureNode
 
+
+
+
+
+
+
+
+# ==================== JSON TRANSLATION ENGINE ====================
+
+def serialize_evolver(evolver) -> dict:
+    """Converts the complex CortexEvolver object into a JSON-ready dictionary."""
+    return {
+        "population": [asdict(arch) for arch in evolver.population],
+        "archive": {str(k): asdict(v) for k, v in evolver.archive.items()}
+    }
+
+def reconstruct_architecture(data: dict) -> CognitiveArchitecture:
+    """Rebuilds a CognitiveArchitecture object from a dictionary."""
+    # 1. Extract the nodes data (which are currently raw dicts)
+    nodes_raw = data.pop('nodes', {})
+    
+    # 2. Filter data to ensure we only pass valid fields to the constructor
+    # (This prevents errors if you add new fields to the class later)
+    valid_keys = CognitiveArchitecture.__dataclass_fields__.keys()
+    clean_data = {k: v for k, v in data.items() if k in valid_keys}
+    
+    # 3. Create the Shell
+    arch = CognitiveArchitecture(**clean_data)
+    
+    # 4. Rebuild the Brain Cells (Nodes)
+    for nid, n_data in nodes_raw.items():
+        valid_node_keys = ArchitectureNode.__dataclass_fields__.keys()
+        clean_node_data = {k: v for k, v in n_data.items() if k in valid_node_keys}
+        arch.nodes[nid] = ArchitectureNode(**clean_node_data)
+        
+    return arch
+
+def deserialize_evolver(json_data: dict) -> CortexEvolver:
+    """Reconstructs the CortexEvolver from JSON data."""
+    new_evolver = CortexEvolver()
+    
+    # Rebuild Population
+    if 'population' in json_data:
+        for arch_dict in json_data['population']:
+            restored_arch = reconstruct_architecture(arch_dict)
+            new_evolver.population.append(restored_arch)
+            
+    # Rebuild Archive
+    if 'archive' in json_data:
+        for gen, arch_dict in json_data['archive'].items():
+            restored_arch = reconstruct_architecture(arch_dict)
+            # JSON keys are always strings, convert generation back to int
+            new_evolver.archive[int(gen)] = restored_arch
+            
+    return new_evolver
+
+
+
 # ==================== STREAMLIT APP LOGIC ====================
 
 def main():
@@ -1857,90 +1918,81 @@ def main():
     st.sidebar.title("OMNISCIENCE PANEL")
     
     # ==================== 1. THE TIME CAPSULE (SAVE/LOAD SYSTEM) ====================
-    with st.sidebar.expander("💾 Time Capsule (Save/Load State)", expanded=True):
-        st.caption("Preserve the entire simulation state or restore a previous timeline.")
+    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
+    with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
+        st.caption("Preserve simulation state using error-free JSON serialization.")
         
-        # --- A. UPLOAD / RESTORE ---
+        # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
         if uploaded_file is not None:
             try:
                 with zipfile.ZipFile(uploaded_file, 'r') as z:
-                    # We look for the 'simulation_core.pkl' inside the zip
-                    with z.open('simulation_core.pkl') as f:
-                        loaded_state = pickle.load(f)
+                    # Read the JSON text file
+                    with z.open('simulation_core.json') as f:
+                        json_str = f.read().decode('utf-8')
+                        loaded_state = json.loads(json_str)
                         
-                        # Restore Critical Session State
-                        if 'evolver' in loaded_state:
-                            st.session_state.evolver = loaded_state['evolver']
-                        if 'history' in loaded_state:
-                            st.session_state.history = loaded_state['history']
-                        if 'generation' in loaded_state:
-                            st.session_state.generation = loaded_state['generation']
-                        if 'archive' in loaded_state:
-                            if hasattr(st.session_state.evolver, 'archive'):
-                                st.session_state.evolver.archive = loaded_state['archive']
+                        # RECONSTRUCT THE OBJECTS
+                        # 1. Restore Evolver using our custom translator
+                        st.session_state.evolver = deserialize_evolver(loaded_state['evolver_data'])
                         
-                        # Attempt to restore simple widget keys if they exist
-                        if 'config' in loaded_state:
-                            for key, value in loaded_state['config'].items():
-                                # We only update keys that don't clash with internal logic
-                                if key not in ['state_uploader', 'evolver', 'history']:
-                                    st.session_state[key] = value
+                        # 2. Restore Simple Data
+                        st.session_state.history = loaded_state.get('history', [])
+                        st.session_state.generation = loaded_state.get('generation', 0)
+                        
+                        # 3. Restore Config (Safely)
+                        saved_config = loaded_state.get('config', {})
+                        for key, value in saved_config.items():
+                            if key not in ['evolver', 'history', 'state_uploader']:
+                                st.session_state[key] = value
 
                         st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
-                        time.sleep(1) # Give user a moment to see the success message
+                        time.sleep(1)
                         st.rerun()
             except Exception as e:
                 st.error(f"Corrupted Timeline Data: {str(e)}")
 
-        # --- B. DOWNLOAD / SAVE ---
-        # We prepare the data only when needed (Lazy preparation isn't possible with download button logic directly, 
-        # but we capture the current state).
-        
-        # --- B. DOWNLOAD / SAVE ---
+        # --- B. DOWNLOAD / SAVE (JSON) ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
-            # 1. HEAL THE DATA (Fixes PicklingError)
-            heal_simulation_state(st.session_state.evolver)
             
-            # 2. Gather all data
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            # 1. Capture Config
             current_config = {k: v for k, v in st.session_state.items() 
-                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader']}
+                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader'] 
+                              and isinstance(v, (int, float, str, bool, type(None)))}
 
+            # 2. Build the Big Dictionary (The Blueprint)
             full_state = {
-                'evolver': st.session_state.evolver,
+                'evolver_data': serialize_evolver(st.session_state.evolver), # <--- Uses helper
                 'history': st.session_state.history,
                 'generation': st.session_state.generation,
-                'archive': st.session_state.evolver.archive,
                 'config': current_config,
-                'version': '1.0.0'
+                'version': '1.1.0 (JSON)'
             }
             
-            # 3. Serialize to RAM
-            pickle_buffer = io.BytesIO()
+            # 3. Convert to JSON String
             try:
-                pickle.dump(full_state, pickle_buffer)
-                pickle_buffer.seek(0)
+                json_output = json.dumps(full_state, indent=2)
                 
-                # 4. Zip it
+                # 4. Zip it up
+                timestamp = time.strftime("%Y%m%d-%H%M%S")
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-                    zf.writestr('simulation_core.pkl', pickle_buffer.getvalue())
-                    summary_txt = f"Generation: {st.session_state.generation}\nBest Loss: {st.session_state.evolver.population[0].loss}"
-                    zf.writestr('read_me.txt', summary_txt)
+                    zf.writestr('simulation_core.json', json_output)
+                    zf.writestr('read_me.txt', f"Cortex Genesis Save\nGeneration: {st.session_state.generation}")
 
                 zip_buffer.seek(0)
                 
-                # 5. The Button
                 st.download_button(
-                    label="⬇️ Download Full Timeline (.zip)",
+                    label="⬇️ Download JSON Timeline",
                     data=zip_buffer,
-                    file_name=f"Cortex_Genesis_{timestamp}_Gen{st.session_state.generation}.zip",
+                    file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
                     mime="application/zip"
                 )
-            except Exception as e:
-                st.error(f"Save Failed: {str(e)}")
+            except TypeError as e:
+                st.error(f"Serialization Error: {e} - Make sure all properties are basic types.")
+        else:
+            st.warning("Initialize Simulation to enable downloading.")
 
     st.sidebar.markdown("---")
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
