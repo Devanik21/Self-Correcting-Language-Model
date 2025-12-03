@@ -642,7 +642,7 @@ def generate_ai_thought(arch, generation: int) -> str:
     # 2. SELECT MODE & PREFIX
     if aging < 1.0 or loss < 0.05:
         mode = "GOD"
-        prefix = "👑 **SINGULARITY:**"
+        prefix = ""
         adj_list = "adjective_divine"
         verb_list = "verb_creative"
     elif aging > 50.0 or loss > 50.0:
