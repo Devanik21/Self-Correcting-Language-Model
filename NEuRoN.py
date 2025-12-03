@@ -773,7 +773,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             size=node_sizes,
             color=node_color_values, # Map values...
             colorscale='Viridis',    # ...to the Eye-Friendly Palette
-            line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=0.4),
             opacity=0.8
         ),
         text=[f"Neuron: {n}<br>Type: {G.nodes[n]['type']}" for n in node_list],
