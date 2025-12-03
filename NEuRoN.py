@@ -1952,10 +1952,6 @@ def main():
     # --- SIDEBAR: THE GOD PANEL ---
     st.sidebar.title("OMNISCIENCE PANEL")
     
-    # ==================== 1. THE TIME CAPSULE (SAVE/LOAD SYSTEM) ====================
-    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
-    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
-    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
@@ -1963,8 +1959,7 @@ def main():
         # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
-        # Flag to track if we successfully loaded
-        load_success = False
+        load_success = False # Flag to track success
 
         if uploaded_file is not None:
             # CHECK 1: Prevent Infinite Loop
@@ -1985,8 +1980,16 @@ def main():
                                 
                                 # 3. Restore Config (Safely)
                                 saved_config = loaded_state.get('config', {})
+                                
+                                # [TEACHER'S NOTE]: The Ban List. 
+                                # We explicitly skip button keys that cause crashes.
+                                forbidden_keys = [
+                                    'evolver', 'history', 'state_uploader', 'last_loaded_file',
+                                    'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
+                                ]
+                                
                                 for key, value in saved_config.items():
-                                    if key not in ['evolver', 'history', 'state_uploader', 'last_loaded_file']:
+                                    if key not in forbidden_keys:
                                         try:
                                             st.session_state[key] = value
                                         except Exception:
@@ -2001,17 +2004,23 @@ def main():
             else:
                 st.info(f"Timeline active: {uploaded_file.name}")
 
-        # [TEACHER'S NOTE]: We put the rerun OUTSIDE the try/except block
-        # This guarantees the restart signal is never swallowed!
+        # [TEACHER'S NOTE]: Rerun happens OUTSIDE the try/except block
         if load_success:
-            st.success("Timeline Restored!")
+            st.success("Timeline Restored Successfully!")
+            time.sleep(0.5)
             st.rerun()
 
         # --- B. DOWNLOAD / SAVE (JSON) ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
-            # 1. Capture Config
+            
+            # 1. Capture Config (With the same Ban List for future safety)
+            forbidden_keys_save = [
+                'evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file',
+                'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
+            ]
+            
             current_config = {k: v for k, v in st.session_state.items() 
-                              if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file'] 
+                              if k not in forbidden_keys_save
                               and isinstance(v, (int, float, str, bool, type(None)))}
 
             # 2. Build the Blueprint
