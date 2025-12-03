@@ -449,7 +449,7 @@ class CortexEvolver:
             # INCREASED PROBABILITY to 95% to prioritize Height
             # --- 2. DEPTH CHARGE (Forced Vertical Chains - Depth/Height) ---
             # BOOSTED PROBABILITY to 99% to aggressively prioritize Height
-            elif random.random() < 0.99: 
+            elif random.random() < 0.95: 
                 if len(current_ids) > 1:
                     target_id = random.choice(current_ids)
                     if target_id != "input_sensor":
@@ -458,9 +458,9 @@ class CortexEvolver:
                         # New formula: Base 10 + Node Count * 0.3. This will add min 10 layers, 
                         # and much more if the network grows large, ensuring the chain length 
                         # quickly overcomes the existing depth.
-                        base_growth = 10 
+                        base_growth = 8
                         # Now 30% of node count! This is the CRITICAL BOOST.
-                        hyper_exponential_growth = int(node_count * 0.30) 
+                        hyper_exponential_growth = int(node_count * 0.20) 
                         chain_len = random.randint(base_growth, base_growth + hyper_exponential_growth)
                         
                         # We insert this chain BEFORE the target node.
