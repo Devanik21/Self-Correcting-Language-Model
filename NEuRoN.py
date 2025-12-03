@@ -2807,8 +2807,6 @@ def main():
             depth_display = "Undefined"
 
         metric_placeholders["Network Depth"].metric("Network Depth", depth_display)
-
-        metric_placeholders["Network Depth"].metric("Network Depth", f"{depth} Layers")
         metric_placeholders["Component Count"].metric("Component Count", f"{len(best_arch.nodes)}")
         metric_placeholders["Parameter Count (M)"].metric("Parameter Count (M)", f"{best_arch.parameter_count/1e6:.2f}")
         metric_placeholders["Inference Speed (T/s)"].metric("Inference Speed (T/s)", f"{best_arch.inference_speed:.1f}")
