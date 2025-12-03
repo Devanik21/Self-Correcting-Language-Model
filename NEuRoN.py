@@ -1953,20 +1953,17 @@ def main():
     st.sidebar.title("OMNISCIENCE PANEL")
     
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
-    # ==================== 1. THE TIME CAPSULE (MANUAL TRIGGER EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
         # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
+        load_success = False # Flag to track success
+
         if uploaded_file is not None:
-            st.info(f"Ready to load: {uploaded_file.name}")
-            
-            # [TEACHER'S NOTE]: This Button is the Gatekeeper! 
-            # Nothing happens until you click this. No loops, no auto-execution.
-            if st.button("LOAD TIMELINE NOW", type="primary", use_container_width=True):
-                
+            # CHECK 1: Prevent Infinite Loop
+            if st.session_state.get("last_loaded_file") != uploaded_file.name:
                 try:
                     with st.spinner("Decoding Neural Timeline..."):
                         with zipfile.ZipFile(uploaded_file, 'r') as z:
@@ -1981,10 +1978,11 @@ def main():
                                 st.session_state.history = loaded_state.get('history', [])
                                 st.session_state.generation = loaded_state.get('generation', 0)
                                 
-                                # 3. Restore Config (With the Ban List to prevent crashes)
+                                # 3. Restore Config (Safely)
                                 saved_config = loaded_state.get('config', {})
                                 
-                                # Keys that crash Streamlit if we try to set them manually
+                                # [TEACHER'S NOTE]: The Ban List. 
+                                # We explicitly skip button keys that cause crashes.
                                 forbidden_keys = [
                                     'evolver', 'history', 'state_uploader', 'last_loaded_file',
                                     'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
@@ -1997,56 +1995,14 @@ def main():
                                         except Exception:
                                             pass
                                 
-                                st.success("Timeline Restored Successfully!")
-                                time.sleep(0.5)
-                                st.rerun()
+                                # Mark as processed
+                                st.session_state.last_loaded_file = uploaded_file.name
+                                load_success = True
                                 
                 except Exception as e:
                     st.error(f"Corrupted Timeline Data: {str(e)}")
-
-        # --- B. DOWNLOAD / SAVE (JSON) ---
-        if 'evolver' in st.session_state and st.session_state.evolver.population:
-            
-            # 1. Capture Config (Using the same Ban List for safety)
-            forbidden_keys_save = [
-                'evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file',
-                'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
-            ]
-            
-            current_config = {k: v for k, v in st.session_state.items() 
-                              if k not in forbidden_keys_save
-                              and isinstance(v, (int, float, str, bool, type(None)))}
-
-            # 2. Build the Blueprint
-            full_state = {
-                'evolver_data': serialize_evolver(st.session_state.evolver), 
-                'history': st.session_state.history,
-                'generation': st.session_state.generation,
-                'config': current_config,
-                'version': '1.1.0 (JSON)'
-            }
-            
-            # 3. Zip and Download
-            try:
-                json_output = json.dumps(full_state, indent=2)
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                zip_buffer = io.BytesIO()
-                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-                    zf.writestr('simulation_core.json', json_output)
-                    zf.writestr('read_me.txt', f"Cortex Genesis Save\nGeneration: {st.session_state.generation}")
-
-                zip_buffer.seek(0)
-                
-                st.download_button(
-                    label="⬇️ Download JSON Timeline",
-                    data=zip_buffer,
-                    file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
-                    mime="application/zip"
-                )
-            except TypeError as e:
-                st.error(f"Serialization Error: {e}")
-        else:
-            st.warning("Initialize Simulation to enable downloading.")
+            else:
+                st.info(f"Timeline active: {uploaded_file.name}")
 
         # [TEACHER'S NOTE]: Rerun happens OUTSIDE the try/except block
         if load_success:
