@@ -2067,54 +2067,7 @@ def main():
         else:
             st.warning("Initialize Simulation to enable downloading.")
 
-        # [TEACHER'S NOTE]: Rerun happens OUTSIDE the try/except block
-        if load_success:
-            st.success("Timeline Restored Successfully!")
-            time.sleep(0.5)
-            st.rerun()
-
-        # --- B. DOWNLOAD / SAVE (JSON) ---
-        if 'evolver' in st.session_state and st.session_state.evolver.population:
-            
-            # 1. Capture Config (With the same Ban List for future safety)
-            forbidden_keys_save = [
-                'evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file',
-                'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
-            ]
-            
-            current_config = {k: v for k, v in st.session_state.items() 
-                              if k not in forbidden_keys_save
-                              and isinstance(v, (int, float, str, bool, type(None)))}
-
-            # 2. Build the Blueprint
-            full_state = {
-                'evolver_data': serialize_evolver(st.session_state.evolver), 
-                'history': st.session_state.history,
-                'generation': st.session_state.generation,
-                'config': current_config,
-                'version': '1.1.0 (JSON)'
-            }
-            
-            # 3. Zip and Download
-            try:
-                json_output = json.dumps(full_state, indent=2)
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                zip_buffer = io.BytesIO()
-                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-                    zf.writestr('simulation_core.json', json_output)
-                    zf.writestr('read_me.txt', f"Cortex Genesis Save\nGeneration: {st.session_state.generation}")
-                zip_buffer.seek(0)
-                
-                st.download_button(
-                    label="⬇️ Download JSON Timeline",
-                    data=zip_buffer,
-                    file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
-                    mime="application/zip"
-                )
-            except TypeError as e:
-                st.error(f"Serialization Error: {e}")
-        else:
-            st.warning("Initialize Simulation to enable downloading.")
+ 
 
     st.sidebar.markdown("---")
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
