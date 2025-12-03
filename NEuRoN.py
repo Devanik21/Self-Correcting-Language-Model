@@ -3106,23 +3106,29 @@ def main():
             }
 
             # 3. The Control Panel (Buttons for Lazy Loading)
+            # 3. The Control Panel (Buttons for Lazy Loading)
             st.caption("Select a lens to analyze the Neural Substrate:")
             
             for category, views in viz_registry.items():
                 cols = st.columns(len(views))
+                
+                # --- START OF CORRECTED LOOP ---
                 for i, (view_name, view_func) in enumerate(views.items()):
                     # Check if this view is currently active
                     is_active = (st.session_state.current_viz_view == view_name)
                     
-                    # Create the button
+                    # Create the button. NOTE: The key now includes the CATEGORY to ensure uniqueness.
+                    unique_key = f"btn_{category.replace(' ', '_')}_{view_name.replace(' ', '_')}"
+                    
                     if cols[i].button(
                         f"{'' if is_active else ''} {view_name}", 
-                        key=f"btn_{view_name}", 
+                        key=unique_key,  # <--- FIXED KEY
                         use_container_width=True,
                         type="primary" if is_active else "secondary"
                     ):
                         st.session_state.current_viz_view = view_name
                         st.rerun() # Reload to render the new choice
+                # --- END OF CORRECTED LOOP ---
 
             st.divider()
 
