@@ -671,6 +671,89 @@ def build_nx_graph(arch, directed=True):
 
 
 
+def plot_plasticity_heatmap(arch: CognitiveArchitecture):
+    """
+    VISUALIZATION: Synaptic Plasticity Heatmap.
+    - Color: Shows how 'teachable' a node is (Plasticity).
+    - Size: Shows how connected it is.
+    - Helps identify which parts of the brain are 'rigid' vs 'flexible'.
+    """
+    metrics = get_node_metrics(arch)
+    
+    # Extract Plasticity specifically
+    plasticity_vals = []
+    for nid in arch.nodes:
+        p = arch.nodes[nid].properties.get('plasticity', 0.5)
+        plasticity_vals.append(p)
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['x'], y=metrics['y'], z=metrics['z'],
+        mode='markers',
+        text=[f"ID: {n}<br>Plasticity: {p:.2f}" for n, p in zip(arch.nodes, plasticity_vals)],
+        hoverinfo='text',
+        marker=dict(
+            size=10,
+            color=plasticity_vals,
+            colorscale='Hot', # Hot = High Plasticity (Flexible)
+            colorbar=dict(title='Synaptic Plasticity'),
+            opacity=0.9,
+            line=dict(color='black', width=1)
+        )
+    )])
+    
+    fig.update_layout(
+        title="SYNAPTIC PLASTICITY HEATMAP (Learnability)",
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Courier New, monospace")
+    )
+    return fig
+
+def plot_memory_allocation_tower(arch: CognitiveArchitecture):
+    """
+    VISUALIZATION: VRAM Allocation Towers.
+    - Z-Axis: Represents Memory Cost (RAM Usage).
+    - Helps identify 'Memory Leaks' or heavy storage nodes.
+    """
+    metrics = get_node_metrics(arch)
+    
+    # Z-Axis becomes Memory Cost
+    z_mem = [max(0.1, m * 10) for m in metrics['memory']] 
+
+    fig = go.Figure(data=[go.Scatter3d(
+        x=metrics['x'], y=metrics['y'], z=z_mem,
+        mode='markers+lines', # Lines to ground to show height
+        text=[f"Memory: {m:.2f} MB" for m in metrics['memory']],
+        hoverinfo='text',
+        marker=dict(
+            size=8,
+            color=z_mem,
+            colorscale='Ice', # Cold colors for storage
+            symbol='square',
+            opacity=1.0
+        ),
+        line=dict(color='rgba(255,255,255,0.2)', width=1) # Drop lines
+    )])
+    
+    # Add floor projection
+    fig.add_trace(go.Scatter3d(
+        x=metrics['x'], y=metrics['y'], z=[0]*len(metrics['x']),
+        mode='markers', marker=dict(size=2, color='gray')
+    ))
+
+    fig.update_layout(
+        title="MEMORY ALLOCATION TOWERS (VRAM Usage)",
+        scene=dict(
+            xaxis=dict(visible=False), yaxis=dict(visible=False), 
+            zaxis=dict(title="VRAM (MB)", visible=True), 
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family="Courier New, monospace")
+    )
+    return fig
+
+
 
 def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
     """
@@ -3141,34 +3224,37 @@ def main():
             st.markdown("### Holographic Architecture Inspection")
             
             # 2. Define the Registry of Views (Expanded to 16)
+            # 2. Define the Registry of Views (PERFECTED 5x4 GRID)
             viz_registry = {
+                # Row 1: The Skeleton
                 "Structural Engineering": {
                     "Neural Topology": plot_neural_topology_3d,
                     "Component Cityscape": plot_component_cityscape_3d,
                     "Architectural Flux": plot_architectural_flux,
                     "Radial Density": plot_radial_network_density_3d,
                 },
+                # Row 2: The Math
+                "Analytical Metrics": {
+                    "Loss Gradient Force": plot_loss_gradient_force_3d,
+                    "Compute Landscape": plot_compute_cost_landscape,
+                    "Memory Towers": plot_memory_allocation_tower,    # <--- NEW FILLER
+                    "Plasticity Heatmap": plot_plasticity_heatmap,    # <--- NEW FILLER
+                },
+                # Row 3: The Biology (Fixed Duplicates)
+                "Biological Analysis": {
+                    "Genome Lifespan Radar": plot_whole_genome_lifespan_radar,
+                    "Metabolic Energy Map": plot_metabolic_energy_landscape,
+                    "Genetic Heritage": plot_genetic_heritage_view,   # <--- MOVED HERE
+                    "Type Clusters": plot_component_type_manifold,    # <--- MOVED HERE
+                },
+                # Row 4: The Abstract
                 "Abstract Manifolds": {
                     "Phenotype Manifold": plot_architectural_abstract_3d,
                     "Hyperbolic Map": plot_hyperbolic_connectivity_3d,
                     "Temporal Vortex": plot_temporal_vortex_3d,
                     "Entropy Quasar": plot_entropy_diversity_quasar,
                 },
-             
-             
-                
-                "Analytical Metrics": {
-                    "Loss Gradient Force": plot_loss_gradient_force_3d,
-                    "Compute Landscape": plot_compute_cost_landscape,
-                    "Type Clusters": plot_component_type_manifold,
-                    "Genetic Heritage": plot_genetic_heritage_view,
-                },
-             "Biological Analysis": {
-                "Genome Lifespan Radar": plot_whole_genome_lifespan_radar,
-                "Genetic Heritage": plot_genetic_heritage_view,
-                "Type Clusters": plot_component_type_manifold,
-                "Metabolic Energy Map": plot_metabolic_energy_landscape, # <--- THE NEW 4TH PILLAR
-            },
+                # Row 5: The Forbidden
                 "⚠️ EXPERIMENTAL": {
                      "Bio-Connectome": plot_bio_connectome_web,
                      "Neuro-Genesis": plot_neuro_genesis_cloud,
