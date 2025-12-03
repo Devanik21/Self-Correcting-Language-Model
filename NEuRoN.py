@@ -1821,6 +1821,35 @@ def plot_loss_landscape_surface(history):
     )
     return fig
 
+
+
+def heal_simulation_state(evolver_instance):
+    """
+    The 'Identity Healer':
+    Forces old objects from session_state to recognize the new class definitions 
+    of the current script run. This fixes the PicklingError.
+    """
+    # 1. Heal the God Object (Evolver)
+    if evolver_instance.__class__ is not CortexEvolver:
+        evolver_instance.__class__ = CortexEvolver
+    
+    # 2. Heal the Population (The Living)
+    for arch in evolver_instance.population:
+        if arch.__class__ is not CognitiveArchitecture:
+            arch.__class__ = CognitiveArchitecture
+        # Heal the Brain Cells (Nodes)
+        for node in arch.nodes.values():
+            if node.__class__ is not ArchitectureNode:
+                node.__class__ = ArchitectureNode
+            
+    # 3. Heal the Archive (The Ancestors)
+    for arch in evolver_instance.archive.values():
+        if arch.__class__ is not CognitiveArchitecture:
+            arch.__class__ = CognitiveArchitecture
+        for node in arch.nodes.values():
+            if node.__class__ is not ArchitectureNode:
+                node.__class__ = ArchitectureNode
+
 # ==================== STREAMLIT APP LOGIC ====================
 
 def main():
@@ -1869,12 +1898,13 @@ def main():
         # We prepare the data only when needed (Lazy preparation isn't possible with download button logic directly, 
         # but we capture the current state).
         
+        # --- B. DOWNLOAD / SAVE ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
-            # 1. Gather all data
-            # Note: We save the 'evolver' object which contains the population and physics
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            # 1. HEAL THE DATA (Fixes PicklingError)
+            heal_simulation_state(st.session_state.evolver)
             
-            # Capture current widget config (approximate)
+            # 2. Gather all data
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
             current_config = {k: v for k, v in st.session_state.items() 
                               if k not in ['evolver', 'history', 'archive_loaded', 'state_uploader']}
 
@@ -1887,38 +1917,30 @@ def main():
                 'version': '1.0.0'
             }
             
-            # 2. Serialize to RAM (Pickle)
+            # 3. Serialize to RAM
             pickle_buffer = io.BytesIO()
-            pickle.dump(full_state, pickle_buffer)
-            pickle_buffer.seek(0)
-            
-            # 3. Zip it (To allow downloading multiple meta-files if needed later)
-            zip_buffer = io.BytesIO()
-            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr('simulation_core.pkl', pickle_buffer.getvalue())
+            try:
+                pickle.dump(full_state, pickle_buffer)
+                pickle_buffer.seek(0)
                 
-                # Add a human-readable summary text file
-                summary_txt = f"""
-                CORTEX GENESIS SIMULATION DUMP
-                Date: {timestamp}
-                Generation: {st.session_state.generation}
-                Population Size: {len(st.session_state.evolver.population)}
-                Best Loss: {st.session_state.evolver.population[0].loss if st.session_state.evolver.population else 'N/A'}
-                """
-                zf.writestr('read_me.txt', summary_txt)
+                # 4. Zip it
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+                    zf.writestr('simulation_core.pkl', pickle_buffer.getvalue())
+                    summary_txt = f"Generation: {st.session_state.generation}\nBest Loss: {st.session_state.evolver.population[0].loss}"
+                    zf.writestr('read_me.txt', summary_txt)
 
-            zip_buffer.seek(0)
-            
-            # 4. The Button
-            st.download_button(
-                label="⬇️ Download Full Timeline (.zip)",
-                data=zip_buffer,
-                file_name=f"Cortex_Genesis_{timestamp}_Gen{st.session_state.generation}.zip",
-                mime="application/zip",
-                help="Saves the entire Population, History, Archive, and Settings."
-            )
-        else:
-            st.warning("Initialize Simulation to enable downloading.")
+                zip_buffer.seek(0)
+                
+                # 5. The Button
+                st.download_button(
+                    label="⬇️ Download Full Timeline (.zip)",
+                    data=zip_buffer,
+                    file_name=f"Cortex_Genesis_{timestamp}_Gen{st.session_state.generation}.zip",
+                    mime="application/zip"
+                )
+            except Exception as e:
+                st.error(f"Save Failed: {str(e)}")
 
     st.sidebar.markdown("---")
     st.sidebar.caption("Hyperparameters for Digital Consciousness")
