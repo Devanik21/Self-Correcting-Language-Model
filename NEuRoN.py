@@ -1955,18 +1955,19 @@ def main():
     # ==================== 1. THE TIME CAPSULE (SAVE/LOAD SYSTEM) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
+    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
         # --- A. UPLOAD / RESTORE (JSON) ---
         uploaded_file = st.file_uploader("Restore Timeline (.zip)", type="zip", key="state_uploader")
         
-        # [TEACHER'S NOTE]: We add this check to stop the Infinite Loop
         if uploaded_file is not None:
-            # Check: Have we already processed this exact file?
+            # CHECK 1: Prevent Infinite Loop
+            # Only process if this is a NEW file we haven't seen yet
             if st.session_state.get("last_loaded_file") != uploaded_file.name:
                 try:
-                    with st.spinner("Decoding Neural Timeline..."): # Adds a visual loader
+                    with st.spinner("Decoding Neural Timeline..."):
                         with zipfile.ZipFile(uploaded_file, 'r') as z:
                             # Read the JSON text file
                             with z.open('simulation_core.json') as f:
@@ -1982,27 +1983,33 @@ def main():
                                 st.session_state.generation = loaded_state.get('generation', 0)
                                 
                                 # 3. Restore Config (Safely)
+                                # CHECK 2: Prevent Streamlit Crash
                                 saved_config = loaded_state.get('config', {})
                                 for key, value in saved_config.items():
+                                    # Skip the heavy objects and the uploader itself
                                     if key not in ['evolver', 'history', 'state_uploader', 'last_loaded_file']:
-                                        st.session_state[key] = value
+                                        try:
+                                            # We wrap this in a TRY block so if Streamlit says
+                                            # "You can't set this widget!", we just ignore it.
+                                            st.session_state[key] = value
+                                        except Exception:
+                                            pass
 
-                                # 4. Mark this file as "Processed" so we don't loop
+                                # 4. Mark this file as "Processed"
                                 st.session_state.last_loaded_file = uploaded_file.name
 
                                 st.success(f"Timeline Restored! Gen: {st.session_state.generation}")
-                                time.sleep(0.5) # Reduced sleep time for speed
+                                time.sleep(0.5)
                                 st.rerun()
                                 
                 except Exception as e:
                     st.error(f"Corrupted Timeline Data: {str(e)}")
             else:
-                # If the file is already loaded, just show a calm status message
-                st.info(f"Timeline '{uploaded_file.name}' is active.")
+                # If we already loaded it, just show a message so the user knows
+                st.info(f"Timeline active: {uploaded_file.name}")
 
         # --- B. DOWNLOAD / SAVE (JSON) ---
         if 'evolver' in st.session_state and st.session_state.evolver.population:
-             # ... (Keep your existing Download Logic here, it is correct) ...
             
             # 1. Capture Config
             current_config = {k: v for k, v in st.session_state.items() 
