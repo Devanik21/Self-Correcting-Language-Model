@@ -1953,6 +1953,7 @@ def main():
     st.sidebar.title("OMNISCIENCE PANEL")
     
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
+    # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
@@ -1962,8 +1963,8 @@ def main():
         load_success = False # Flag to track success
 
         if uploaded_file is not None:
-            # CHECK 1: Prevent Infinite Loop
-            if st.session_state.get("last_loaded_file") != uploaded_file.name:
+            # CHANGE: Manual Button to trigger the load
+            if st.button("🔓 Decrypt & Restore Timeline", type="primary", use_container_width=True):
                 try:
                     with st.spinner("Decoding Neural Timeline..."):
                         with zipfile.ZipFile(uploaded_file, 'r') as z:
@@ -1981,16 +1982,29 @@ def main():
                                 # 3. Restore Config (Safely)
                                 saved_config = loaded_state.get('config', {})
                                 
-                                # [TEACHER'S NOTE]: The Ban List. 
-                                # We explicitly skip button keys that cause crashes.
+                                # [TEACHER'S NOTE]: The Updated Ban List.
+                                # We explicitly skip ANY key that belongs to a widget to prevent 
+                                # StreamlitValueAssignmentNotAllowedError.
                                 forbidden_keys = [
-                                    'evolver', 'history', 'state_uploader', 'last_loaded_file',
-                                    'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle'
+                                    'evolver', 
+                                    'history', 
+                                    'state_uploader',      # The file uploader widget
+                                    'load_archive',        # The archive button widget
+                                    'hide_archive',        # The hide button widget
+                                    'btn_spiral_toggle',   # Visualizer toggle
+                                    'btn_abstract_toggle', # Visualizer toggle
+                                    'archive_prev',        # Pagination button
+                                    'archive_next',        # Pagination button
+                                    'last_loaded_file'     # Internal tracking
                                 ]
                                 
+                                # Add any dynamic view buttons to forbidden list
+                                forbidden_keys.extend([k for k in saved_config.keys() if k.startswith('btn_')])
+
                                 for key, value in saved_config.items():
                                     if key not in forbidden_keys:
                                         try:
+                                            # Only set the value if it's safe
                                             st.session_state[key] = value
                                         except Exception:
                                             pass
@@ -2001,8 +2015,56 @@ def main():
                                 
                 except Exception as e:
                     st.error(f"Corrupted Timeline Data: {str(e)}")
-            else:
-                st.info(f"Timeline active: {uploaded_file.name}")
+
+        # [TEACHER'S NOTE]: Rerun happens OUTSIDE the try/except block
+        if load_success:
+            st.success("Timeline Restored Successfully!")
+            time.sleep(0.5)
+            st.rerun()
+
+        # --- B. DOWNLOAD / SAVE (JSON) ---
+        if 'evolver' in st.session_state and st.session_state.evolver.population:
+            
+            # 1. Capture Config (With the same Ban List for future safety)
+            forbidden_keys_save = [
+                'evolver', 'history', 'archive_loaded', 'state_uploader', 'last_loaded_file',
+                'load_archive', 'hide_archive', 'btn_spiral_toggle', 'btn_abstract_toggle',
+                'archive_prev', 'archive_next'
+            ]
+            
+            current_config = {k: v for k, v in st.session_state.items() 
+                              if k not in forbidden_keys_save
+                              and isinstance(v, (int, float, str, bool, type(None)))}
+
+            # 2. Build the Blueprint
+            full_state = {
+                'evolver_data': serialize_evolver(st.session_state.evolver), 
+                'history': st.session_state.history,
+                'generation': st.session_state.generation,
+                'config': current_config,
+                'version': '1.1.0 (JSON)'
+            }
+            
+            # 3. Zip and Download
+            try:
+                json_output = json.dumps(full_state, indent=2)
+                timestamp = time.strftime("%Y%m%d-%H%M%S")
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+                    zf.writestr('simulation_core.json', json_output)
+                    zf.writestr('read_me.txt', f"Cortex Genesis Save\nGeneration: {st.session_state.generation}")
+                zip_buffer.seek(0)
+                
+                st.download_button(
+                    label="⬇️ Download JSON Timeline",
+                    data=zip_buffer,
+                    file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
+                    mime="application/zip"
+                )
+            except TypeError as e:
+                st.error(f"Serialization Error: {e}")
+        else:
+            st.warning("Initialize Simulation to enable downloading.")
 
         # [TEACHER'S NOTE]: Rerun happens OUTSIDE the try/except block
         if load_success:
