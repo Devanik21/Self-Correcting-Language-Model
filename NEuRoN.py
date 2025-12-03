@@ -3216,6 +3216,69 @@ def main():
     # --- UI UPDATE LOGIC (runs after simulation step or on first load) ---
     if st.session_state.evolver.population:
      
+
+        # ==================== NEW: NEURAL THOUGHT STREAM (LAZY LOADED) ====================
+        with st.expander("🧠 Neuronal Thought Stream (Lazy Loaded)", expanded=False):
+            st.caption("Access the accumulated internal monologue of the AI across all generations.")
+
+            # 1. Initialize the State Variable
+            if 'messages_loaded' not in st.session_state:
+                st.session_state.messages_loaded = False
+
+            # 2. Logic: If Loaded, Show Content + Hide Button. If Not, Show Load Button.
+            if st.session_state.messages_loaded:
+                
+                # --- THE HIDE BUTTON ---
+                if st.button("Disconnect Neural Link (Hide)", key="hide_messages"):
+                    st.session_state.messages_loaded = False
+                    st.rerun()
+
+                # --- THE CONTENT DISPLAY ---
+                if st.session_state.history:
+                    # We define a custom style for a "Terminal" look
+                    st.markdown("""
+                    <style>
+                        .terminal-box {
+                            background-color: rgba(0, 20, 0, 0.5);
+                            border-left: 3px solid #00FF00;
+                            padding: 10px;
+                            margin-bottom: 5px;
+                            font-family: 'Courier New', monospace;
+                            font-size: 0.9em;
+                            color: #ccffcc;
+                        }
+                    </style>
+                    """, unsafe_allow_html=True)
+                    
+                    # We use a scrollable container to keep the UI clean if the log is huge
+                    with st.container(height=500): 
+                        # We iterate backwards (reversed) so the newest messages appear at the top
+                        count = 0
+                        for entry in reversed(st.session_state.history):
+                            thought = entry.get('thought', None)
+                            gen = entry.get('generation', '?')
+                            
+                            if thought:
+                                # Display the thought in a nice box
+                                st.markdown(f"""
+                                <div class="terminal-box">
+                                    <b>GEN {gen}:</b> {thought}
+                                </div>
+                                """, unsafe_allow_html=True)
+                                count += 1
+                        
+                    if count == 0:
+                        st.warning("History exists, but no thought data was found.")
+                else:
+                    st.info("No history recorded yet. Run the simulation to generate thoughts.")
+
+            else:
+                # --- THE LOAD BUTTON ---
+                if st.button("Establish Neural Link (Load Messages)", key="load_messages"):
+                    st.session_state.messages_loaded = True
+                    st.rerun()
+        # ==================================================================================
+     
         with st.expander("Gene Archive (Lazy Loaded)", expanded=False):
             st.caption("Inspect the best architecture from every past generation.")
             
