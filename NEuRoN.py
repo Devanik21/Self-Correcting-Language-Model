@@ -266,15 +266,16 @@ class LossLandscapePhysics:
         
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
-        Calculates fitness with High-Entropy Physics.
-        The AI must now balance massive growth with massive repair capabilities.
+        NATURAL SELECTION ENGINE: THE INTELLIGENCE IMPERATIVE
+        Forces the AI to be complex. It cannot shrink to survive.
+        It must be smart AND immortal.
         """
         # --- 1. CALCULATE INTELLIGENCE & DEPTH ---
         G = nx.DiGraph()
         ai_complexity = 0.0
         repair_power = 0.0
         cleanup_power = 0.0
-        energy_efficiency = 1.0 # 1.0 = baseline cost
+        energy_efficiency = 1.0 
         node_count = len(arch.nodes)
         
         for nid, node in arch.nodes.items():
@@ -288,72 +289,61 @@ class LossLandscapePhysics:
             if n_type in ['Attention', 'SSM', 'Meta']:
                 ai_complexity += complexity
             elif n_type == 'Repair':
-                # REPAIR IS POWERFUL, BUT NOT INFINITE
-                repair_power += (complexity * 8.0) 
+                # Weak repair power (Keep this low to force the struggle!)
+                repair_power += (complexity * 0.5) 
             elif n_type == 'Cleanup':
-                cleanup_power += (complexity * 4.0)
+                cleanup_power += (complexity * 0.5)
             elif n_type == 'Energy':
-                # Diminishing returns on efficiency (Can't reach 0 cost)
                 energy_efficiency *= 0.98 
 
         try:
             depth = nx.dag_longest_path_length(G) if node_count > 1 else 1
         except:
-            # If cyclic, we reward the cycle length as depth (Recurrent Intelligence)
-            try:
-                cycles = list(nx.simple_cycles(G))
-                depth = max(len(c) for c in cycles) if cycles else 10
-            except:
-                depth = 1
+            depth = 10 # Reward loops
         
-        # Intelligence Score (Rewarding Exponential Depth)
+        # Intelligence Score
         intelligence = (depth * 25.0) + (math.log1p(ai_complexity) * 40.0)
         
-        # Ignorance Penalty
-        ignorance_penalty = max(0, 150.0 - intelligence) 
+        # --- THE FIX: BRUTAL IGNORANCE PENALTY ---
+        # If intelligence is below 300 (a complex brain), the penalty is SQUARED.
+        # This forces the AI to maintain a massive structure.
+        target_intelligence = 300.0
+        if intelligence < target_intelligence:
+            # Massive penalty for being simple
+            ignorance_penalty = math.pow((target_intelligence - intelligence), 1.5)
+        else:
+            ignorance_penalty = 0.0
 
         # --- 2. CALCULATE AGING (The "Thermodynamic Drag") ---
         
-        # CHANGE 1: Higher Base Stress (The Universe is Hostile)
-        # Was 5.0, now 25.0. Existing is painful.
-        base_stress = 25.0 * self.difficulty 
+        # High Base Stress (Existence is pain)
+        base_stress = 15.0 * self.difficulty 
         
-        # CHANGE 2: Complexity is Expensive (Linear Drag)
-        # Old code used log() which made massive brains cheap. 
-        # Now, every parameter adds "Heat".
-        # 1 Million params = ~5 units of stress
-        complexity_stress = (arch.parameter_count / 200_000.0) * self.difficulty
+        # Complexity is Expensive (Linear Drag)
+        # We keep this cost, so the big brain CAUSES the aging.
+        complexity_stress = (arch.parameter_count / 250_000.0) * self.difficulty
         
-        # Structural Dampening: Efficient depth reduces stress
-        # We weaken this slightly so depth isn't a "magic shield"
         structural_dampening = math.pow(depth, 0.4) if depth > 0 else 1
         
         raw_stress = (base_stress + complexity_stress) / structural_dampening
-        
-        # Synergy Factor (Metabolic Cost Multiplier)
         synergy_factor = 1.0 / (math.log10(node_count + 1) + 1)
         
         metabolic_stress = raw_stress * energy_efficiency * synergy_factor
 
         # The Aging Equation
-        # Now the AI needs significantly more Repair Power to hit 0.
         current_aging = metabolic_stress - (repair_power + cleanup_power)
-        
-        # Clamp to 0 (Immortality) but make it hard to reach
         current_aging = max(0.0001, current_aging)
         
         # Store for visualization
         arch.aging_score = current_aging
 
         # --- 3. TOTAL LOSS ---
-        # Aging is now the primary enemy. 
-        # Multiplier increased to 2.0x to force priority on survival.
+        # We balance the two: It MUST be smart, and it MUST stop aging.
         aging_penalty = current_aging * 2.0
         
         total_loss = ignorance_penalty + aging_penalty
         
         return max(0.0001, total_loss)
-
 
 
 class CortexEvolver:
