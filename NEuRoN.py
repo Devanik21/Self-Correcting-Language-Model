@@ -2729,20 +2729,26 @@ def main():
                                 # 3. Restore Config (Safely)
                                 saved_config = loaded_state.get('config', {})
                                 
-                                # [TEACHER'S NOTE]: The Updated Ban List.
-                                # We explicitly skip ANY key that belongs to a widget to prevent 
-                                # StreamlitValueAssignmentNotAllowedError.
+                                # [TEACHER'S FIX]: ADD 'download_timeline_keyz2' TO THIS LIST!
                                 forbidden_keys = [
                                     'evolver', 
                                     'history', 
-                                    'state_uploader',      # The file uploader widget
-                                    'load_archive',        # The archive button widget
-                                    'hide_archive',        # The hide button widget
-                                    'btn_spiral_toggle',   # Visualizer toggle
-                                    'btn_abstract_toggle', # Visualizer toggle
-                                    'archive_prev',        # Pagination button
-                                    'archive_next',        # Pagination button
-                                    'last_loaded_file'     # Internal tracking
+                                    'state_uploader',      
+                                    'load_archive',        
+                                    'hide_archive',        
+                                    'btn_spiral_toggle',   
+                                    'btn_abstract_toggle', 
+                                    'archive_prev',        
+                                    'archive_next',        
+                                    'last_loaded_file',
+                                    'download_timeline_keyz2',  # <--- NEW ADDITION
+                                    'btn_load_curve',           # <--- Added lazy load buttons just in case
+                                    'btn_load_stats',
+                                    'btn_load_timeline',
+                                    'btn_load_matrix',
+                                    'btn_load_deep_inspect',
+                                    'btn_load_landscape',
+                                    'btn_load_genepool'
                                 ]
                                 
                                 # Add any dynamic view buttons to forbidden list
