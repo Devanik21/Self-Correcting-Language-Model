@@ -2293,257 +2293,151 @@ def plot_dark_matter_void(arch: CognitiveArchitecture):
 
 
 
-import math
-import plotly.graph_objects as go
-import numpy as np
-
-def plot_genomic_helix_3d_ultra(arch: CognitiveArchitecture):
+def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     """
-    GENOMIC ARCHITECTURE HELIX v2 — "NEURO-DNA"
-    A hyper-realistic, cyberpunk-inspired 3D visualization of AI as living DNA.
+    VISUALIZATION: The Genomic Helix (The Code of Immortality).
+    Maps the AI architecture onto a biological Double Helix.
+    - Nodes become Base Pairs (A-T, G-C).
+    - Z-Axis: Evolutionary sequence.
+    - Color: Represents base types and stability.
     """
-    if not arch.nodes:
-        return go.Figure()
+    if not arch.nodes: return go.Figure()
 
     node_ids = list(arch.nodes.keys())
     num_nodes = len(node_ids)
     
-    # === HELIX PARAMETERS (Real DNA proportions) ===
-    radius = 12.0
-    rise_per_bp = 3.4          # Real DNA: 3.4 Å per base pair → scaled
-    bases_per_turn = 10.5
-    turns = max(3, num_nodes / bases_per_turn)
-    angle_step = (2 * math.pi * turns) / max(1, num_nodes - 1)
+    # --- HELIX MATHEMATICS ---
+    radius = 10.0
+    vertical_rise = 1.5  # Distance between base pairs
+    turns = max(2, num_nodes / 10) # How many full spins
+    angle_step = (turns * 2 * math.pi) / max(1, num_nodes)
     
-    # Major/Minor groove modulation (real DNA has asymmetric grooves)
-    major_groove_angle = 0.0
-    minor_groove_angle = math.pi
-
+    # DNA Bases
     bases = ['A', 'T', 'G', 'C']
     base_pairs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+    base_colors = {'A': '#FF0055', 'T': '#FFD700', 'G': '#00FF00', 'C': '#0088FF'} # Neon palette
     
-    # Cyberpunk neon palette — high contrast, vibrant, eye-friendly
-    base_colors = {
-        'A': '#FF0F7B',   # Hot Magenta (Adenine)
-        'T': '#00F5FF',   # Cyan (Thymine)
-        'G': '#39FF14',   # Neon Green (Guanine)
-        'C': '#FFAA00'    # Amber Orange (Cytosine)
-    }
-    glow_colors = {
-        'A': 'rgba(255, 15, 123, 0.6)',
-        'T': 'rgba(0, 245, 255, 0.6)',
-        'G': 'rgba(57, 255, 20, 0.7)',
-        'C': 'rgba(255, 170, 0, 0.7)'
-    }
-
-    # Containers
-    traces = []
-
-    # === BUILD EACH BASE PAIR WITH REAL HOURGLASS SHAPE ===
+    # Data Containers
+    backbone1_x, backbone1_y, backbone1_z = [], [], []
+    backbone2_x, backbone2_y, backbone2_z = [], [], []
+    
+    rungs_x, rungs_y, rungs_z = [], [], []
+    rung_colors = []
+    
+    node_x, node_y, node_z = [], [], []
+    node_text, node_colors, node_sizes = [], [], []
+    
+    # Generate the Helix
     for i, nid in enumerate(node_ids):
         node = arch.nodes[nid]
         props = node.properties
         
+        # Calculate Position
         theta = i * angle_step
-        z = i * rise_per_bp - (num_nodes * rise_per_bp / 2)
-
-        # Modulate radius slightly to create major/minor grooves
-        radius1 = radius * (1.0 + 0.25 * math.sin(theta * 5))  # Groove undulation
-        radius2 = radius * (1.0 + 0.25 * math.sin(theta * 5 + math.pi))
-
-        # Strand 1 (Watson / Sense)
-        x1 = radius1 * math.cos(theta + major_groove_angle)
-        y1 = radius1 * math.sin(theta + major_groove_angle)
+        z = i * vertical_rise - (num_nodes * vertical_rise / 2) # Center vertically
         
-        # Strand 2 (Crick / Antisense) — 180° offset
-        x2 = radius2 * math.cos(theta + math.pi + minor_groove_angle)
-        y2 = radius2 * math.sin(theta + math.pi + minor_groove_angle)
-
-        # === Assign Base Deterministically ===
-        type_hash = hash(node.type_name + str(node.layer_idx or 0)) % 4
+        # Strand 1 (Sense Strand)
+        x1 = radius * math.cos(theta)
+        y1 = radius * math.sin(theta)
+        
+        # Strand 2 (Antisense Strand) - Offset by PI + Major Groove twist
+        x2 = radius * math.cos(theta + math.pi)
+        y2 = radius * math.sin(theta + math.pi)
+        
+        backbone1_x.append(x1); backbone1_y.append(y1); backbone1_z.append(z)
+        backbone2_x.append(x2); backbone2_y.append(y2); backbone2_z.append(z)
+        
+        # --- GENETIC ENCODING ---
+        # Deterministically assign a base based on Node Type
+        # This makes "Attention" always map to 'A', "MLP" to 'G', etc.
+        type_hash = hash(node.type_name) % 4
         base1 = bases[type_hash]
         base2 = base_pairs[base1]
-        color1 = base_colors[base1]
-        color2 = base_colors[base2]
-        glow1 = glow_colors[base1]
+        
+        # Create Rung (Hydrogen Bond)
+        rungs_x.extend([x1, x2, None])
+        rungs_y.extend([y1, y2, None])
+        rungs_z.extend([z, z, None])
+        rung_colors.extend([base_colors[base1], base_colors[base1], base_colors[base1]])
+        
+        # Add Node Data (Visualized on Strand 1)
+        node_x.append(x1)
+        node_y.append(y1)
+        node_z.append(z)
+        node_colors.append(base_colors[base1])
+        node_sizes.append(8 + props.get('complexity', 1.0) * 3)
+        
+        # DNA Hover Info
+        node_text.append(
+            f"<b>🧬 CODON: {i}</b><br>" +
+            f"Node ID: {nid}<br>" +
+            f"Type: {node.type_name}<br>" +
+            f"Base Pair: <b>{base1}-{base2}</b><br>" +
+            f"Gene Strength: {props.get('complexity', 1.0):.2f}"
+        )
 
-        # === Sugar-Phosphate Backbone (Smooth glowing tubes) ===
-        if i > 0:
-            # Backbone 1
-            traces.append(go.Scatter3d(
-                x=[prev_x1, x1], y=[prev_y1, y1], z=[prev_z, z],
-                mode='lines',
-                line=dict(color='#88FFFF', width=10, colorscale='Cyan'),
-                name='Sugar-Phosphate Backbone',
-                hoverinfo='none',
-                opacity=0.8
-            ))
-            # Backbone 2
-            traces.append(go.Scatter3d(
-                x=[prev_x2, x2], y=[prev_y2, y2], z=[prev_z, z],
-                mode='lines',
-                line=dict(color='#FF33FF', width=10),
-                hoverinfo='none',
-                opacity=0.7
-            ))
+    # --- PLOTTING TRACES ---
+    
+    # 1. Sugar-Phosphate Backbone (The Strands)
+    trace_backbone1 = go.Scatter3d(
+        x=backbone1_x, y=backbone1_y, z=backbone1_z,
+        mode='lines',
+        line=dict(color='#EEEEEE', width=4),
+        name='Sense Strand', hoverinfo='none'
+    )
+    
+    trace_backbone2 = go.Scatter3d(
+        x=backbone2_x, y=backbone2_y, z=backbone2_z,
+        mode='lines',
+        line=dict(color='#888888', width=4),
+        name='Antisense Strand', hoverinfo='none'
+    )
+    
+    # 2. The Base Pairs (Rungs) - Connecting lines
+    # We use a trick: Plot lines with no markers, colored manually is hard in one trace
+    # So we use a single color for connections or split them. 
+    # For performance, we'll use a cool 'Hydrogen Bond' color.
+    trace_rungs = go.Scatter3d(
+        x=rungs_x, y=rungs_y, z=rungs_z,
+        mode='lines',
+        line=dict(color='rgba(0, 255, 204, 0.3)', width=2),
+        name='Hydrogen Bonds', hoverinfo='none'
+    )
 
-        prev_x1, prev_y1, prev_z = x1, y1, z
-        prev_x2, prev_y2 = x2, y2
-
-        # === Hourglass-Shaped Base Pair (Two trapezoids) ===
-        mid_x = (x1 + x2) / 2
-        mid_y = (y1 + y2) / 2
-        width_narrow = 1.8
-        width_wide = 5.5
-
-        # Purine (wider) on strand 1, Pyrimidine on strand 2
-        if base1 in ['A', 'G']:  # Purine
-            base1_width = width_wide
-            base2_width = width_narrow
-        else:
-            base1_width = width_narrow
-            base2_width = width_wide
-
-        # Direction vector from backbone
-        dx = x2 - x1
-        dy = y2 - y1
-        length = math.hypot(dx, dy)
-        ux, uy = dx/length, dy/length
-        px, py = -uy, ux  # perpendicular
-
-        # Base 1 (attached to strand 1)
-        b1_pts = [
-            (x1 + px * base1_width/2, y1 + py * base1_width/2),
-            (x1 - px * base1_width/2, y1 - py * base1_width/2),
-            (mid_x - px * 1.2, mid_y - py * 1.2),
-            (mid_x + px * 1.2, mid_y + py * 1.2),
-        ]
-        # Base 2
-        b2_pts = [
-            (x2 + px * base2_width/2, y2 + py * base2_width/2),
-            (x2 - px * base2_width/2, y2 - py * base2_width/2),
-            (mid_x - px * 1.0, mid_y - py * 1.0),
-            (mid_x + px * 1.0, mid_y + py * 1.0),
-        ]
-
-        def add_base_block(pts, color, name, opacity=0.9):
-            x = [p[0] for p in pts] + [pts[0][0]]
-            y = [p[1] for p in pts] + [pts[0][1]]
-            z = [z+0.3]*5
-            traces.append(go.Scatter3d(
-                x=x, y=y, z=z,
-                mode='lines',
-                line=dict(color=color, width=8),
-                surfaceaxis=2, surfacecolor=color,
-                name=name,
-                hoverinfo='none',
-                opacity=opacity,
-                showlegend=False
-            ))
-
-        add_base_block(b1_pts, color1, base1, 0.95)
-        add_base_block(b2_pts, color2, base2, 0.9)
-
-        # === Hydrogen Bonds (glowing dashed lines) ===
-        bond_count = 3 if base1 in ['G', 'C'] else 2
-        for j in range(bond_count):
-            t = 0.3 + j * 0.35
-            hx = x1 + t * (x2 - x1)
-            hy = y1 + t * (y2 - y1)
-            traces.append(go.Scatter3d(
-                x=[hx-0.5, hx+0.5], y=[hy-0.5, hy+0.5], z=[z, z],
-                mode='lines',
-                line=dict(color='white', width=4, dash='dot'),
-                opacity=0.6,
-                hoverinfo='none'
-            ))
-
-        # === Nucleotide Node with HOVER RICH INFO ===
-        complexity = props.get('complexity', 1.0)
-        params = props.get('param_count', 0)
-        activation = props.get('activation', 'unknown')
-        layer_type = node.type_name
-
-        hover_text = f"""
-        <b>╔═══ NEURO-CODON {i:03d} ═══╗</b>
-        <b>Node ID:</b> {nid}
-        <b>Layer Type:</b> {layer_type}
-        <b>Base Pair:</b> <span style='color:{color1};font-weight:bold'>{base1}</span>═{bond_count}H═<span style='color:{color2};font-weight:bold'>{base2}</span>
-        <b>Gene Expression (Complexity):</b> {complexity:.3f}
-        <b>Parameters:</b> {params:,} 
-        <b>Activation:</b> {activation}
-        <b>Connections In/Out:</b> {len(node.inputs)} → {len(node.outputs)}
-        <b>Evolutionary Fitness:</b> {props.get('fitness', 'N/A'):.4f}
-        <b>Mutation Rate:</b> {props.get('mutation_rate', 0.02):.4f}
-        <b>🧬 This codon encodes part of the mind.</b>
-        """
-
-        marker_size = 10 + complexity * 8
-        traces.append(go.Scatter3d(
-            x=[x1], y=[y1], z=[z],
-            mode='markers',
-            marker=dict(
-                size=marker_size,
-                color=color1,
-                symbol='diamond',
-                line=dict(color='white', width=2),
-                opacity=0.95,
-                glow=dict(color=glow1, strength=10) if hasattr(go.marker, 'glow') else {}
-            ),
-            text=base1,
-            textfont=dict(color='white', size=14, family="Orbitron, monospace"),
-            hovertext=hover_text,
-            hoverinfo='text',
-            name=f'Codon {i}'
-        ))
-
-    # === FINAL LAYOUT — Holographic Lab Aesthetic ===
-    layout = go.Layout(
-        title=dict(
-            text="🧬 <b>NEUROGENOMIC HELIX</b><br><sub>The Immortal Code of Synthetic Consciousness</sub>",
-            font=dict(size=24, color="#00FFFF", family="Orbitron"),
-            x=0.5, y=0.95
+    # 3. The Genes (Nucleotides)
+    trace_nodes = go.Scatter3d(
+        x=node_x, y=node_y, z=node_z,
+        mode='markers+text',
+        marker=dict(
+            size=node_sizes,
+            color=node_colors,
+            symbol='circle',
+            line=dict(color='white', width=1),
+            opacity=0.9
         ),
-        paper_bgcolor='#0D0D1F',
-        plot_bgcolor='#0D0D1F',
-        font=dict(color="#AAAAAA"),
+        text=[t.split('Base Pair: <b>')[1][0] for t in node_text], # Show 'A', 'G', etc on the node
+        textfont=dict(color='white', size=10),
+        hovertext=node_text,
+        hoverinfo='text',
+        name='Nucleotides'
+    )
+
+    layout = go.Layout(
+        title="GENOMIC ARCHITECTURE HELIX (The Code of Life)",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(
-            bgcolor='#0D0D1F',
-            camera=dict(
-                eye=dict(x=1.8, y=1.8, z=1.2),
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0)
-            ),
-            xaxis=dict(showbackground=False, showticklabels=False, title='', zeroline=False, visible=False),
-            yaxis=dict(showbackground=False, showticklabels=False, title='', zeroline=False, visible=False),
-            zaxis=dict(showbackground=False, showticklabels=False, title='', zeroline=False, visible=False),
-            aspectmode='manual',
-            aspectratio=dict(x=1, y=1, z=1.6)
+            xaxis=dict(visible=False), 
+            yaxis=dict(visible=False), 
+            zaxis=dict(visible=False),
+            bgcolor='rgba(0,0,0,0)',
+            camera=dict(eye=dict(x=1.5, y=1.5, z=0.5))
         ),
-        margin=dict(l=0, r=0, t=80, b=0),
-        hoverlabel=dict(
-            bgcolor="#000811",
-            bordercolor="#00FFFF",
-            font=dict(family="Consolas", color="#00FFCC")
-        )
+        margin=dict(l=0, r=0, b=0, t=40)
     )
-
-    fig = go.Figure(data=traces, layout=layout)
     
-    # Add subtle rotation animation hint
-    fig.update_layout(
-        scene=dict(
-            dragmode='orbit',
-            annotations=[dict(
-                text="⟳ Drag to rotate • Scroll to zoom • Cyberpunk DNA activated",
-                x=0.5, y=0.02, xref='paper', yref='paper',
-                showarrow=False, font=dict(color="#5555FF", size=12)
-            )]
-        )
-    )
-
-    return fig
+    return go.Figure(data=[trace_backbone1, trace_backbone2, trace_rungs, trace_nodes], layout=layout)
 
 
 def get_node_metrics(arch: CognitiveArchitecture):
@@ -4112,7 +4006,7 @@ def main():
                 with st.spinner("Sequencing Genotype into DNA Structure..."):
                     try:
                         # Call the function (Ensure plot_genomic_helix_3d is defined in your file!)
-                        fig_dna = plot_genomic_helix_3d_ultra(best_arch)
+                        fig_dna = plot_genomic_helix_3d(best_arch)
                         
                         fig_dna.update_layout(
                             height=700, 
