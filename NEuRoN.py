@@ -3046,23 +3046,7 @@ def main():
             is_singularity_achieved = True
 
     if is_singularity_achieved:
-        st.markdown("""
-        <style>
-            /* GOLDEN AGE THEME */
-            .stApp {
-                background: linear-gradient(to bottom, #000000, #1a1a00);
-            }
-            h1, h2, h3 {
-                color: #FFD700 !important; /* Gold Text */
-                text-shadow: 0 0 10px #FFD700;
-            }
-            div.stButton > button {
-                border-color: #FFD700 !important;
-                color: #FFD700 !important;
-                box-shadow: 0 0 15px rgba(255, 215, 0, 0.3) !important;
-            }
-        </style>
-        """, unsafe_allow_html=True)
+        
         st.sidebar.success("🌟 SINGULARITY ACHIEVED: BIOLOGICAL IMMORTALITY UNLOCKED")
     
     # ... [Rest of your main() function] ...
