@@ -3975,6 +3975,52 @@ def main():
             
             st.divider()
 
+         # ==================== SPECIAL FEATURE: GENOMIC HELIX ====================
+            # [TEACHER'S UPDATE]: A dedicated VIP section for your DNA visualization
+            
+            # 1. State Management for the Special Button
+            if 'viz_dna_active' not in st.session_state:
+                st.session_state.viz_dna_active = False
+
+            # 2. The Special Button (Centered & Distinct)
+            dna_col1, dna_col2, dna_col3 = st.columns([1, 2, 1]) # Centered layout
+            
+            with dna_col2:
+                # Dynamic Label
+                lbl_dna = "🧬 CLOSE DNA SEQUENCE" if st.session_state.viz_dna_active else "🧬 LAUNCH GENOMIC DOUBLE HELIX"
+                
+                if st.button(lbl_dna, key="btn_special_dna", use_container_width=True, type="primary"):
+                    st.session_state.viz_dna_active = not st.session_state.viz_dna_active
+                    st.rerun()
+
+            # 3. Lazy Loading Render
+            if st.session_state.viz_dna_active:
+                st.markdown("""
+                    <div style='text-align: center; margin-bottom: 10px;'>
+                        <p style='color: #00FFCC; font-size: 14px;'>
+                            <b>PROJECT IMMORTALITY:</b> Mapping Neural Architecture to Biological Code
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                with st.spinner("Sequencing Genotype into DNA Structure..."):
+                    try:
+                        # Call the function (Ensure plot_genomic_helix_3d is defined in your file!)
+                        fig_dna = plot_genomic_helix_3d(best_arch)
+                        
+                        fig_dna.update_layout(
+                            height=700, 
+                            margin=dict(l=0,r=0,b=0,t=40), 
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font=dict(family="Courier New, monospace")
+                        )
+                        st.plotly_chart(fig_dna, use_container_width=True)
+                    except NameError:
+                        st.error("Function 'plot_genomic_helix_3d' not found. Did you paste the definition earlier in the file?")
+            
+            st.divider() # Divider to separate it from the main grid below
+            # ========================================================================
+
             
 
             # ==================== MAIN INSPECTION DECK ====================
