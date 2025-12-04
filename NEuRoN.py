@@ -3951,21 +3951,311 @@ def main():
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['parameter_count'], name="Params", line=dict(color='#FF00FF')), secondary_y=True)
             
             
-         # --- [START OF NEW CODE] ---
-        # 1. Create the visual space for the Longevity Plot
-        st.markdown("---")
-        st.markdown("### Longevity Analysis (The Path to Immortality)")
+         st.markdown("---")
+        st.markdown("""
+            <div style='text-align: center; padding: 20px 0;'>
+                <h2 style='color: #00ffcc; font-family: "Courier New", monospace; 
+                           text-shadow: 0 0 10px rgba(0,255,204,0.5);
+                           letter-spacing: 2px; margin-bottom: 5px;'>
+                    ⚗️ LONGEVITY ANALYSIS ⚗️
+                </h2>
+                <p style='color: #888; font-size: 14px; font-style: italic;'>
+                    The Path to Computational Immortality
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+        
         aging_plot_col = st.empty()
-
-        # 2. Calculate and Draw the "Aging Curve"
+        
+        # Enhanced Aging Curve Visualization
         with aging_plot_col.container():
             if st.session_state.history:
-                # This calls the function we added to the visualization section
-                fig_aging = plot_immortality_curve(st.session_state.history)
-                st.plotly_chart(fig_aging, use_container_width=True)
+                # Create tabs for different analysis views
+                analysis_tabs = st.tabs([
+                    "📈 Evolution Curve", 
+                    "🔬 Statistical Analysis", 
+                    "🧬 Mutation Timeline",
+                    "💎 Performance Matrix"
+                ])
+                
+                with analysis_tabs[0]:
+                    st.markdown("""
+                        <div style='background: linear-gradient(135deg, rgba(0,20,40,0.6), rgba(20,0,40,0.6));
+                                   border-left: 3px solid #00ffcc; padding: 15px; border-radius: 8px;
+                                   margin-bottom: 20px;'>
+                            <p style='color: #aaa; margin: 0; font-size: 13px;'>
+                                📊 <b style='color: #00ffcc;'>Fitness Evolution:</b> 
+                                Tracking the survival trajectory across generations
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    fig_aging = plot_immortality_curve(st.session_state.history)
+                    st.plotly_chart(fig_aging, use_container_width=True)
+                
+                with analysis_tabs[1]:
+                    st.markdown("""
+                        <div style='background: linear-gradient(135deg, rgba(0,20,40,0.6), rgba(20,0,40,0.6));
+                                   border-left: 3px solid #ff6ec7; padding: 15px; border-radius: 8px;
+                                   margin-bottom: 20px;'>
+                            <p style='color: #aaa; margin: 0; font-size: 13px;'>
+                                📉 <b style='color: #ff6ec7;'>Statistical Metrics:</b> 
+                                Deep dive into evolutionary patterns
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Calculate statistics
+                    fitness_values = [entry['fitness'] for entry in st.session_state.history]
+                    generations = list(range(len(fitness_values)))
+                    
+                    # Create 2x2 metric grid
+                    metric_cols = st.columns(4)
+                    
+                    with metric_cols[0]:
+                        st.markdown("""
+                            <div style='background: rgba(0,255,204,0.1); padding: 20px; border-radius: 10px;
+                                       border: 1px solid rgba(0,255,204,0.3); text-align: center;'>
+                                <p style='color: #666; font-size: 12px; margin: 0;'>PEAK FITNESS</p>
+                                <h2 style='color: #00ffcc; margin: 10px 0; font-family: monospace;'>
+                                    {:.4f}
+                                </h2>
+                                <p style='color: #888; font-size: 11px; margin: 0;'>
+                                    Gen {}</p>
+                            </div>
+                        """.format(max(fitness_values), fitness_values.index(max(fitness_values))), 
+                        unsafe_allow_html=True)
+                    
+                    with metric_cols[1]:
+                        avg_fitness = sum(fitness_values) / len(fitness_values)
+                        st.markdown("""
+                            <div style='background: rgba(255,110,199,0.1); padding: 20px; border-radius: 10px;
+                                       border: 1px solid rgba(255,110,199,0.3); text-align: center;'>
+                                <p style='color: #666; font-size: 12px; margin: 0;'>AVG FITNESS</p>
+                                <h2 style='color: #ff6ec7; margin: 10px 0; font-family: monospace;'>
+                                    {:.4f}
+                                </h2>
+                                <p style='color: #888; font-size: 11px; margin: 0;'>
+                                    Across {} Gens</p>
+                            </div>
+                        """.format(avg_fitness, len(fitness_values)), unsafe_allow_html=True)
+                    
+                    with metric_cols[2]:
+                        improvement = fitness_values[-1] - fitness_values[0] if len(fitness_values) > 1 else 0
+                        improvement_pct = (improvement / fitness_values[0] * 100) if fitness_values[0] != 0 else 0
+                        st.markdown("""
+                            <div style='background: rgba(100,255,100,0.1); padding: 20px; border-radius: 10px;
+                                       border: 1px solid rgba(100,255,100,0.3); text-align: center;'>
+                                <p style='color: #666; font-size: 12px; margin: 0;'>IMPROVEMENT</p>
+                                <h2 style='color: #64ff64; margin: 10px 0; font-family: monospace;'>
+                                    {:+.2f}%
+                                </h2>
+                                <p style='color: #888; font-size: 11px; margin: 0;'>
+                                    Total Growth</p>
+                            </div>
+                        """.format(improvement_pct), unsafe_allow_html=True)
+                    
+                    with metric_cols[3]:
+                        import statistics
+                        volatility = statistics.stdev(fitness_values) if len(fitness_values) > 1 else 0
+                        st.markdown("""
+                            <div style='background: rgba(255,200,100,0.1); padding: 20px; border-radius: 10px;
+                                       border: 1px solid rgba(255,200,100,0.3); text-align: center;'>
+                                <p style='color: #666; font-size: 12px; margin: 0;'>VOLATILITY</p>
+                                <h2 style='color: #ffc864; margin: 10px 0; font-family: monospace;'>
+                                    {:.4f}
+                                </h2>
+                                <p style='color: #888; font-size: 11px; margin: 0;'>
+                                    Std Deviation</p>
+                            </div>
+                        """.format(volatility), unsafe_allow_html=True)
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    # Distribution histogram
+                    import plotly.graph_objects as go
+                    fig_dist = go.Figure()
+                    fig_dist.add_trace(go.Histogram(
+                        x=fitness_values,
+                        nbinsx=20,
+                        marker=dict(
+                            color=fitness_values,
+                            colorscale='Viridis',
+                            line=dict(color='rgba(255,255,255,0.3)', width=1)
+                        ),
+                        hovertemplate='<b>Fitness Range:</b> %{x}<br><b>Count:</b> %{y}<extra></extra>'
+                    ))
+                    
+                    fig_dist.update_layout(
+                        title=dict(text="Fitness Distribution Histogram", 
+                                  font=dict(color='#aaa', size=16)),
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        xaxis=dict(title='Fitness Value', gridcolor='rgba(255,255,255,0.1)',
+                                  color='#888'),
+                        yaxis=dict(title='Frequency', gridcolor='rgba(255,255,255,0.1)',
+                                  color='#888'),
+                        margin=dict(l=40, r=40, t=60, b=40)
+                    )
+                    st.plotly_chart(fig_dist, use_container_width=True)
+                
+                with analysis_tabs[2]:
+                    st.markdown("""
+                        <div style='background: linear-gradient(135deg, rgba(0,20,40,0.6), rgba(20,0,40,0.6));
+                                   border-left: 3px solid #ffc864; padding: 15px; border-radius: 8px;
+                                   margin-bottom: 20px;'>
+                            <p style='color: #aaa; margin: 0; font-size: 13px;'>
+                                🧬 <b style='color: #ffc864;'>Mutation Events:</b> 
+                                Tracking architectural changes over time
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Timeline visualization
+                    timeline_data = []
+                    for i, entry in enumerate(st.session_state.history):
+                        timeline_data.append({
+                            'generation': i,
+                            'fitness': entry['fitness'],
+                            'mutation': entry.get('mutation_type', 'Initial'),
+                            'timestamp': entry.get('timestamp', f'Gen {i}')
+                        })
+                    
+                    # Create timeline scatter
+                    fig_timeline = go.Figure()
+                    
+                    mutation_types = list(set([d['mutation'] for d in timeline_data]))
+                    colors = ['#00ffcc', '#ff6ec7', '#ffc864', '#64ff64', '#6eb4ff']
+                    
+                    for idx, mut_type in enumerate(mutation_types):
+                        filtered = [d for d in timeline_data if d['mutation'] == mut_type]
+                        fig_timeline.add_trace(go.Scatter(
+                            x=[d['generation'] for d in filtered],
+                            y=[d['fitness'] for d in filtered],
+                            mode='markers+lines',
+                            name=mut_type,
+                            marker=dict(size=12, color=colors[idx % len(colors)], 
+                                      line=dict(width=2, color='rgba(255,255,255,0.5)')),
+                            line=dict(width=2, dash='dot'),
+                            hovertemplate='<b>Generation:</b> %{x}<br><b>Fitness:</b> %{y:.4f}<br>' +
+                                         f'<b>Mutation:</b> {mut_type}<extra></extra>'
+                        ))
+                    
+                    fig_timeline.update_layout(
+                        title=dict(text="Mutation Timeline & Impact", 
+                                  font=dict(color='#aaa', size=16)),
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        xaxis=dict(title='Generation', gridcolor='rgba(255,255,255,0.1)',
+                                  color='#888'),
+                        yaxis=dict(title='Fitness', gridcolor='rgba(255,255,255,0.1)',
+                                  color='#888'),
+                        legend=dict(bgcolor='rgba(20,20,20,0.8)', bordercolor='#444',
+                                   font=dict(color='#aaa')),
+                        margin=dict(l=40, r=40, t=60, b=40)
+                    )
+                    st.plotly_chart(fig_timeline, use_container_width=True)
+                
+                with analysis_tabs[3]:
+                    st.markdown("""
+                        <div style='background: linear-gradient(135deg, rgba(0,20,40,0.6), rgba(20,0,40,0.6));
+                                   border-left: 3px solid #6eb4ff; padding: 15px; border-radius: 8px;
+                                   margin-bottom: 20px;'>
+                            <p style='color: #aaa; margin: 0; font-size: 13px;'>
+                                💎 <b style='color: #6eb4ff;'>Performance Matrix:</b> 
+                                Multi-dimensional evolution analysis
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Create correlation matrix if we have enough data
+                    if len(st.session_state.history) > 5:
+                        matrix_cols = st.columns(2)
+                        
+                        with matrix_cols[0]:
+                            # Rolling average chart
+                            window_size = min(5, len(fitness_values))
+                            rolling_avg = []
+                            for i in range(len(fitness_values)):
+                                start = max(0, i - window_size + 1)
+                                rolling_avg.append(sum(fitness_values[start:i+1]) / (i - start + 1))
+                            
+                            fig_rolling = go.Figure()
+                            fig_rolling.add_trace(go.Scatter(
+                                x=generations, y=fitness_values,
+                                mode='lines', name='Raw Fitness',
+                                line=dict(color='rgba(100,100,255,0.3)', width=1),
+                                hovertemplate='<b>Gen:</b> %{x}<br><b>Fitness:</b> %{y:.4f}<extra></extra>'
+                            ))
+                            fig_rolling.add_trace(go.Scatter(
+                                x=generations, y=rolling_avg,
+                                mode='lines', name='Rolling Average',
+                                line=dict(color='#00ffcc', width=3),
+                                hovertemplate='<b>Gen:</b> %{x}<br><b>Avg Fitness:</b> %{y:.4f}<extra></extra>'
+                            ))
+                            
+                            fig_rolling.update_layout(
+                                title=dict(text="Smoothed Evolution Trend", 
+                                          font=dict(color='#aaa', size=14)),
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                plot_bgcolor='rgba(0,0,0,0)',
+                                xaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='#888'),
+                                yaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='#888'),
+                                legend=dict(bgcolor='rgba(20,20,20,0.8)', font=dict(color='#aaa')),
+                                margin=dict(l=40, r=40, t=60, b=40),
+                                height=350
+                            )
+                            st.plotly_chart(fig_rolling, use_container_width=True)
+                        
+                        with matrix_cols[1]:
+                            # Generation-over-generation change
+                            changes = [fitness_values[i] - fitness_values[i-1] 
+                                      for i in range(1, len(fitness_values))]
+                            
+                            fig_delta = go.Figure()
+                            colors_delta = ['#64ff64' if c >= 0 else '#ff6464' for c in changes]
+                            
+                            fig_delta.add_trace(go.Bar(
+                                x=list(range(1, len(fitness_values))),
+                                y=changes,
+                                marker=dict(color=colors_delta,
+                                          line=dict(color='rgba(255,255,255,0.3)', width=1)),
+                                hovertemplate='<b>Gen:</b> %{x}<br><b>Δ Fitness:</b> %{y:+.4f}<extra></extra>'
+                            ))
+                            
+                            fig_delta.update_layout(
+                                title=dict(text="Generation-over-Generation Δ", 
+                                          font=dict(color='#aaa', size=14)),
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                plot_bgcolor='rgba(0,0,0,0)',
+                                xaxis=dict(title='Generation', gridcolor='rgba(255,255,255,0.1)',
+                                          color='#888'),
+                                yaxis=dict(title='Fitness Change', gridcolor='rgba(255,255,255,0.1)',
+                                          color='#888'),
+                                margin=dict(l=40, r=40, t=60, b=40),
+                                height=350
+                            )
+                            st.plotly_chart(fig_delta, use_container_width=True)
+                    else:
+                        st.info("🔬 Collecting more data for advanced matrix analysis...")
+            
             else:
-                st.info("Awaiting evolution data for longevity analysis...")
-        # --- [END OF NEW CODE] ---
+                st.markdown("""
+                    <div style='text-align: center; padding: 60px 20px;
+                               background: linear-gradient(135deg, rgba(0,20,40,0.4), rgba(20,0,40,0.4));
+                               border-radius: 15px; border: 2px dashed rgba(0,255,204,0.3);'>
+                        <div style='font-size: 48px; margin-bottom: 20px;'>🧬</div>
+                        <h3 style='color: #00ffcc; font-family: monospace; margin-bottom: 10px;'>
+                            AWAITING EVOLUTION DATA
+                        </h3>
+                        <p style='color: #888; font-size: 14px;'>
+                            Begin the evolutionary process to unlock longevity analysis
+                        </p>
+                        <div style='margin-top: 20px;'>
+                            <span style='color: #666; font-size: 12px;'>● ● ●</span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
           
 
     # --- DEEP ANALYSIS (Always available when not running) ---
