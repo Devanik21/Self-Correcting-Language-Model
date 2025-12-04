@@ -1379,12 +1379,10 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
 
 
 
-
-
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     """
     Renders the architecture as an abstract, bio-mechanical sculpture.
-    UPDATED: Now uses the soothing 'Viridis' complexity gradient.
+    UPDATED: Enhanced with futuristic hover details in clean list format.
     """
     if not arch.nodes:
         return go.Figure()
@@ -1404,8 +1402,9 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
 
     # --- Create the "Bizarre" Shape Transformation ---
     node_x, node_y, node_z = [], [], []
-    node_color_values = [] # Changed name to reflect numeric values
-    node_text, node_size = [], []
+    node_color_values = []
+    node_hover_texts = []
+    node_size = []
 
     for node_id in G.nodes():
         if node_id in pos:
@@ -1423,15 +1422,71 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             node_x.append(warped_x)
             node_y.append(warped_y)
             node_z.append(warped_z)
-
-            # CHANGE: Use complexity number instead of hex string
             node_color_values.append(complexity)
-            
             node_size.append(10 + complexity * 5)
-            node_text.append(f"<b>{node_id}</b><br>Type: {arch.nodes[node_id].type_name}<br>Complexity: {complexity:.2f}")
+            
+            # Calculate connections
+            in_degree = G.in_degree(node_id)
+            out_degree = G.out_degree(node_id)
+            
+            # Build comprehensive hover information
+            hover_lines = [
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"<b>🔶 NODE: {node_id}</b>",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"",
+                f"<b>CLASSIFICATION</b>",
+                f"  • Type: {arch.nodes[node_id].type_name}",
+                f"",
+                f"<b>CORE METRICS</b>",
+                f"  • Complexity Index: {complexity:.4f}",
+                f"  • Compute Cost: {compute:.4f}",
+                f"  • Input Connections: {in_degree}",
+                f"  • Output Connections: {out_degree}",
+                f"  • Total Links: {in_degree + out_degree}",
+                f"",
+                f"<b>SPATIAL COORDINATES</b>",
+                f"  • Original Position:",
+                f"    - X: {x:.3f}",
+                f"    - Y: {y:.3f}",
+                f"    - Z: {z:.3f}",
+                f"  • Warped Position:",
+                f"    - X: {warped_x:.3f}",
+                f"    - Y: {warped_y:.3f}",
+                f"    - Z: {warped_z:.3f}",
+            ]
+            
+            # Add all additional properties
+            additional_props = {k: v for k, v in props.items() 
+                              if k not in ['complexity', 'compute_cost']}
+            
+            if additional_props:
+                hover_lines.append("")
+                hover_lines.append("<b>ADDITIONAL PROPERTIES</b>")
+                for key, value in additional_props.items():
+                    if isinstance(value, float):
+                        hover_lines.append(f"  • {key}: {value:.4f}")
+                    elif isinstance(value, (list, tuple)):
+                        hover_lines.append(f"  • {key}: {len(value)} items")
+                    else:
+                        hover_lines.append(f"  • {key}: {value}")
+            
+            # Transformation info
+            hover_lines.append("")
+            hover_lines.append("<b>TRANSFORMATION DATA</b>")
+            rotation_angle = complexity * math.pi * (180 / math.pi)
+            z_offset = math.sin(compute * 2) * 0.5
+            hover_lines.append(f"  • Rotation Applied: {rotation_angle:.2f}°")
+            hover_lines.append(f"  • Z-Axis Warp: {z_offset:.4f}")
+            hover_lines.append(f"  • Node Size: {node_size[-1]:.2f}")
+            
+            hover_lines.append("")
+            hover_lines.append(f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>")
+            
+            node_hover_texts.append("<br>".join(hover_lines))
 
-    # Edges
-    edge_x, edge_y, edge_z = [], [], []
+    # Edges with enhanced hover
+    edge_traces = []
     for u, v in G.edges():
         if u in pos and v in pos:
             x0, y0, z0 = pos[u]
@@ -1446,31 +1501,78 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             vy_w = x1 * math.sin(v_props['complexity'] * math.pi) + y1 * math.cos(v_props['complexity'] * math.pi)
             vz_w = z1 + math.sin(v_props['compute_cost'] * 2) * 0.5
 
-            edge_x.extend([ux_w, vx_w, None])
-            edge_y.extend([uy_w, vy_w, None])
-            edge_z.extend([uz_w, vz_w, None])
-
-    # CHANGE: Soft Ghostly Grey edges
-    edge_trace = go.Scatter3d(
-        x=edge_x, y=edge_y, z=edge_z, 
-        mode='lines', 
-        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.5), 
-        hoverinfo='none'
-    )
+            # Calculate edge properties
+            edge_length = math.sqrt((vx_w-ux_w)**2 + (vy_w-uy_w)**2 + (vz_w-uz_w)**2)
+            complexity_diff = abs(u_props['complexity'] - v_props['complexity'])
+            compute_diff = abs(u_props['compute_cost'] - v_props['compute_cost'])
+            
+            edge_hover_lines = [
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"<b>⚡ NEURAL PATHWAY</b>",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"",
+                f"<b>CONNECTION</b>",
+                f"  • Source Node: {u}",
+                f"  • Target Node: {v}",
+                f"  • Direction: Downstream",
+                f"",
+                f"<b>GEOMETRIC PROPERTIES</b>",
+                f"  • Warped Length: {edge_length:.4f} units",
+                f"  • Original Distance:",
+                f"    - ΔX: {abs(x1-x0):.3f}",
+                f"    - ΔY: {abs(y1-y0):.3f}",
+                f"    - ΔZ: {abs(z1-z0):.3f}",
+                f"",
+                f"<b>NODE TYPE MAPPING</b>",
+                f"  • From: {arch.nodes[u].type_name}",
+                f"  • To: {arch.nodes[v].type_name}",
+                f"",
+                f"<b>COMPUTATIONAL GRADIENT</b>",
+                f"  • Complexity Δ: {complexity_diff:.4f}",
+                f"  • Compute Cost Δ: {compute_diff:.4f}",
+                f"  • Source Complexity: {u_props['complexity']:.4f}",
+                f"  • Target Complexity: {v_props['complexity']:.4f}",
+                f"",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>"
+            ]
+            
+            edge_trace = go.Scatter3d(
+                x=[ux_w, vx_w], 
+                y=[uy_w, vy_w], 
+                z=[uz_w, vz_w],
+                mode='lines',
+                line=dict(color='rgba(255, 255, 255, 0.1)', width=0.5),
+                text="<br>".join(edge_hover_lines),
+                hoverinfo='text',
+                hoverlabel=dict(
+                    bgcolor='rgba(15, 10, 30, 0.98)',
+                    font=dict(size=12, family='Consolas, Monaco, monospace', color='#ff6ec7'),
+                    bordercolor='#ff6ec7',
+                    align='left',
+                    namelength=0
+                )
+            )
+            edge_traces.append(edge_trace)
     
-    # CHANGE: Viridis Gradient
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z, 
         mode='markers', 
-        text=node_text, 
+        text=node_hover_texts, 
         hoverinfo='text',
         marker=dict(
             size=node_size, 
-            color=node_color_values, # Numeric values
-            colorscale='Viridis',    # Eye-friendly gradient
+            color=node_color_values,
+            colorscale='Viridis',
             line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
             opacity=0.8, 
             symbol='circle'
+        ),
+        hoverlabel=dict(
+            bgcolor='rgba(10, 15, 25, 0.98)',
+            font=dict(size=13, family='Consolas, Monaco, monospace', color='#00ffcc'),
+            bordercolor='#00ffcc',
+            align='left',
+            namelength=0
         )
     )
 
@@ -1485,7 +1587,8 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
                    bgcolor='rgba(0,0,0,0)'),
         margin=dict(l=0, r=0, b=0, t=40))
 
-    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+    return go.Figure(data=edge_traces + [node_trace], layout=layout)
+
 
 
 
