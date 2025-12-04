@@ -3943,12 +3943,32 @@ def main():
                 st.caption(f"{t}: {c} instances")
 
         # Stats Plot
+        # Stats Plot
+        # [TEACHER'S FIX]: Initialize the variable to None first. 
+        # This prevents the "UnboundLocalError" by ensuring the name always exists in this scope.
+        fig_stats = None 
+
         if len(st.session_state.history) > 1:
             hist_df = pd.DataFrame(st.session_state.history)
             
             fig_stats = make_subplots(specs=[[{"secondary_y": True}]])
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['loss'], name="Loss", line=dict(color='#00FF00')), secondary_y=False)
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['parameter_count'], name="Params", line=dict(color='#FF00FF')), secondary_y=True)
+            
+            # Update layout for a cleaner look
+            fig_stats.update_layout(
+                title="Evolutionary Progress",
+                template="plotly_dark",
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                height=400,
+                margin=dict(l=10, r=10, t=40, b=10)
+            )
+
+        # [TEACHER'S FIX]: Only render if the chart was actually created
+        if fig_stats is not None:
+            # We render into the 'stats_plot' placeholder we defined earlier in the code
+            stats_plot.plotly_chart(fig_stats, use_container_width=True)
             
             
         st.markdown("---")
