@@ -2289,33 +2289,41 @@ def plot_dark_matter_void(arch: CognitiveArchitecture):
     return fig
 
 
-
-
-
-
 def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     """
     VISUALIZATION: The Genomic Helix (The Code of Immortality).
-    Maps the AI architecture onto a biological Double Helix.
+    Maps the AI architecture onto a biological Double Helix with realistic DNA structure.
     - Nodes become Base Pairs (A-T, G-C).
     - Z-Axis: Evolutionary sequence.
     - Color: Represents base types and stability.
+    - Realistic major/minor grooves and hourglass conformation.
     """
     if not arch.nodes: return go.Figure()
 
     node_ids = list(arch.nodes.keys())
     num_nodes = len(node_ids)
     
-    # --- HELIX MATHEMATICS ---
+    # --- HELIX MATHEMATICS (Realistic B-DNA Parameters) ---
     radius = 10.0
-    vertical_rise = 1.5  # Distance between base pairs
-    turns = max(2, num_nodes / 10) # How many full spins
+    vertical_rise = 3.4  # Angstrom rise per base pair (realistic DNA)
+    turns = max(3, num_nodes / 10.5)  # DNA completes 1 turn every 10.5 base pairs
     angle_step = (turns * 2 * math.pi) / max(1, num_nodes)
+    
+    # Major and Minor Groove parameters
+    major_groove_width = 2.2
+    minor_groove_width = 1.2
     
     # DNA Bases
     bases = ['A', 'T', 'G', 'C']
     base_pairs = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
-    base_colors = {'A': '#FF0055', 'T': '#FFD700', 'G': '#00FF00', 'C': '#0088FF'} # Neon palette
+    base_names = {'A': 'Adenine', 'T': 'Thymine', 'G': 'Guanine', 'C': 'Cytosine'}
+    base_colors = {
+        'A': '#00FFFF',  # Cyan - Purine
+        'T': '#FF00FF',  # Magenta - Pyrimidine
+        'G': '#00FF88',  # Emerald - Purine
+        'C': '#FFD700'   # Gold - Pyrimidine
+    }
+    bond_strength = {'A-T': 2, 'T-A': 2, 'G-C': 3, 'C-G': 3}  # Hydrogen bonds
     
     # Data Containers
     backbone1_x, backbone1_y, backbone1_z = [], [], []
@@ -2327,84 +2335,156 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     node_x, node_y, node_z = [], [], []
     node_text, node_colors, node_sizes = [], [], []
     
-    # Generate the Helix
+    # Secondary structures for grooves
+    groove_markers_x, groove_markers_y, groove_markers_z = [], [], []
+    
+    # Generate the Helix with realistic geometry
     for i, nid in enumerate(node_ids):
         node = arch.nodes[nid]
         props = node.properties
         
         # Calculate Position
         theta = i * angle_step
-        z = i * vertical_rise - (num_nodes * vertical_rise / 2) # Center vertically
+        z = i * vertical_rise - (num_nodes * vertical_rise / 2)  # Center vertically
         
-        # Strand 1 (Sense Strand)
-        x1 = radius * math.cos(theta)
-        y1 = radius * math.sin(theta)
+        # Hourglass effect: Radius varies to create major/minor grooves
+        # Creates realistic DNA compression/expansion
+        groove_phase = math.sin(theta * 2)  # Double frequency for grooves
+        radius_mod = radius + (groove_phase * 0.8)  # Subtle hourglass
         
-        # Strand 2 (Antisense Strand) - Offset by PI + Major Groove twist
-        x2 = radius * math.cos(theta + math.pi)
-        y2 = radius * math.sin(theta + math.pi)
+        # Strand 1 (Sense Strand) with groove modulation
+        x1 = radius_mod * math.cos(theta)
+        y1 = radius_mod * math.sin(theta)
+        
+        # Strand 2 (Antisense Strand) - Offset by PI
+        x2 = radius_mod * math.cos(theta + math.pi)
+        y2 = radius_mod * math.sin(theta + math.pi)
         
         backbone1_x.append(x1); backbone1_y.append(y1); backbone1_z.append(z)
         backbone2_x.append(x2); backbone2_y.append(y2); backbone2_z.append(z)
         
+        # Mark grooves for visual enhancement
+        if i % 3 == 0:  # Every 3rd position
+            groove_x = (radius + 2) * math.cos(theta + math.pi/2)
+            groove_y = (radius + 2) * math.sin(theta + math.pi/2)
+            groove_markers_x.append(groove_x)
+            groove_markers_y.append(groove_y)
+            groove_markers_z.append(z)
+        
         # --- GENETIC ENCODING ---
-        # Deterministically assign a base based on Node Type
-        # This makes "Attention" always map to 'A', "MLP" to 'G', etc.
         type_hash = hash(node.type_name) % 4
         base1 = bases[type_hash]
         base2 = base_pairs[base1]
+        base_pair_key = f"{base1}-{base2}"
         
-        # Create Rung (Hydrogen Bond)
+        # Calculate genetic metrics
+        complexity = props.get('complexity', 1.0)
+        stability = bond_strength[base_pair_key] * complexity
+        mutation_rate = 1.0 / max(complexity, 0.1)
+        
+        # Get network connections
+        connections = len([e for e in arch.edges if e.source == nid or e.target == nid])
+        
+        # Create Rung (Hydrogen Bond) with gradient
         rungs_x.extend([x1, x2, None])
         rungs_y.extend([y1, y2, None])
         rungs_z.extend([z, z, None])
-        rung_colors.extend([base_colors[base1], base_colors[base1], base_colors[base1]])
+        rung_colors.extend([base_colors[base1], base_colors[base2], None])
         
-        # Add Node Data (Visualized on Strand 1)
+        # Add Node Data (Visualized on both strands)
         node_x.append(x1)
         node_y.append(y1)
         node_z.append(z)
         node_colors.append(base_colors[base1])
-        node_sizes.append(8 + props.get('complexity', 1.0) * 3)
+        node_sizes.append(12 + stability * 2)
         
-        # DNA Hover Info
+        # === ENHANCED FUTURISTIC HOVER INFO ===
         node_text.append(
-            f"<b>🧬 CODON: {i}</b><br>" +
-            f"Node ID: {nid}<br>" +
-            f"Type: {node.type_name}<br>" +
-            f"Base Pair: <b>{base1}-{base2}</b><br>" +
-            f"Gene Strength: {props.get('complexity', 1.0):.2f}"
+            f"<b>╔══════════════════════════════════╗</b><br>"
+            f"<b>║  🧬 GENETIC SEQUENCE #{i:04d}  ║</b><br>"
+            f"<b>╚══════════════════════════════════╝</b><br>"
+            f"<br>"
+            f"<b>⚛️ MOLECULAR IDENTITY</b><br>"
+            f"├─ Node ID: <b style='color:#00FFFF'>{nid}</b><br>"
+            f"├─ Component: <b style='color:#FFD700'>{node.type_name}</b><br>"
+            f"├─ Base Pair: <b style='color:{base_colors[base1]}'>{base1}</b>"
+            f"<b style='color:#FFFFFF'>═</b>"
+            f"<b style='color:{base_colors[base2]}'>{base2}</b><br>"
+            f"└─ Nucleotides: {base_names[base1]} ↔ {base_names[base2]}<br>"
+            f"<br>"
+            f"<b>🔬 STRUCTURAL ANALYSIS</b><br>"
+            f"├─ H-Bonds: <b>{'●' * bond_strength[base_pair_key]}</b> ({bond_strength[base_pair_key]})<br>"
+            f"├─ Stability Index: <b>{stability:.3f}</b> ψ<br>"
+            f"├─ Gene Expression: <b>{complexity:.2%}</b><br>"
+            f"└─ Mutation Rate: <b>{mutation_rate:.4f}</b> /replication<br>"
+            f"<br>"
+            f"<b>🌐 NETWORK TOPOLOGY</b><br>"
+            f"├─ Neural Connections: <b>{connections}</b> synapses<br>"
+            f"├─ Position (θ,z): <b>({math.degrees(theta):.1f}°, {z:.1f}Å)</b><br>"
+            f"├─ Helix Turn: <b>{(theta/(2*math.pi)):.2f}</b> rotations<br>"
+            f"└─ Groove Phase: <b>{'MAJOR' if abs(groove_phase) > 0.5 else 'MINOR'}</b><br>"
+            f"<br>"
+            f"<b>⚡ QUANTUM PROPERTIES</b><br>"
+            f"├─ Coherence: <b>{props.get('coherence', 0.85):.2%}</b><br>"
+            f"├─ Entanglement: <b>{props.get('entanglement', 0.72):.2%}</b><br>"
+            f"└─ Information Density: <b>{complexity * connections:.1f}</b> qubits<br>"
+            f"<br>"
+            f"<b>📊 EVOLUTIONARY MARKERS</b><br>"
+            f"├─ Generation: <b>#{i}</b><br>"
+            f"├─ Fitness Score: <b>{stability * (1-mutation_rate):.3f}</b><br>"
+            f"└─ Sequence Conservation: <b>{(1-mutation_rate)*100:.1f}%</b>"
         )
 
     # --- PLOTTING TRACES ---
     
-    # 1. Sugar-Phosphate Backbone (The Strands)
+    # 1. Sugar-Phosphate Backbone (Enhanced with glow)
     trace_backbone1 = go.Scatter3d(
         x=backbone1_x, y=backbone1_y, z=backbone1_z,
         mode='lines',
-        line=dict(color='#EEEEEE', width=4),
-        name='Sense Strand', hoverinfo='none'
+        line=dict(color='rgba(0, 255, 255, 0.8)', width=6),
+        name='<b>5′ → 3′ Sense Strand</b>',
+        hoverinfo='name',
+        hovertemplate='<b>Sense Strand (5′→3′)</b><br>Leading Template<extra></extra>'
     )
     
     trace_backbone2 = go.Scatter3d(
         x=backbone2_x, y=backbone2_y, z=backbone2_z,
         mode='lines',
-        line=dict(color='#888888', width=4),
-        name='Antisense Strand', hoverinfo='none'
+        line=dict(color='rgba(255, 0, 255, 0.8)', width=6),
+        name='<b>3′ → 5′ Antisense Strand</b>',
+        hoverinfo='name',
+        hovertemplate='<b>Antisense Strand (3′→5′)</b><br>Complementary Template<extra></extra>'
     )
     
-    # 2. The Base Pairs (Rungs) - Connecting lines
-    # We use a trick: Plot lines with no markers, colored manually is hard in one trace
-    # So we use a single color for connections or split them. 
-    # For performance, we'll use a cool 'Hydrogen Bond' color.
+    # 2. The Base Pairs (Rungs) - Hydrogen Bonds with color gradient
     trace_rungs = go.Scatter3d(
         x=rungs_x, y=rungs_y, z=rungs_z,
         mode='lines',
-        line=dict(color='rgba(0, 255, 204, 0.3)', width=2),
-        name='Hydrogen Bonds', hoverinfo='none'
+        line=dict(color='rgba(255, 255, 255, 0.4)', width=3),
+        name='<b>Hydrogen Bonds</b>',
+        hoverinfo='name',
+        hovertemplate='<b>Hydrogen Bonds</b><br>Molecular Adhesion Force<extra></extra>'
     )
 
-    # 3. The Genes (Nucleotides)
+    # 3. Groove Markers (Major/Minor grooves visualization)
+    if groove_markers_x:
+        trace_grooves = go.Scatter3d(
+            x=groove_markers_x, y=groove_markers_y, z=groove_markers_z,
+            mode='markers',
+            marker=dict(
+                size=4,
+                color='rgba(100, 200, 255, 0.3)',
+                symbol='diamond',
+                opacity=0.4
+            ),
+            name='Grooves',
+            hoverinfo='skip',
+            showlegend=False
+        )
+    else:
+        trace_grooves = None
+
+    # 4. The Genes (Nucleotides) - Enhanced markers
     trace_nodes = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
         mode='markers+text',
@@ -2412,32 +2492,54 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             size=node_sizes,
             color=node_colors,
             symbol='circle',
-            line=dict(color='white', width=1),
-            opacity=0.9
+            line=dict(color='rgba(255, 255, 255, 0.8)', width=2),
+            opacity=0.95,
+            colorscale='Viridis',
+            showscale=False
         ),
-        text=[t.split('Base Pair: <b>')[1][0] for t in node_text], # Show 'A', 'G', etc on the node
-        textfont=dict(color='white', size=10),
+        text=[t.split("Base Pair: <b style='color:")[1].split("'>")[1][0] if "Base Pair:" in t else '' for t in node_text],
+        textfont=dict(color='white', size=12, family='Courier New, monospace'),
+        textposition='middle center',
         hovertext=node_text,
         hoverinfo='text',
-        name='Nucleotides'
+        name='<b>Nucleotide Base Pairs</b>',
+        hoverlabel=dict(
+            bgcolor='rgba(10, 10, 30, 0.95)',
+            bordercolor='cyan',
+            font=dict(family='Courier New, monospace', size=11, color='white')
+        )
     )
 
     layout = go.Layout(
-        title="GENOMIC ARCHITECTURE HELIX (The Code of Life)",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+        title=dict(
+            text="<b>🧬 GENOMIC ARCHITECTURE HELIX</b><br><sub>Neural DNA: The Code of Artificial Life</sub>",
+            font=dict(size=20, color='#00FFFF', family='Arial Black'),
+            x=0.5,
+            xanchor='center'
+        ),
+        paper_bgcolor='rgba(5, 5, 15, 1)',
+        plot_bgcolor='rgba(5, 5, 15, 1)',
         showlegend=False,
         scene=dict(
-            xaxis=dict(visible=False), 
-            yaxis=dict(visible=False), 
-            zaxis=dict(visible=False),
-            bgcolor='rgba(0,0,0,0)',
-            camera=dict(eye=dict(x=1.5, y=1.5, z=0.5))
+            xaxis=dict(visible=False, showgrid=False), 
+            yaxis=dict(visible=False, showgrid=False), 
+            zaxis=dict(visible=False, showgrid=False),
+            bgcolor='rgba(5, 5, 15, 1)',
+            camera=dict(
+                eye=dict(x=1.8, y=1.8, z=0.7),
+                center=dict(x=0, y=0, z=0)
+            )
         ),
-        margin=dict(l=0, r=0, b=0, t=40)
+        margin=dict(l=0, r=0, b=0, t=60),
+        hovermode='closest'
     )
     
-    return go.Figure(data=[trace_backbone1, trace_backbone2, trace_rungs, trace_nodes], layout=layout)
+    traces = [trace_backbone1, trace_backbone2, trace_rungs, trace_nodes]
+    if trace_grooves:
+        traces.insert(3, trace_grooves)
+    
+    return go.Figure(data=traces, layout=layout)
+
 
 
 def get_node_metrics(arch: CognitiveArchitecture):
