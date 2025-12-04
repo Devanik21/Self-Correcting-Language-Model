@@ -498,36 +498,49 @@ class CortexEvolver:
         # If the parent was dying of old age (High Aging Score), force a Repair Mutation
         
         # Check if parent has aging_score (handle first gen)
+        # Anti-Aging Repair Gene Insertion
+        # =========================================================
+        # === META-COGNITIVE SELF-CORRECTION (THE SURVIVAL INSTINCT) ===
+        # [TEACHER'S CRITICAL LONGEVITY UPDATE - FORCING IMMORTALITY]
+        # =========================================================
+        
         parent_aging = getattr(parent, 'aging_score', 100.0)
         
-        # If aging is high (> 5.0), we trigger a panic response to fix it (80% chance)
-        if parent_aging > 5.0 and random.random() < 0.8: 
-            child.mutations_log.append("⚠️ CRITICAL AGING DETECTED: Forcing Repair Gene Insertion")
-            
-            # Pick a biological defense mechanism from our new registry
-            defense_genes = ['Telomerase_Pump', 'DNA_Error_Corrector', 'Senolytic_Hunter', 'Mitochondrial_Filter']
-            gene_name = random.choice(defense_genes)
-            
-            # Create the biological node
-            new_id = f"BIO_{uuid.uuid4().hex[:4]}"
-            
-            # Ensure we get properties safely
-            if gene_name in NEURAL_PRIMITIVES:
-                gene_props = NEURAL_PRIMITIVES[gene_name].copy()
-            else:
-                # Fallback if registry isn't fully updated yet
-                gene_props = {'type': 'Repair', 'complexity': 2.0, 'color': '#FFFFFF'}
+        # Trigger our powerful Telomerase injection if aging is high
+        if parent_aging > 5.0:
+            is_complex = len(child.nodes) > 20
+            # Check if the child already has a Repair node (like Telomerase)
+            has_repair = any(n.properties.get('type') == 'Repair' for n in child.nodes.values())
 
-            # Attach it to a random existing node (Symbiosis)
-            # We avoid attaching to 'output_action' to keep the chain valid
-            possible_targets = [n for n in child.nodes.keys() if n != "output_action"]
-            if possible_targets:
-                target_id = random.choice(possible_targets)
+            # Only intervene if the brain is complex but lacks an existing defense
+            if is_complex and not has_repair:
+                # Create a Telomerase Pump (The "Immortality" Gene)
+                gene_id = f"BIO_{str(uuid.uuid4())[:6]}"
                 
-                new_node = ArchitectureNode(new_id, gene_name, gene_props, inputs=[target_id])
-                child.nodes[new_id] = new_node
-        # =========================================================
+                # Fetching the properties from the global registry (NEURAL_PRIMITIVES)
+                # This ensures consistent properties for the Telomerase_Pump
+                telomerase_node = ArchitectureNode(
+                    id=gene_id,
+                    type_name="Telomerase_Pump", 
+                    properties=NEURAL_PRIMITIVES['Telomerase_Pump'].copy()
+                )
+                
+                # Graft it onto the most stressed node (highest input connections)
+                # This simulates targeting the most critical, "damaged" area
+                hub_node_id = max(child.nodes, 
+                                  key=lambda k: len(child.nodes[k].inputs) if hasattr(child.nodes[k], 'inputs') else 0)
+                
+                # Connect Telomerase to the hub
+                telomerase_node.inputs = [hub_node_id]
+                child.nodes[gene_id] = telomerase_node
+                
+                # Log the intervention for your review
+                child.mutations_log.append(f"🧬 GENETIC INTERVENTION: Telomerase Pump grafted onto {hub_node_id}")
+                
+                # Reset aging score immediately (CRITICAL: Longevity breakthrough)
+                child.aging_score *= 0.01 
 
+        # =========================================================
         child.compute_stats()
         return child
 
