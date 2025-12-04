@@ -3944,14 +3944,19 @@ def main():
 
         # Stats Plot
         # Stats Plot
+        # Stats Plot
         # [TEACHER'S FIX]: Initialize the variable to None first. 
-        # This prevents the "UnboundLocalError" by ensuring the name always exists in this scope.
+        # This prevents scope issues if the 'if' block is skipped.
         fig_stats = None 
 
         if len(st.session_state.history) > 1:
             hist_df = pd.DataFrame(st.session_state.history)
             
+            # [CRITICAL STEP]: Ensure this line is present and correctly indented!
+            # This is where fig_stats is actually defined as a plot object.
             fig_stats = make_subplots(specs=[[{"secondary_y": True}]])
+            
+            # These lines (where the error is now pointing) should run fine if the line above executes.
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['loss'], name="Loss", line=dict(color='#00FF00')), secondary_y=False)
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['parameter_count'], name="Params", line=dict(color='#FF00FF')), secondary_y=True)
             
