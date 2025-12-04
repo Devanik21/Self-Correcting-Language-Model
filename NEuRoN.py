@@ -1195,7 +1195,7 @@ def plot_immortality_curve(history):
 def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
     """
     Renders the architecture using the Golden Ratio (Fibonacci Phyllotaxis).
-    UPDATED: Now uses the soothing 'Viridis' complexity gradient.
+    UPDATED: Enhanced hover details with comprehensive node information.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
@@ -1203,7 +1203,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         props = getattr(node, 'properties', {})
         t_name = getattr(node, 'type_name', 'Unknown')
         # We fetch complexity for the gradient mapping
-        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0))
+        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0), properties=props)
         
         inputs = getattr(node, 'inputs', [])
         for parent in inputs:
@@ -1241,28 +1241,75 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         node_x.append(x)
         node_y.append(y)
         node_z.append(z)
-
-    # Render Nodes
-    # CHANGE: Use complexity values instead of hex strings
+    
+    # Render Nodes with enhanced hover information
     node_color_values = [G.nodes[n]['complexity'] for n in node_list]
     node_sizes = [8 + G.nodes[n]['complexity'] * 5 for n in node_list]
+    
+    # Build comprehensive hover text
+    hover_texts = []
+    for n in node_list:
+        node_data = G.nodes[n]
+        props = node_data.get('properties', {})
+        
+        # Calculate connections
+        in_degree = G.in_degree(n)
+        out_degree = G.out_degree(n)
+        
+        # Build detailed hover information
+        hover_info = f"""
+<b>╔═══ NEURAL NODE: {n} ═══╗</b>
+<b>│</b> Type: <b>{node_data['type']}</b>
+<b>│</b> Complexity Index: <b>{node_data['complexity']:.3f}</b>
+<b>│</b>
+<b>│</b> 🔗 Connections:
+<b>│</b>   ↓ Inputs: {in_degree}
+<b>│</b>   ↑ Outputs: {out_degree}
+<b>│</b>   Σ Total: {in_degree + out_degree}
+<b>│</b>
+<b>│</b> 📊 Coordinates:
+<b>│</b>   X: {pos_map[n][0]:.2f}
+<b>│</b>   Y: {pos_map[n][1]:.2f}
+<b>│</b>   Z: {pos_map[n][2]:.2f}
+<b>│</b>
+<b>│</b> ⚙️ Properties:"""
+        
+        # Add all properties dynamically
+        if props:
+            for key, value in props.items():
+                if key != 'complexity':  # Already shown
+                    if isinstance(value, float):
+                        hover_info += f"\n<b>│</b>   {key}: {value:.3f}"
+                    else:
+                        hover_info += f"\n<b>│</b>   {key}: {value}"
+        else:
+            hover_info += "\n<b>│</b>   [No additional properties]"
+        
+        hover_info += "\n<b>╚═══════════════════════╝</b>"
+        hover_texts.append(hover_info)
     
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
         mode='markers',
         marker=dict(
             size=node_sizes,
-            color=node_color_values, # Map values...
-            colorscale='Viridis',    # ...to the Eye-Friendly Palette
+            color=node_color_values,
+            colorscale='Viridis',
             line=dict(color='rgba(255, 255, 255, 0.5)', width=0.4),
             opacity=0.8
         ),
-        text=[f"Neuron: {n}<br>Type: {G.nodes[n]['type']}" for n in node_list],
-        hoverinfo='text'
+        text=hover_texts,
+        hoverinfo='text',
+        hoverlabel=dict(
+            bgcolor='rgba(20, 20, 30, 0.95)',
+            font=dict(size=12, family='Courier New, monospace', color='#00ff88'),
+            bordercolor='#00ff88',
+            align='left'
+        )
     )
     
-    # Render Organic Tendrils (Edges)
-    edge_x, edge_y, edge_z = [], [], []
+    # Render Organic Tendrils (Edges) with hover info
+    edge_traces = []
     for u, v in G.edges():
         if u in pos_map and v in pos_map:
             x0, y0, z0 = pos_map[u]
@@ -1273,18 +1320,32 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             mid_y = (y0 + y1) / 2
             mid_z = (z0 + z1) / 2 * 0.8
             
-            edge_x.extend([x0, mid_x, x1, None])
-            edge_y.extend([y0, mid_y, y1, None])
-            edge_z.extend([z0, mid_z, z1, None])
-
-    edge_trace = go.Scatter3d(
-        x=edge_x, y=edge_y, z=edge_z,
-        mode='lines',
-        # CHANGE: Soft Ghostly Grey instead of Green
-        line=dict(color='rgba(255, 255, 255, 0.1)', width=1.5), 
-        hoverinfo='none'
-    )
-
+            # Calculate edge properties
+            edge_length = math.sqrt((x1-x0)**2 + (y1-y0)**2 + (z1-z0)**2)
+            
+            edge_hover = f"""
+<b>⚡ SYNAPTIC CONNECTION</b>
+From: <b>{u}</b> → To: <b>{v}</b>
+Length: {edge_length:.2f} units
+Type: {G.nodes[u]['type']} → {G.nodes[v]['type']}
+Signal Flow: Downstream"""
+            
+            edge_trace = go.Scatter3d(
+                x=[x0, mid_x, x1],
+                y=[y0, mid_y, y1],
+                z=[z0, mid_z, z1],
+                mode='lines',
+                line=dict(color='rgba(255, 255, 255, 0.1)', width=1.5),
+                text=edge_hover,
+                hoverinfo='text',
+                hoverlabel=dict(
+                    bgcolor='rgba(30, 20, 40, 0.95)',
+                    font=dict(size=11, family='Courier New, monospace', color='#ff00ff'),
+                    bordercolor='#ff00ff'
+                )
+            )
+            edge_traces.append(edge_trace)
+    
     layout = go.Layout(
         title=dict(text=f"Fibonacci Neuro-Spiral: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
@@ -1295,7 +1356,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         ),
         margin=dict(l=0, r=0, b=0, t=40)
     )
-    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+    return go.Figure(data=edge_traces + [node_trace], layout=layout)
 
 
 
