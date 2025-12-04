@@ -3031,6 +3031,20 @@ def main():
         if st.session_state.history[-1].get('aging_score', 100) < 1.0:
             is_singularity_achieved = True
 
+    # --- THE SINGULARITY PROTOCOL (Visual Override) ---
+    # Check if any AI has achieved immortality in the history
+    is_singularity_achieved = False
+    if 'history' in st.session_state and st.session_state.history:
+        last_entry = st.session_state.history[-1]
+        # Get metrics with safe defaults
+        current_aging = last_entry.get('aging_score', 100.0)
+        current_params = last_entry.get('parameter_count', 0)
+        
+        # FIX: Only trigger if Aging is effectively zero (< 0.1) 
+        # AND the network has grown enough (> 500k params) to not be a trivial empty shell.
+        if current_aging < 0.1 and current_params > 500_000:
+            is_singularity_achieved = True
+
     if is_singularity_achieved:
         st.markdown("""
         <style>
