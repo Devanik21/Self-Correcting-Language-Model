@@ -3950,13 +3950,7 @@ def main():
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['loss'], name="Loss", line=dict(color='#00FF00')), secondary_y=False)
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['parameter_count'], name="Params", line=dict(color='#FF00FF')), secondary_y=True)
             
-            fig_stats.update_layout(
-                title="System Performance vs Complexity",
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white')
-            )
-            stats_plot.plotly_chart(fig_stats, use_container_width=True)
+            
          # --- [START OF NEW CODE] ---
         # 1. Create the visual space for the Longevity Plot
         st.markdown("---")
