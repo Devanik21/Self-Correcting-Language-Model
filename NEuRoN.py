@@ -4217,48 +4217,107 @@ def main():
             if 'archive_page' not in st.session_state:
                 st.session_state.archive_page = 0
 
-            tabs = st.tabs(["Deep Inspection", "Loss Landscape", "Gene Pool"])
+            # ==================== ARCHITECTURAL INSIGHTS (LAZY LOADED) ====================
+        st.markdown("---")
+        st.markdown("""
+            <div style='text-align: center; padding: 20px 0;'>
+                <h2 style='color: #6eb4ff; font-family: "Courier New", monospace; 
+                           text-shadow: 0 0 10px rgba(110,180,255,0.5);
+                           letter-spacing: 2px; margin-bottom: 5px;'>
+                    🧠 ARCHITECTURAL INSIGHTS 🧠
+                </h2>
+                <p style='color: #888; font-size: 14px; font-style: italic;'>
+                    The Structure, Terrain, and Population of the Digital Mind
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        tabs = st.tabs(["Deep Inspection", "Loss Landscape", "Gene Pool"])
+        
+        # --- TAB 1: DEEP INSPECTION ---
+        with tabs[0]:
+            st.markdown("""
+                <p style='color: #aaa; font-size: 13px;'>
+                    🔎 <b style='color: #6eb4ff;'>Component Hierarchy:</b> 
+                    Detailed look at the best individual's structure (Sunburst Chart) and full genotype (JSON).
+                </p>
+            """, unsafe_allow_html=True)
             
-            with tabs[0]:
-                best_now = st.session_state.evolver.population[0]
-                st.subheader(f"Architecture ID: {best_now.id}")
-                
-                c1, c2 = st.columns(2)
-                with c1:
-                    # Sunburst of components
-                    # Build hierarchy for sunburst
-                    flat_data = []
-                    for nid, node in best_now.nodes.items():
-                        flat_data.append({'id': nid, 'parent': 'Model', 'value': node.properties['complexity'], 'color': node.properties['color']})
-                    flat_data.append({'id': 'Model', 'parent': '', 'value': 0, 'color': '#FFFFFF'})
+            # LAZY LOAD BUTTON
+            if st.button("⚡ Inspect Best Genotype", key="btn_load_deep_inspect", type="primary", use_container_width=True):
+                if 'best_genotype' in st.session_state:
+                    best_now = st.session_state.best_genotype
                     
+                    # [TEACHER'S NOTE]: Assuming the functions 'get_sunburst_data' and 'asdict' exist and are imported.
+                    # This is where the heavy data prep for the sunburst chart happens.
+                    flat_data = get_sunburst_data(best_now)
                     sb_df = pd.DataFrame(flat_data)
-                    fig_sb = go.Figure(go.Sunburst(
-                        labels=sb_df['id'],
-                        parents=sb_df['parent'],
-                        values=sb_df['value'],
-                        marker=dict(colors=sb_df['color'])
-                    ))
-                    fig_sb.update_layout(title="Component Hierarchy", margin=dict(t=0, l=0, r=0, b=0))
-                    st.plotly_chart(fig_sb, use_container_width=True)
                     
-                with c2:
-                    st.json(asdict(best_now))
+                    c1, c2 = st.columns(2)
+                    
+                    with c1:
+                        fig_sb = go.Figure(go.Sunburst(
+                            labels=sb_df['id'],
+                            parents=sb_df['parent'],
+                            values=sb_df['value'],
+                            marker=dict(colors=sb_df['color'])
+                        ))
+                        fig_sb.update_layout(title="Component Hierarchy", margin=dict(t=0, l=0, r=0, b=0))
+                        st.plotly_chart(fig_sb, use_container_width=True)
+                        
+                    with c2:
+                        st.json(asdict(best_now))
+                else:
+                    st.error("No best genotype found. Run a generation first.")
+            else:
+                st.info("Module Standby. Click to load the full structural data.")
+
+        # --- TAB 2: LOSS LANDSCAPE ---
+        with tabs[1]:
+            st.markdown("""
+                <p style='color: #aaa; font-size: 13px;'>
+                    🏔️ <b style='color: #ff6ec7;'>Loss Landscape:</b> 
+                    A 3D surface plot visualizing the optimization path of the best model.
+                </p>
+            """, unsafe_allow_html=True)
             
-            with tabs[1]:
-                fig_land = plot_loss_landscape_surface(st.session_state.history)
-                st.plotly_chart(fig_land, use_container_width=True)
-                
-            with tabs[2]:
-                # Population distribution
-                pop_params = [a.parameter_count for a in st.session_state.evolver.population]
-                pop_loss = [a.loss for a in st.session_state.evolver.population]
-                
-                fig_dist = px.scatter(x=pop_params, y=pop_loss, color=pop_loss, 
-                                      labels={'x': 'Parameters', 'y': 'Loss'}, 
-                                      title="Population Distribution (Fitness vs Size)",
-                                      color_continuous_scale='Turbo_r')
-                st.plotly_chart(fig_dist, use_container_width=True)
+            # LAZY LOAD BUTTON
+            if st.button("⚡ Render 3D Landscape", key="btn_load_landscape", type="primary", use_container_width=True):
+                if st.session_state.history:
+                    # [TEACHER'S NOTE]: Assuming 'plot_loss_landscape_surface' handles the complex 3D plotting.
+                    fig_land = plot_loss_landscape_surface(st.session_state.history)
+                    st.plotly_chart(fig_land, use_container_width=True)
+                else:
+                    st.warning("History required for Loss Landscape. Run the simulation first.")
+            else:
+                st.info("Module Standby. Click to render the computational terrain.")
+
+        # --- TAB 3: GENE POOL ---
+        with tabs[2]:
+            st.markdown("""
+                <p style='color: #aaa; font-size: 13px;'>
+                    🌊 <b style='color: #00ffcc;'>Gene Pool:</b> 
+                    Scatter plot showing the current population's trade-off between size (Parameters) and performance (Loss).
+                </p>
+            """, unsafe_allow_html=True)
+            
+            # LAZY LOAD BUTTON
+            if st.button("⚡ Analyze Population", key="btn_load_genepool", type="primary", use_container_width=True):
+                if 'evolver' in st.session_state and st.session_state.evolver.population:
+                    # Population distribution
+                    pop_params = [a.parameter_count for a in st.session_state.evolver.population]
+                    pop_loss = [a.loss for a in st.session_state.evolver.population]
+                    
+                    # [TEACHER'S NOTE]: px (plotly.express) is imported at the top of your file.
+                    fig_dist = px.scatter(x=pop_params, y=pop_loss, color=pop_loss, 
+                                          labels={'x': 'Parameters', 'y': 'Loss'}, 
+                                          title="Population Distribution (Fitness vs Size)",
+                                          color_continuous_scale='Turbo_r')
+                    st.plotly_chart(fig_dist, use_container_width=True)
+                else:
+                    st.error("Evolver not initialized or population is empty.")
+            else:
+                st.info("Module Standby. Click to analyze the current generation's data.")
                 
 
 if __name__ == "__main__":
