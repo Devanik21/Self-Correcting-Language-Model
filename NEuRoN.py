@@ -734,14 +734,14 @@ def generate_ai_thought(arch, generation: int) -> str:
 def plot_neural_topology_3d(arch: CognitiveArchitecture):
     """
     Renders the neural network with an EYE-FRIENDLY soothing gradient.
+    UPDATED: Enhanced with futuristic hover details in clean list format.
     """
     G = nx.DiGraph()
     for nid, node in arch.nodes.items():
         # Safely access properties for robustness
         props = getattr(node, 'properties', {})
         t_name = getattr(node, 'type_name', 'Unknown')
-        # We ignore the hardcoded neon 'color' here and use complexity for the gradient instead
-        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0))
+        G.add_node(nid, type=t_name, complexity=props.get('complexity', 1.0), properties=props)
         
         # Safely access inputs
         inputs = getattr(node, 'inputs', [])
@@ -752,27 +752,64 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     # Layout
     pos = nx.spring_layout(G, dim=3)
     
-    # Edges (Made slightly softer grey)
-    edge_x, edge_y, edge_z = [], [], []
+    # Edges with enhanced hover
+    edge_traces = []
     for u, v in G.edges():
         if u in pos and v in pos:
             x0, y0, z0 = pos[u]
             x1, y1, z1 = pos[v]
-            edge_x.extend([x0, x1, None])
-            edge_y.extend([y0, y1, None])
-            edge_z.extend([z0, z1, None])
-        
-    edge_trace = go.Scatter3d(
-        x=edge_x, y=edge_y, z=edge_z,
-        mode='lines',
-        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6), # Soft Ghostly Grey
-        hoverinfo='none'
-    )
+            
+            # Calculate edge properties
+            edge_length = math.sqrt((x1-x0)**2 + (y1-y0)**2 + (z1-z0)**2)
+            u_complexity = G.nodes[u]['complexity']
+            v_complexity = G.nodes[v]['complexity']
+            complexity_delta = v_complexity - u_complexity
+            
+            edge_hover_lines = [
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"<b>⚡ NEURAL PATHWAY</b>",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"",
+                f"<b>CONNECTION PATH</b>",
+                f"  • Source: {u}",
+                f"  • Target: {v}",
+                f"  • Flow: Forward Propagation",
+                f"",
+                f"<b>TOPOLOGY METRICS</b>",
+                f"  • Edge Length: {edge_length:.4f} units",
+                f"  • Source Type: {G.nodes[u]['type']}",
+                f"  • Target Type: {G.nodes[v]['type']}",
+                f"",
+                f"<b>COMPLEXITY FLOW</b>",
+                f"  • Source Complexity: {u_complexity:.4f}",
+                f"  • Target Complexity: {v_complexity:.4f}",
+                f"  • Gradient (Δ): {complexity_delta:+.4f}",
+                f"",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>"
+            ]
+            
+            edge_trace = go.Scatter3d(
+                x=[x0, x1],
+                y=[y0, y1],
+                z=[z0, z1],
+                mode='lines',
+                line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6),
+                text="<br>".join(edge_hover_lines),
+                hoverinfo='text',
+                hoverlabel=dict(
+                    bgcolor='rgba(15, 10, 30, 0.98)',
+                    font=dict(size=12, family='Consolas, Monaco, monospace', color='#ff6ec7'),
+                    bordercolor='#ff6ec7',
+                    align='left',
+                    namelength=0
+                )
+            )
+            edge_traces.append(edge_trace)
     
-    # Nodes
+    # Nodes with enhanced hover
     node_x, node_y, node_z = [], [], []
-    node_color_values = [] # We use values now, not hex codes
-    node_text = []
+    node_color_values = []
+    node_hover_texts = []
     node_size = []
     
     for node in G.nodes():
@@ -786,18 +823,80 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
             props = getattr(n_data, 'properties', {})
             t_name = getattr(n_data, 'type_name', 'Unknown')
             inputs = getattr(n_data, 'inputs', [])
-
-            hover_text = (
-                f"<b>ID: {node}</b><br>"
-                f"Type: {t_name}<br>"
-                f"Complexity: {props.get('complexity', 0):.2f}<br>"
-                f"Inputs: {len(inputs)}"
-            )
+            
+            # Calculate connections
+            in_degree = G.in_degree(node)
+            out_degree = G.out_degree(node)
+            
+            # Build comprehensive hover information
+            hover_lines = [
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"<b>🔷 NODE: {node}</b>",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"",
+                f"<b>NODE CLASSIFICATION</b>",
+                f"  • Type: {t_name}",
+                f"  • ID: {node}",
+                f"",
+                f"<b>COMPLEXITY ANALYSIS</b>",
+                f"  • Complexity Index: {props.get('complexity', 0):.4f}",
+                f"  • Node Size Factor: {8 + props.get('complexity', 1.0) * 4:.2f}",
+                f"",
+                f"<b>NETWORK CONNECTIVITY</b>",
+                f"  • Incoming Links: {in_degree}",
+                f"  • Outgoing Links: {out_degree}",
+                f"  • Total Connections: {in_degree + out_degree}",
+                f"  • Input Nodes: {len(inputs)}",
+                f"",
+                f"<b>SPATIAL POSITION</b>",
+                f"  • X-Coordinate: {x:.4f}",
+                f"  • Y-Coordinate: {y:.4f}",
+                f"  • Z-Coordinate: {z:.4f}",
+                f"  • Distance from Origin: {math.sqrt(x**2 + y**2 + z**2):.4f}",
+            ]
+            
+            # Add all additional properties
+            additional_props = {k: v for k, v in props.items() 
+                              if k != 'complexity'}
+            
+            if additional_props:
+                hover_lines.append("")
+                hover_lines.append("<b>ADDITIONAL PROPERTIES</b>")
+                for key, value in additional_props.items():
+                    if isinstance(value, float):
+                        hover_lines.append(f"  • {key}: {value:.4f}")
+                    elif isinstance(value, (list, tuple)):
+                        hover_lines.append(f"  • {key}: [{len(value)} items]")
+                    else:
+                        hover_lines.append(f"  • {key}: {value}")
+            
+            # Network statistics
+            if in_degree > 0 or out_degree > 0:
+                hover_lines.append("")
+                hover_lines.append("<b>TOPOLOGY STATISTICS</b>")
+                if in_degree > 0:
+                    hover_lines.append(f"  • Fan-in Ratio: {in_degree/(in_degree+out_degree):.2%}")
+                if out_degree > 0:
+                    hover_lines.append(f"  • Fan-out Ratio: {out_degree/(in_degree+out_degree):.2%}")
+                
+                # Calculate average neighbor complexity
+                neighbor_complexities = []
+                for pred in G.predecessors(node):
+                    neighbor_complexities.append(G.nodes[pred]['complexity'])
+                for succ in G.successors(node):
+                    neighbor_complexities.append(G.nodes[succ]['complexity'])
+                
+                if neighbor_complexities:
+                    avg_neighbor_complexity = sum(neighbor_complexities) / len(neighbor_complexities)
+                    hover_lines.append(f"  • Avg Neighbor Complexity: {avg_neighbor_complexity:.4f}")
+            
+            hover_lines.append("")
+            hover_lines.append(f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>")
+            
+            node_hover_texts.append("<br>".join(hover_lines))
             
             # Use Complexity as the source for the gradient color
             node_color_values.append(props.get('complexity', 0.5))
-            
-            node_text.append(hover_text)
             node_size.append(8 + props.get('complexity', 1.0) * 4)
         
     node_trace = go.Scatter3d(
@@ -805,23 +904,26 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         mode='markers',
         marker=dict(
             size=node_size,
-            color=node_color_values, # Map values...
-            colorscale='Viridis',    # ...to this Eye-Friendly Palette (Blue-Green-Yellow)
+            color=node_color_values,
+            colorscale='Viridis',
             line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
             opacity=0.9
         ),
-        text=node_text,
-        hoverinfo='text'
+        text=node_hover_texts,
+        hoverinfo='text',
+        hoverlabel=dict(
+            bgcolor='rgba(10, 15, 25, 0.98)',
+            font=dict(size=13, family='Consolas, Monaco, monospace', color='#00ffcc'),
+            bordercolor='#00ffcc',
+            align='left',
+            namelength=0
+        )
     )
     
     layout = go.Layout(
         title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        hoverlabel=dict(
-            font_size=16,
-            bgcolor="rgba(20, 30, 40, 0.9)" # Dark blueish background for tooltip
-        ),
         showlegend=False,
         scene=dict(
             camera=dict(eye=dict(x=1.5, y=1.5, z=0.5)),
@@ -833,7 +935,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
         margin=dict(l=0, r=0, b=0, t=40)
     )
     
-    return go.Figure(data=[edge_trace, node_trace], layout=layout)
+    return go.Figure(data=edge_traces + [node_trace], layout=layout)
 
 
 
