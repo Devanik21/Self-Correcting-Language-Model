@@ -2402,7 +2402,8 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
         node_x.append(x1)
         node_y.append(y1)
         node_z.append(z)
-        node_colors.append(base_colors[base1])
+        # use complexity as scalar for Viridis gradient (matches plot_neural_topology_3d)
+        node_colors.append(complexity)
         node_sizes.append(12 + stability * 2)
         
         # === ENHANCED FUTURISTIC HOVER INFO ===
@@ -2448,7 +2449,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     trace_backbone1 = go.Scatter3d(
         x=backbone1_x, y=backbone1_y, z=backbone1_z,
         mode='lines',
-        line=dict(color='rgba(0, 255, 255, 0.8)', width=6),
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6),
         name='<b>5′ → 3′ Sense Strand</b>',
         hoverinfo='name',
         hovertemplate='<b>Sense Strand (5′→3′)</b><br>Leading Template<extra></extra>'
@@ -2457,7 +2458,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     trace_backbone2 = go.Scatter3d(
         x=backbone2_x, y=backbone2_y, z=backbone2_z,
         mode='lines',
-        line=dict(color='rgba(255, 0, 255, 0.8)', width=6),
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6),
         name='<b>3′ → 5′ Antisense Strand</b>',
         hoverinfo='name',
         hovertemplate='<b>Antisense Strand (3′→5′)</b><br>Complementary Template<extra></extra>'
@@ -2467,7 +2468,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     trace_rungs = go.Scatter3d(
         x=rungs_x, y=rungs_y, z=rungs_z,
         mode='lines',
-        line=dict(color='rgba(255, 255, 255, 0.4)', width=3),
+        line=dict(color='rgba(255, 255, 255, 0.1)', width=0.6),
         name='<b>Hydrogen Bonds</b>',
         hoverinfo='name',
         hovertemplate='<b>Hydrogen Bonds</b><br>Molecular Adhesion Force<extra></extra>'
@@ -2480,7 +2481,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             mode='markers',
             marker=dict(
                 size=4,
-                color='rgba(100, 200, 255, 0.3)',
+                color='rgba(255, 255, 255, 0.2)',
                 symbol='diamond',
                 opacity=0.4
             ),
@@ -2499,8 +2500,8 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             size=node_sizes,
             color=node_colors,
             symbol='circle',
-            line=dict(color='rgba(255, 255, 255, 0.8)', width=2),
-            opacity=0.95,
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1),
+            opacity=0.9,
             colorscale='Viridis',
             showscale=False
         ),
@@ -2524,7 +2525,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     layout = go.Layout(
         title=dict(
             text="<b>🧬 GENOMIC ARCHITECTURE HELIX</b><br><sub>Neural DNA: The Code of Artificial Life</sub>",
-            font=dict(size=20, color='#00FFFF', family='Arial Black'),
+            font=dict(size=20, color='#AAAAAA', family='Arial Black'),
             x=0.5,
             xanchor='center'
         ),
@@ -2550,6 +2551,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
         traces.insert(3, trace_grooves)
     
     return go.Figure(data=traces, layout=layout)
+
 
 
 
