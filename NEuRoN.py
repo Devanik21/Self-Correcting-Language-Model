@@ -1110,7 +1110,7 @@ def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
             else: col = '#FF5500' # Orange
             
             colors.append(col)
-            hover_texts.append(f"<b>🧠 NEURAL TISSUE</b><br>ID: {nid}<br>Type: {n_type}<br>Metabolic Cost: {complexity:.2f}")
+            hover_texts.append(f"<b> NEURAL TISSUE</b><br>ID: {nid}<br>Type: {n_type}<br>Metabolic Cost: {complexity:.2f}")
             widths.append(5) # Thinner bars for standard tissue
 
     # --- PLOTLY CONSTRUCTION ---
@@ -3987,7 +3987,7 @@ def main():
                 <h2 style='color: #00ffcc; font-family: "Courier New", monospace; 
                            text-shadow: 0 0 10px rgba(0,255,204,0.5);
                            letter-spacing: 2px; margin-bottom: 5px;'>
-                    ⚗️ LONGEVITY ANALYSIS ⚗️
+                     LONGEVITY ANALYSIS 
                 </h2>
                 <p style='color: #888; font-size: 14px; font-style: italic;'>
                     The Path to Computational Immortality
@@ -4228,7 +4228,7 @@ def main():
                 <h2 style='color: #6eb4ff; font-family: "Courier New", monospace; 
                            text-shadow: 0 0 10px rgba(110,180,255,0.5);
                            letter-spacing: 2px; margin-bottom: 5px;'>
-                    🧠 ARCHITECTURAL INSIGHTS 🧠
+                     ARCHITECTURAL INSIGHTS 
                 </h2>
                 <p style='color: #888; font-size: 14px; font-style: italic;'>
                     The Structure, Terrain, and Population of the Digital Mind
