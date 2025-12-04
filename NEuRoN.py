@@ -4112,7 +4112,7 @@ def main():
                 with st.spinner("Sequencing Genotype into DNA Structure..."):
                     try:
                         # Call the function (Ensure plot_genomic_helix_3d is defined in your file!)
-                        fig_dna = plot_genomic_helix_3d(best_arch)
+                        fig_dna = plot_genomic_helix_3d_ultra(best_arch)
                         
                         fig_dna.update_layout(
                             height=700, 
