@@ -1247,6 +1247,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
     node_sizes = [8 + G.nodes[n]['complexity'] * 5 for n in node_list]
     
     # Build comprehensive hover text
+    # Build comprehensive hover text
     hover_texts = []
     for n in node_list:
         node_data = G.nodes[n]
@@ -1256,37 +1257,42 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         in_degree = G.in_degree(n)
         out_degree = G.out_degree(n)
         
-        # Build detailed hover information
-        hover_info = f"""
-<b>╔═══ NEURAL NODE: {n} ═══╗</b>
-<b>│</b> Type: <b>{node_data['type']}</b>
-<b>│</b> Complexity Index: <b>{node_data['complexity']:.3f}</b>
-<b>│</b>
-<b>│</b> 🔗 Connections:
-<b>│</b>   ↓ Inputs: {in_degree}
-<b>│</b>   ↑ Outputs: {out_degree}
-<b>│</b>   Σ Total: {in_degree + out_degree}
-<b>│</b>
-<b>│</b> 📊 Coordinates:
-<b>│</b>   X: {pos_map[n][0]:.2f}
-<b>│</b>   Y: {pos_map[n][1]:.2f}
-<b>│</b>   Z: {pos_map[n][2]:.2f}
-<b>│</b>
-<b>│</b> ⚙️ Properties:"""
+        # Build detailed hover information in clean list format
+        hover_lines = [
+            f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+            f"<b>🔷 NODE: {n}</b>",
+            f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+            f"",
+            f"<b>TYPE</b>",
+            f"  • {node_data['type']}",
+            f"",
+            f"<b>METRICS</b>",
+            f"  • Complexity: {node_data['complexity']:.4f}",
+            f"  • Input Links: {in_degree}",
+            f"  • Output Links: {out_degree}",
+            f"  • Total Connections: {in_degree + out_degree}",
+            f"",
+            f"<b>POSITION</b>",
+            f"  • X-Axis: {pos_map[n][0]:.2f}",
+            f"  • Y-Axis: {pos_map[n][1]:.2f}",
+            f"  • Z-Axis: {pos_map[n][2]:.2f}",
+        ]
         
-        # Add all properties dynamically
+        # Add properties if available
         if props:
+            hover_lines.append("")
+            hover_lines.append("<b>PROPERTIES</b>")
             for key, value in props.items():
-                if key != 'complexity':  # Already shown
+                if key != 'complexity':
                     if isinstance(value, float):
-                        hover_info += f"\n<b>│</b>   {key}: {value:.3f}"
+                        hover_lines.append(f"  • {key}: {value:.4f}")
                     else:
-                        hover_info += f"\n<b>│</b>   {key}: {value}"
-        else:
-            hover_info += "\n<b>│</b>   [No additional properties]"
+                        hover_lines.append(f"  • {key}: {value}")
         
-        hover_info += "\n<b>╚═══════════════════════╝</b>"
-        hover_texts.append(hover_info)
+        hover_lines.append("")
+        hover_lines.append(f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>")
+        
+        hover_texts.append("<br>".join(hover_lines))
     
     node_trace = go.Scatter3d(
         x=node_x, y=node_y, z=node_z,
@@ -1301,10 +1307,11 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         text=hover_texts,
         hoverinfo='text',
         hoverlabel=dict(
-            bgcolor='rgba(20, 20, 30, 0.95)',
-            font=dict(size=12, family='Courier New, monospace', color='#00ff88'),
-            bordercolor='#00ff88',
-            align='left'
+            bgcolor='rgba(10, 15, 25, 0.98)',
+            font=dict(size=13, family='Consolas, Monaco, monospace', color='#00ffcc'),
+            bordercolor='#00ffcc',
+            align='left',
+            namelength=0
         )
     )
     
@@ -1323,12 +1330,22 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             # Calculate edge properties
             edge_length = math.sqrt((x1-x0)**2 + (y1-y0)**2 + (z1-z0)**2)
             
-            edge_hover = f"""
-<b>⚡ SYNAPTIC CONNECTION</b>
-From: <b>{u}</b> → To: <b>{v}</b>
-Length: {edge_length:.2f} units
-Type: {G.nodes[u]['type']} → {G.nodes[v]['type']}
-Signal Flow: Downstream"""
+            edge_hover_lines = [
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"<b>⚡ SYNAPSE CONNECTION</b>",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
+                f"",
+                f"<b>PATH</b>",
+                f"  • Source: {u}",
+                f"  • Target: {v}",
+                f"",
+                f"<b>PROPERTIES</b>",
+                f"  • Length: {edge_length:.3f} units",
+                f"  • From Type: {G.nodes[u]['type']}",
+                f"  • To Type: {G.nodes[v]['type']}",
+                f"",
+                f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>"
+            ]
             
             edge_trace = go.Scatter3d(
                 x=[x0, mid_x, x1],
@@ -1336,12 +1353,14 @@ Signal Flow: Downstream"""
                 z=[z0, mid_z, z1],
                 mode='lines',
                 line=dict(color='rgba(255, 255, 255, 0.1)', width=1.5),
-                text=edge_hover,
+                text="<br>".join(edge_hover_lines),
                 hoverinfo='text',
                 hoverlabel=dict(
-                    bgcolor='rgba(30, 20, 40, 0.95)',
-                    font=dict(size=11, family='Courier New, monospace', color='#ff00ff'),
-                    bordercolor='#ff00ff'
+                    bgcolor='rgba(15, 10, 30, 0.98)',
+                    font=dict(size=12, family='Consolas, Monaco, monospace', color='#ff6ec7'),
+                    bordercolor='#ff6ec7',
+                    align='left',
+                    namelength=0
                 )
             )
             edge_traces.append(edge_trace)
