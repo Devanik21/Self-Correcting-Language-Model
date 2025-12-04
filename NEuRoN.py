@@ -2383,7 +2383,17 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
         mutation_rate = 1.0 / max(complexity, 0.1)
         
         # Get network connections
-        connections = len([e for e in arch.edges if e.source == nid or e.target == nid])
+        # --- FIXED CONNECTION COUNTING LOGIC ---
+        # Incoming connections (Inputs this node receives)
+        incoming = len(node.inputs)
+        
+        # Outgoing connections (Other nodes that listen to this node)
+        outgoing = 0
+        for other_node in arch.nodes.values():
+            if nid in other_node.inputs:
+                outgoing += 1
+                
+        connections = incoming + outgoing
         
         # Create Rung (Hydrogen Bond) with gradient
         rungs_x.extend([x1, x2, None])
