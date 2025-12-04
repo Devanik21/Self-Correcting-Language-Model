@@ -3686,6 +3686,10 @@ def main():
         if len(st.session_state.evolver.population) > 0:
             st.session_state.evolver.population.sort(key=lambda x: x.loss)
         best_arch = st.session_state.evolver.population[0]
+     
+
+        st.session_state.best_genotype = best_arch
+     
 
         # --- CALCULATE & DISPLAY ADVANCED METRICS ---
         metric_placeholders["Lowest Loss"].metric("Lowest Loss", f"{best_arch.loss:.4f}")
@@ -4235,6 +4239,7 @@ def main():
         tabs = st.tabs(["Deep Inspection", "Loss Landscape", "Gene Pool"])
         
         # --- TAB 1: DEEP INSPECTION ---
+        # --- TAB 1: DEEP INSPECTION ---
         with tabs[0]:
             st.markdown("""
                 <p style='color: #aaa; font-size: 13px;'>
@@ -4245,30 +4250,49 @@ def main():
             
             # LAZY LOAD BUTTON
             if st.button("⚡ Inspect Best Genotype", key="btn_load_deep_inspect", type="primary", use_container_width=True):
+                # [TEACHER'S FIX]: Check for the key we just saved in Step 1
                 if 'best_genotype' in st.session_state:
                     best_now = st.session_state.best_genotype
                     
-                    # [TEACHER'S NOTE]: Assuming the functions 'get_sunburst_data' and 'asdict' exist and are imported.
-                    # This is where the heavy data prep for the sunburst chart happens.
-                    flat_data = get_sunburst_data(best_now)
+                    # [TEACHER'S FIX]: Inline logic for the Sunburst Chart (No helper function needed)
+                    # We build the data structure for the plot right here.
+                    flat_data = []
+                    for nid, node in best_now.nodes.items():
+                        # We use safe .get() calls to avoid crashes if properties are missing
+                        flat_data.append({
+                            'id': nid, 
+                            'parent': 'Model', 
+                            'value': node.properties.get('complexity', 1.0), 
+                            'color': node.properties.get('color', '#FFFFFF')
+                        })
+                    # Add the root node
+                    flat_data.append({'id': 'Model', 'parent': '', 'value': 0, 'color': '#FFFFFF'})
+                    
                     sb_df = pd.DataFrame(flat_data)
                     
                     c1, c2 = st.columns(2)
                     
                     with c1:
+                        # Create the Sunburst Plot
                         fig_sb = go.Figure(go.Sunburst(
                             labels=sb_df['id'],
                             parents=sb_df['parent'],
                             values=sb_df['value'],
                             marker=dict(colors=sb_df['color'])
                         ))
-                        fig_sb.update_layout(title="Component Hierarchy", margin=dict(t=0, l=0, r=0, b=0))
+                        fig_sb.update_layout(
+                            title="Component Hierarchy", 
+                            margin=dict(t=30, l=0, r=0, b=0),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font=dict(color='#EEE')
+                        )
                         st.plotly_chart(fig_sb, use_container_width=True)
                         
                     with c2:
-                        st.json(asdict(best_now))
+                        st.caption("Genotype Data Structure (JSON)")
+                        st.json(asdict(best_now), expanded=False)
                 else:
-                    st.error("No best genotype found. Run a generation first.")
+                    st.error("No best genotype found. Please run the simulation for at least 1 generation.")
             else:
                 st.info("Module Standby. Click to load the full structural data.")
 
