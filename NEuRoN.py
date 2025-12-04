@@ -4098,7 +4098,7 @@ def main():
                     st.markdown("<br>", unsafe_allow_html=True)
                     
                     # Distribution histogram
-                    import plotly.graph_objects as go
+                    
                     fig_dist = go.Figure()
                     fig_dist.add_trace(go.Histogram(
                         x=fitness_values,
