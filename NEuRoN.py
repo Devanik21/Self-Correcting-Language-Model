@@ -3951,7 +3951,7 @@ def main():
             fig_stats.add_trace(go.Scatter(x=hist_df['generation'], y=hist_df['parameter_count'], name="Params", line=dict(color='#FF00FF')), secondary_y=True)
             
             
-         st.markdown("---")
+        st.markdown("---")
         st.markdown("""
             <div style='text-align: center; padding: 20px 0;'>
                 <h2 style='color: #00ffcc; font-family: "Courier New", monospace; 
