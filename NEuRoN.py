@@ -2382,18 +2382,15 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
         stability = bond_strength[base_pair_key] * complexity
         mutation_rate = 1.0 / max(complexity, 0.1)
         
-        # Get network connections
-        # --- FIXED CONNECTION COUNTING LOGIC ---
-        # Incoming connections (Inputs this node receives)
+        # --- [FIXED] CONNECTION COUNTING LOGIC ---
+        # Replaces broken arch.edges call to prevent crash
         incoming = len(node.inputs)
-        
-        # Outgoing connections (Other nodes that listen to this node)
         outgoing = 0
         for other_node in arch.nodes.values():
             if nid in other_node.inputs:
                 outgoing += 1
-                
         connections = incoming + outgoing
+        # -----------------------------------------
         
         # Create Rung (Hydrogen Bond) with gradient
         rungs_x.extend([x1, x2, None])
@@ -2513,13 +2510,17 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
         hovertext=node_text,
         hoverinfo='text',
         name='<b>Nucleotide Base Pairs</b>',
+        # --- STYLE MATCH: Updated to match plot_neural_topology_3d ---
         hoverlabel=dict(
-            bgcolor='rgba(10, 10, 30, 0.95)',
-            bordercolor='cyan',
-            font=dict(family='Courier New, monospace', size=11, color='white')
+            bgcolor='rgba(10, 15, 25, 0.98)',
+            font=dict(size=13, family='Consolas, Monaco, monospace', color='#00ffcc'),
+            bordercolor='#00ffcc',
+            align='left',
+            namelength=0
         )
     )
 
+    # --- STYLE MATCH: Updated Layout to match "Easy View" (Transparent) ---
     layout = go.Layout(
         title=dict(
             text="<b>🧬 GENOMIC ARCHITECTURE HELIX</b><br><sub>Neural DNA: The Code of Artificial Life</sub>",
@@ -2527,14 +2528,14 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             x=0.5,
             xanchor='center'
         ),
-        paper_bgcolor='rgba(5, 5, 15, 1)',
-        plot_bgcolor='rgba(5, 5, 15, 1)',
+        paper_bgcolor='rgba(0,0,0,0)',  # TRANSPARENT BACKGROUND
+        plot_bgcolor='rgba(0,0,0,0)',   # TRANSPARENT BACKGROUND
         showlegend=False,
         scene=dict(
-            xaxis=dict(visible=False, showgrid=False), 
-            yaxis=dict(visible=False, showgrid=False), 
-            zaxis=dict(visible=False, showgrid=False),
-            bgcolor='rgba(5, 5, 15, 1)',
+            xaxis=dict(showbackground=False, showticklabels=False, title=''),
+            yaxis=dict(showbackground=False, showticklabels=False, title=''),
+            zaxis=dict(showbackground=False, showticklabels=False, title=''),
+            bgcolor='rgba(0,0,0,0)',    # TRANSPARENT SCENE
             camera=dict(
                 eye=dict(x=1.8, y=1.8, z=0.7),
                 center=dict(x=0, y=0, z=0)
