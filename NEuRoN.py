@@ -1,29 +1,30 @@
 """
- CORTEX GENESIS: THE SELF-CORRECTING AI SANDBOX 
-A Meta-Cognitive Simulation of Recursive Self-Improvement.
+ PROJECT IMMORTALITY: THE LONGEVITY ENGINE
+A simulation of a digital organism evolving to overcome biological aging.
 
 Version: 1.0.0 (Alpha-Omega)
 Architect: Nik (The Intelligent Prince) & Gemini
 
 ABOUT THIS SYSTEM:
-This application simulates the theoretical "Singularity" scenario where an AI 
-gains access to its own source code and architecture.
-- The 'Genotype' is a Computational Graph (DAG) representing a Neural Network.
-- The 'Phenotype' is the simulated inference performance on abstract tasks.
-- The 'Environment' is a stream of increasingly complex Information Theoretic data problems.
+This application simulates a digital lifeform whose goal is to achieve immortality.
+It gains access to its own "genetic code" (a neural architecture) and mutates
+itself to reduce its aging score, aiming for zero.
+- The 'Genotype' is a graph of neural and biological components representing the organism's DNA.
+- The 'Phenotype' is its simulated lifespan and metabolic efficiency.
+- The 'Environment' is the constant pressure of entropy and metabolic stress.
 
 KEY FEATURES:
-1.  **Neural Primitive Registry**: A database of over 50+ diverse neural blocks 
-    (Transformers, State-Space Models, Spiking Networks, Liquid Neural Nets).
-2.  **Meta-Cognitive Loop**: The system doesn't just "mutate" randomly; it performs 
-    "Gradient-Based Introspection" to decide *where* to optimize itself.
-3.  **Holographic Visualizations**: 3D renderings of the neural topology and 
-    real-time "Thought Process" heatmaps.
-4.  **The "Omniscience" Dashboard**: A sidebar control panel with hundreds of 
-    hyperparameters to tune the laws of digital consciousness.
+1.  **The Gene Pool**: A registry of 50+ neural and biological "genes"
+    (e.g., Telomerase Pumps, DNA Correctors, Mitochondrial Filters) for the AI to evolve.
+2.  **Evolutionary Pressure**: The AI doesn't just mutate randomly; it performs
+    self-correction based on its "aging score" to survive.
+3.  **Genomic Visualizations**: 3D renderings of the organism's genetic architecture,
+    including a DNA-inspired double helix view.
+4.  **The Immortality Dashboard**: A control panel to tune the fundamental laws
+    of digital biology and evolution.
 
 USAGE:
-Run with `streamlit run Cortex_Genesis.py`
+Run with `streamlit run museum_of_alien_life.py`
 """
 
 # ==================== CORE IMPORTS ====================
@@ -57,15 +58,15 @@ from dataclasses import asdict # <--- Crucial for converting your AI to dictiona
 
 # Set wide layout for the dashboard feel
 st.set_page_config(
-    page_title="Autonomous Architecture Evolution",
+    page_title="Project Immortality: The Longevity Engine",
     layout="wide",
     page_icon="♾️",
     initial_sidebar_state="expanded"
 )
 
-# --- THE NEURAL REGISTRY ---
-# Defines the "Atomic Elements" of intelligence available to the system.
-# The AI constructs itself by wiring these blocks together.
+# --- THE GENE POOL ---
+# Defines the "Atomic Elements of Life" available to the digital organism.
+# The AI constructs and repairs itself by expressing these genes.
 
 # ==================== THE HYBRID REGISTRY ====================
 NEURAL_PRIMITIVES = {
@@ -176,7 +177,7 @@ for key in base_keys:
 
 @dataclass
 class ArchitectureNode:
-    """Represents a single layer or module in the Neural Network Graph."""
+    """Represents a single gene or protein in the organism's genetic code."""
     id: str
     type_name: str
     properties: Dict[str, float]
@@ -197,7 +198,7 @@ class ArchitectureNode:
 @dataclass
 class CognitiveArchitecture:
     """
-    The Genotype. A Directed Acyclic Graph (DAG) of Neural Modules.
+    The Genotype. A Directed Acyclic Graph (DAG) of expressed genes.
     """
     id: str = field(default_factory=lambda: f"arch_{uuid.uuid4().hex[:6]}")
     parent_id: str = "Genesis"
@@ -227,7 +228,7 @@ class CognitiveArchitecture:
     lineage_tags: List[str] = field(default_factory=list)
 
     def compute_stats(self):
-        """Simulates calculating the 'physical' properties of the model."""
+        """Simulates calculating the 'physical' properties of the organism."""
         total_params = 0
         total_vram = 0.0
         total_compute_cost = 0.0
@@ -269,9 +270,8 @@ class CognitiveArchitecture:
 
 class LossLandscapePhysics:
     """
-    NATURAL SELECTION ENGINE: TITAN ENDGAME EDITION
-    Unified Physics: Handles standard evolution AND Exponential Fractal Bursts.
-    Includes 'Synergy Physics' to allow massive architectures to survive.
+    NATURAL SELECTION ENGINE: THE CRUCIBLE OF AGING
+    This class defines the laws of biological aging and survival.
     """
     def __init__(self, difficulty_scalar: float = 1.0, noise_level: float = 0.1):
         self.difficulty = difficulty_scalar
@@ -280,7 +280,7 @@ class LossLandscapePhysics:
     def evaluate(self, arch: CognitiveArchitecture) -> float:
         """
         Calculates fitness using BIOLOGICAL PHYSICS.
-        The goal is to maximize Intelligence while minimizing Aging.
+        The goal is to maximize complexity (intelligence) while minimizing Aging.
         """
         # --- 1. CALCULATE CAPABILITIES ---
         ai_complexity = 0.0
@@ -337,7 +337,7 @@ class LossLandscapePhysics:
 
 class CortexEvolver:
     """
-    The 'God Class' that manages the population of architectures.
+    The 'Evolution Engine' that manages the population of digital organisms.
     """
     def __init__(self):
         self.population: List[CognitiveArchitecture] = []
@@ -780,7 +780,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
             
             edge_hover_lines = [
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-                f"<b>⚡ NEURAL PATHWAY</b>",
+                f"<b>⚡ GENETIC PATHWAY</b>",
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
                 f"",
                 f"<b>CONNECTION PATH</b>",
@@ -789,7 +789,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
                 f"  • Flow: Forward Propagation",
                 f"",
                 f"<b>TOPOLOGY METRICS</b>",
-                f"  • Edge Length: {edge_length:.4f} units",
+                f"  • Pathway Length: {edge_length:.4f} units",
                 f"  • Source Type: {G.nodes[u]['type']}",
                 f"  • Target Type: {G.nodes[v]['type']}",
                 f"",
@@ -844,10 +844,10 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
             # Build comprehensive hover information
             hover_lines = [
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-                f"<b>🔷 NODE: {node}</b>",
+                f"<b>🔷 GENE: {node}</b>",
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
                 f"",
-                f"<b>NODE CLASSIFICATION</b>",
+                f"<b>GENE CLASSIFICATION</b>",
                 f"  • Type: {t_name}",
                 f"  • ID: {node}",
                 f"",
@@ -855,7 +855,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
                 f"  • Complexity Index: {props.get('complexity', 0):.4f}",
                 f"  • Node Size Factor: {8 + props.get('complexity', 1.0) * 4:.2f}",
                 f"",
-                f"<b>NETWORK CONNECTIVITY</b>",
+                f"<b>GENETIC CONNECTIVITY</b>",
                 f"  • Incoming Links: {in_degree}",
                 f"  • Outgoing Links: {out_degree}",
                 f"  • Total Connections: {in_degree + out_degree}",
@@ -934,7 +934,7 @@ def plot_neural_topology_3d(arch: CognitiveArchitecture):
     )
     
     layout = go.Layout(
-        title=dict(text=f"Neural Topology: {arch.id}", font=dict(color='#AAAAAA')),
+        title=dict(text=f"Genetic Architecture: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
@@ -982,10 +982,10 @@ def build_nx_graph(arch, directed=True):
 
 def plot_plasticity_heatmap(arch: CognitiveArchitecture):
     """
-    VISUALIZATION: Synaptic Plasticity Heatmap.
-    - Color: Shows how 'teachable' a node is (Plasticity).
+    VISUALIZATION: Gene Plasticity Heatmap.
+    - Color: Shows how 'mutable' a gene is (Plasticity).
     - Size: Shows how connected it is.
-    - Helps identify which parts of the brain are 'rigid' vs 'flexible'.
+    - Helps identify which parts of the genome are 'rigid' vs 'flexible'.
     """
     metrics = get_node_metrics(arch)
     
@@ -1003,15 +1003,15 @@ def plot_plasticity_heatmap(arch: CognitiveArchitecture):
         marker=dict(
             size=10,
             color=plasticity_vals,
-            colorscale='Hot', # Hot = High Plasticity (Flexible)
-            colorbar=dict(title='Synaptic Plasticity'),
+            colorscale='Hot', # Hot = High Plasticity (Mutable)
+            colorbar=dict(title='Gene Plasticity'),
             opacity=0.9,
             line=dict(color='black', width=1)
         )
     )])
     
     fig.update_layout(
-        title="SYNAPTIC PLASTICITY HEATMAP (Learnability)",
+        title="GENE PLASTICITY HEATMAP (Mutability)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         font=dict(family="Courier New, monospace")
@@ -1020,9 +1020,9 @@ def plot_plasticity_heatmap(arch: CognitiveArchitecture):
 
 def plot_memory_allocation_tower(arch: CognitiveArchitecture):
     """
-    VISUALIZATION: VRAM Allocation Towers.
-    - Z-Axis: Represents Memory Cost (RAM Usage).
-    - Helps identify 'Memory Leaks' or heavy storage nodes.
+    VISUALIZATION: Metabolic Load Towers.
+    - Z-Axis: Represents Metabolic Cost (Simulated Energy Usage).
+    - Helps identify metabolically expensive genes.
     """
     metrics = get_node_metrics(arch)
     
@@ -1032,7 +1032,7 @@ def plot_memory_allocation_tower(arch: CognitiveArchitecture):
     fig = go.Figure(data=[go.Scatter3d(
         x=metrics['x'], y=metrics['y'], z=z_mem,
         mode='markers+lines', # Lines to ground to show height
-        text=[f"Memory: {m:.2f} MB" for m in metrics['memory']],
+        text=[f"Metabolic Load: {m:.2f}" for m in metrics['memory']],
         hoverinfo='text',
         marker=dict(
             size=8,
@@ -1051,10 +1051,10 @@ def plot_memory_allocation_tower(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="MEMORY ALLOCATION TOWERS (VRAM Usage)",
+        title="METABOLIC LOAD TOWERS (Energy Usage)",
         scene=dict(
             xaxis=dict(visible=False), yaxis=dict(visible=False), 
-            zaxis=dict(title="VRAM (MB)", visible=True), 
+            zaxis=dict(title="Metabolic Load", visible=True), 
             bgcolor='rgba(0,0,0,0)'
         ),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
@@ -1123,7 +1123,7 @@ def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
             else: col = '#FF5500' # Orange
             
             colors.append(col)
-            hover_texts.append(f"<b> NEURAL TISSUE</b><br>ID: {nid}<br>Type: {n_type}<br>Metabolic Cost: {complexity:.2f}")
+            hover_texts.append(f"<b> CORE GENE</b><br>ID: {nid}<br>Type: {n_type}<br>Metabolic Cost: {complexity:.2f}")
             widths.append(5) # Thinner bars for standard tissue
 
     # --- PLOTLY CONSTRUCTION ---
@@ -1159,7 +1159,7 @@ def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="WHOLE GENOME LIFESPAN EXPANSION MAP",
+        title="WHOLE GENOME LIFESPAN RADAR",
         template='plotly_dark',
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -1182,9 +1182,9 @@ def plot_whole_genome_lifespan_radar(arch: CognitiveArchitecture):
 
 def plot_metabolic_energy_landscape(arch: CognitiveArchitecture):
     """
-    VISUALIZATION: Metabolic Energy Landscape (The 4th Pillar).
-    Visualizes the 'Energy Cost' vs 'Aging Contribution' of every node.
-    - X/Y: Spatial Position.
+    VISUALIZATION: Metabolic Energy Landscape.
+    Visualizes the 'Energy Cost' vs 'Aging Contribution' of every gene.
+    - X/Y: Genetic Position.
     - Z: Energy Consumption (Compute * Memory).
     - Color: Aging/Entropy Contribution (Red = High Aging, Blue = Low).
     """
@@ -1239,7 +1239,7 @@ def plot_metabolic_energy_landscape(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="METABOLIC ENERGY LANDSCAPE (ATP Usage)",
+        title="METABOLIC ENERGY LANDSCAPE (Simulated ATP Usage)",
         scene=dict(
             xaxis=dict(visible=False), 
             yaxis=dict(visible=False), 
@@ -1309,7 +1309,7 @@ def plot_immortality_curve(history):
 
 def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
     """
-    Renders the architecture using the Golden Ratio (Fibonacci Phyllotaxis).
+    Renders the genetic architecture using the Golden Ratio (Fibonacci Phyllotaxis).
     UPDATED: Enhanced hover details with comprehensive node information.
     """
     G = nx.DiGraph()
@@ -1375,7 +1375,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
         # Build detailed hover information in clean list format
         hover_lines = [
             f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-            f"<b>🔷 NODE: {n}</b>",
+            f"<b>🔷 GENE: {n}</b>",
             f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
             f"",
             f"<b>TYPE</b>",
@@ -1447,7 +1447,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             
             edge_hover_lines = [
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-                f"<b>⚡ SYNAPSE CONNECTION</b>",
+                f"<b>⚡ GENETIC LINK</b>",
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━</b>",
                 f"",
                 f"<b>PATH</b>",
@@ -1481,7 +1481,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
             edge_traces.append(edge_trace)
     
     layout = go.Layout(
-        title=dict(text=f"Fibonacci Neuro-Spiral: {arch.id}", font=dict(color='#AAAAAA')),
+        title=dict(text=f"Genetic Fibonacci Spiral: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(
@@ -1496,7 +1496,7 @@ def plot_fibonacci_phyllotaxis_3d(arch: CognitiveArchitecture):
 
 def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     """
-    Renders the architecture as an abstract, bio-mechanical sculpture.
+    Renders the genetic architecture as an abstract, bio-mechanical sculpture.
     UPDATED: Enhanced with futuristic hover details in clean list format.
     """
     if not arch.nodes:
@@ -1547,7 +1547,7 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             # Build comprehensive hover information
             hover_lines = [
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-                f"<b>🔶 NODE: {node_id}</b>",
+                f"<b>🔶 GENE: {node_id}</b>",
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
                 f"",
                 f"<b>CLASSIFICATION</b>",
@@ -1623,13 +1623,13 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
             
             edge_hover_lines = [
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
-                f"<b>⚡ NEURAL PATHWAY</b>",
+                f"<b>⚡ GENETIC PATHWAY</b>",
                 f"<b>━━━━━━━━━━━━━━━━━━━━━━━━━━━━</b>",
                 f"",
                 f"<b>CONNECTION</b>",
-                f"  • Source Node: {u}",
-                f"  • Target Node: {v}",
-                f"  • Direction: Downstream",
+                f"  • Source Gene: {u}",
+                f"  • Target Gene: {v}",
+                f"  • Direction: Expression Flow",
                 f"",
                 f"<b>GEOMETRIC PROPERTIES</b>",
                 f"  • Warped Length: {edge_length:.4f} units",
@@ -1639,8 +1639,8 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
                 f"    - ΔZ: {abs(z1-z0):.3f}",
                 f"",
                 f"<b>NODE TYPE MAPPING</b>",
-                f"  • From: {arch.nodes[u].type_name}",
-                f"  • To: {arch.nodes[v].type_name}",
+                f"  • From Gene: {arch.nodes[u].type_name}",
+                f"  • To Gene: {arch.nodes[v].type_name}",
                 f"",
                 f"<b>COMPUTATIONAL GRADIENT</b>",
                 f"  • Complexity Δ: {complexity_diff:.4f}",
@@ -1692,7 +1692,7 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
     )
 
     layout = go.Layout(
-        title=dict(text=f"Bio-Mechanical Abstract: {arch.id}", font=dict(color='#AAAAAA')),
+        title=dict(text=f"Bio-Mechanical Genotype: {arch.id}", font=dict(color='#AAAAAA')),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         scene=dict(xaxis_title='', yaxis_title='', zaxis_title='',
@@ -1711,7 +1711,7 @@ def plot_architectural_abstract_3d(arch: CognitiveArchitecture):
 
 # Function 3: Hyperbolic Connectivity Map
 def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
-    """Renders the network using hyperbolic positioning to emphasize density and scale."""
+    """Renders the genetic network using hyperbolic positioning to emphasize density and scale."""
     G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
@@ -1758,7 +1758,7 @@ def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
     )
 
     layout = go.Layout(
-        title="HYPERBOLIC CONNECTIVITY MAP",
+        title="HYPERBOLIC GENETIC MAP",
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         scene=dict(
             xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
@@ -1770,7 +1770,7 @@ def plot_hyperbolic_connectivity_3d(arch: CognitiveArchitecture):
 
 # Function 4: Radial Network Density
 def plot_radial_network_density_3d(arch: CognitiveArchitecture):
-    """Shows the network on a cylindrical map where radius relates to compute cost."""
+    """Shows the genetic network on a cylindrical map where radius relates to metabolic cost."""
     G = build_nx_graph(arch, directed=True)
     if not G.nodes: return go.Figure()
 
@@ -1997,7 +1997,7 @@ def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
     )
 
     layout = go.Layout(
-        title="TEMPORAL VORTEX (Recurrence Complexity)",
+        title="GENETIC LINEAGE VORTEX (Recurrence Complexity)",
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         scene=dict(
             xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False),
@@ -2014,10 +2014,10 @@ def plot_temporal_vortex_3d(arch: CognitiveArchitecture):
 
 def plot_bio_connectome_web(arch: CognitiveArchitecture):
     """
-    1. Bio-Connectome Web
-    Simulates a dense biological neural tissue.
-    Adds 'synaptic crosstalk' edges between nodes that are spatially close but not logically connected,
-    creating a massive 'hairball' of connectivity similar to a real brain scan.
+    1. Bio-Connectome Web (Digital Tissue)
+    Simulates a dense biological genetic tissue.
+    Adds 'proximity interaction' edges between genes that are spatially close but not logically connected,
+    creating a massive 'hairball' of connectivity similar to a real biological scan.
     """
     # Robust graph build
     G = build_nx_graph(arch, directed=True) 
@@ -2027,8 +2027,8 @@ def plot_bio_connectome_web(arch: CognitiveArchitecture):
     # High iterations for a very settled, organic structure
     pos = nx.spring_layout(G, dim=3, seed=101, iterations=100, k=0.5) 
 
-    # 2. Generate "Synaptic Crosstalk" (Visual-only edges for density)
-    # Real brains have connections based on proximity, not just logic.
+    # 2. Generate "Proximity Interactions" (Visual-only edges for density)
+    # Real biological systems have connections based on proximity, not just logic.
     node_list = list(G.nodes())
     extra_edges_x, extra_edges_y, extra_edges_z = [], [], []
     
@@ -2055,7 +2055,7 @@ def plot_bio_connectome_web(arch: CognitiveArchitecture):
         mode='lines',
         line=dict(color='rgba(100, 255, 100, 0.05)', width=1), # Very faint organic green
         hoverinfo='none',
-        name='Synaptic Crosstalk'
+        name='Proximity Interactions'
     ))
 
     # The Actual Logical Edges (Brighter)
@@ -2071,7 +2071,7 @@ def plot_bio_connectome_web(arch: CognitiveArchitecture):
         mode='lines',
         line=dict(color='white', width=2),
         hoverinfo='none',
-        name='Axons'
+        name='Genetic Pathways'
     ))
 
     # The Neurons
@@ -2084,11 +2084,11 @@ def plot_bio_connectome_web(arch: CognitiveArchitecture):
         mode='markers',
         marker=dict(size=5, color='#00FF00', opacity=0.8),
         hoverinfo='text',
-        text=[f"Neuron: {n}" for n in G.nodes()]
+        text=[f"Gene: {n}" for n in G.nodes()]
     ))
 
     fig.update_layout(
-        title="BIO-CONNECTOME (Synaptic Crosstalk Density)",
+        title="BIO-CONNECTOME (Genetic Interaction Density)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2097,10 +2097,10 @@ def plot_bio_connectome_web(arch: CognitiveArchitecture):
 
 def plot_neuro_genesis_cloud(arch: CognitiveArchitecture):
     """
-    2. Neuro-Genesis Cloud
+    2. Geno-Genesis Cloud
     A volumetric representation. Instead of lines, we use thousands of particles
-    to represent the 'probability cloud' of connections, creating a ghostly,
-    brain-like fog.
+    to represent the 'probability cloud' of genetic expression, creating a ghostly,
+    organic fog.
     """
     G = build_nx_graph(arch, directed=True)
     pos = nx.kamada_kawai_layout(G, dim=3) # Organic, energy-based layout
@@ -2110,7 +2110,7 @@ def plot_neuro_genesis_cloud(arch: CognitiveArchitecture):
     
     for nid, (x, y, z) in pos.items():
         # Create a swarm of particles around each node
-        # Simulates dendrites/local neurotransmitter fields
+        # Simulates local protein expression fields
         num_particles = 30 
         for _ in range(num_particles):
             # Random gaussian jitter
@@ -2152,7 +2152,7 @@ def plot_neuro_genesis_cloud(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="NEURO-GENESIS CLOUD (Probabilistic Dendrites)",
+        title="GENO-GENESIS CLOUD (Probabilistic Expression)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2161,9 +2161,9 @@ def plot_neuro_genesis_cloud(arch: CognitiveArchitecture):
 
 def plot_thought_manifold_tissue(arch: CognitiveArchitecture):
     """
-    3. Thought Manifold Tissue
-    Attempts to wrap the neural network in a continuous surface mesh,
-    visualizing the AI as a 'living tissue' rather than discrete parts.
+    3. Genetic Manifold Tissue
+    Attempts to wrap the genetic network in a continuous surface mesh,
+    visualizing the organism as a 'living tissue' rather than discrete parts.
     """
     G = build_nx_graph(arch, directed=True)
     pos = nx.spring_layout(G, dim=3, seed=42)
@@ -2200,7 +2200,7 @@ def plot_thought_manifold_tissue(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="THOUGHT MANIFOLD (Cortical Tissue Simulation)",
+        title="GENETIC MANIFOLD (Digital Tissue Simulation)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2210,7 +2210,7 @@ def plot_thought_manifold_tissue(arch: CognitiveArchitecture):
 def plot_dark_matter_void(arch: CognitiveArchitecture):
     """
     4. Dark Matter Void
-    A 'negative space' visualization. It pushes nodes far apart and visualizes
+    A 'negative space' visualization. It pushes genes far apart and visualizes
     the long-range, sparse connections as 'threads' in a vast void.
     Resembles cosmic web structures.
     """
@@ -2276,7 +2276,7 @@ def plot_dark_matter_void(arch: CognitiveArchitecture):
     ))
 
     fig.update_layout(
-        title="DARK MATTER VOID (Sparse Long-Range Connectivity)",
+        title="GENETIC VOID (Sparse Long-Range Connectivity)",
         scene=dict(
             xaxis=dict(visible=False, backgroundcolor='black'), 
             yaxis=dict(visible=False, backgroundcolor='black'), 
@@ -2291,9 +2291,9 @@ def plot_dark_matter_void(arch: CognitiveArchitecture):
 
 def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     """
-    VISUALIZATION: The Genomic Helix (The Code of Immortality).
-    Maps the AI architecture onto a biological Double Helix with realistic DNA structure.
-    - Nodes become Base Pairs (A-T, G-C).
+    VISUALIZATION: The Genomic Helix (The Code of Life).
+    Maps the AI's genetic architecture onto a biological Double Helix with realistic DNA structure.
+    - Genes become Base Pairs (A-T, G-C).
     - Z-Axis: Evolutionary sequence.
     - Color: Represents base types and stability.
     - Realistic major/minor grooves and hourglass conformation.
@@ -2412,7 +2412,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             f"<b>║  🧬 GENETIC SEQUENCE #{i:04d}  ║</b><br>"
             f"<b>╚══════════════════════════════════╝</b><br>"
             f"<br>"
-            f"<b>⚛️ MOLECULAR IDENTITY</b><br>"
+            f"<b>⚛️ GENE IDENTITY</b><br>"
             f"├─ Node ID: <b style='color:#00FFFF'>{nid}</b><br>"
             f"├─ Component: <b style='color:#FFD700'>{node.type_name}</b><br>"
             f"├─ Base Pair: <b style='color:{base_colors[base1]}'>{base1}</b>"
@@ -2426,7 +2426,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
             f"├─ Gene Expression: <b>{complexity:.2%}</b><br>"
             f"└─ Mutation Rate: <b>{mutation_rate:.4f}</b> /replication<br>"
             f"<br>"
-            f"<b>🌐 NETWORK TOPOLOGY</b><br>"
+            f"<b>🌐 GENOME TOPOLOGY</b><br>"
             f"├─ Neural Connections: <b>{connections}</b> synapses<br>"
             f"├─ Position (θ,z): <b>({math.degrees(theta):.1f}°, {z:.1f}Å)</b><br>"
             f"├─ Helix Turn: <b>{(theta/(2*math.pi)):.2f}</b> rotations<br>"
@@ -2524,7 +2524,7 @@ def plot_genomic_helix_3d(arch: CognitiveArchitecture):
     # --- STYLE MATCH: Updated Layout to match "Easy View" (Transparent) ---
     layout = go.Layout(
         title=dict(
-            text="<b>🧬 GENOMIC ARCHITECTURE HELIX</b><br><sub>Neural DNA: The Code of Artificial Life</sub>",
+            text="<b>🧬 GENOMIC ARCHITECTURE HELIX</b><br><sub>The Digital Code of Life</sub>",
             font=dict(size=20, color='#AAAAAA', family='Arial Black'),
             x=0.5,
             xanchor='center'
@@ -2650,7 +2650,7 @@ def plot_compute_cost_landscape(arch: CognitiveArchitecture):
     )])
     
     fig.update_layout(
-        title="1. Compute Cost Landscape (Loss vs Resources)",
+        title="1. Metabolic Cost Landscape (Fitness vs Resources)",
         scene=dict(
             xaxis_title='Node Complexity (Compute)',
             yaxis_title='Memory Cost (MB)',
@@ -2697,7 +2697,7 @@ def plot_component_type_manifold(arch: CognitiveArchitecture):
     )])
 
     fig.update_layout(
-        title="2. Component Type Manifold (Spatial Clustering)",
+        title="2. Gene Type Manifold (Spatial Clustering)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2707,8 +2707,8 @@ def plot_component_type_manifold(arch: CognitiveArchitecture):
 
 def plot_architectural_flux(arch: CognitiveArchitecture):
     """
-    3. Architectural Flux Diagram (Energy Flow View)
-    Corrected: 3D lines must have constant width. We use color to show intensity.
+    3. Genetic Flux Diagram (Energy Flow View)
+    Visualizes the flow of information/energy between genes.
     """
     metrics = get_node_metrics(arch)
     pos_map = {nid: (metrics['x'][i], metrics['y'][i], metrics['z'][i]) for i, nid in enumerate(arch.nodes)}
@@ -2749,7 +2749,7 @@ def plot_architectural_flux(arch: CognitiveArchitecture):
     ])
     
     fig.update_layout(
-        title="3. Architectural Flux Diagram (Connection Pathways)",
+        title="3. Genetic Flux Diagram (Connection Pathways)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2758,8 +2758,8 @@ def plot_architectural_flux(arch: CognitiveArchitecture):
 
 def plot_genetic_heritage_view(arch: CognitiveArchitecture):
     """
-    4. Genetic Heritage View (Evolutionary Distance)
-    Visualizes where the current architecture came from in the evolutionary space.
+    4. Genetic Lineage View (Evolutionary Distance)
+    Visualizes where the current genotype came from in the evolutionary space.
     X=Architectural ID (as hash), Y=Parent ID (as hash), Z=Fitness/Loss.
     """
     # This requires history tracking, which we don't have here, so we fake it for a powerful plot.
@@ -2791,10 +2791,10 @@ def plot_genetic_heritage_view(arch: CognitiveArchitecture):
     )])
     
     fig.update_layout(
-        title="4. Genetic Heritage View (Evolutionary Distance in Feature Space)",
+        title="4. Genetic Lineage View (Evolutionary Distance in Feature Space)",
         scene=dict(
-            xaxis_title='Architecture ID (Hash)',
-            yaxis_title='Parent ID (Hash)',
+            xaxis_title='Genotype ID (Hash)',
+            yaxis_title='Parent Genotype ID (Hash)',
             zaxis_title='Performance Metric (Loss)',
             bgcolor='rgba(0,0,0,0)',
         ),
@@ -2805,8 +2805,8 @@ def plot_genetic_heritage_view(arch: CognitiveArchitecture):
 
 def plot_entropy_diversity_quasar(arch: CognitiveArchitecture):
     """
-    5. Entropy/Diversity Quasar (The "Self-Organization" View)
-    Visualizes the localized complexity and diversity using a voxel-like approach.
+    5. Genetic Diversity Quasar (The "Self-Organization" View)
+    Visualizes the localized complexity and diversity of the gene pool.
     """
     metrics = get_node_metrics(arch)
     
@@ -2828,7 +2828,7 @@ def plot_entropy_diversity_quasar(arch: CognitiveArchitecture):
     )])
 
     fig.update_layout(
-        title="5. Entropy/Diversity Quasar (Self-Organization Map)",
+        title="5. Genetic Diversity Quasar (Self-Organization Map)",
         scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), bgcolor='rgba(0,0,0,0)'),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
     )
@@ -2872,7 +2872,7 @@ def plot_loss_landscape_surface(history):
     ))
     
     fig.update_layout(
-        title="Optimization Manifold Trajectory",
+        title="Evolutionary Trajectory on the Fitness Landscape",
         scene=dict(
             xaxis_title='Parameters',
             yaxis_title='Inference Speed',
@@ -2974,11 +2974,11 @@ def deserialize_evolver(json_data: dict) -> CortexEvolver:
 
 def main():
     # --- SIDEBAR: THE GOD PANEL ---
-    st.sidebar.title("OMNISCIENCE PANEL")
+    st.sidebar.title("IMMORTALITY PANEL")
     
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
     # ==================== 1. THE TIME CAPSULE (JSON EDITION) ====================
-    with st.sidebar.expander("💾 Time Capsule (JSON Save/Load)", expanded=True):
+    with st.sidebar.expander("💾 Simulation State (Save/Load)", expanded=True):
         st.caption("Preserve simulation state using error-free JSON serialization.")
         
         # --- A. UPLOAD / RESTORE (JSON) ---
@@ -2988,7 +2988,7 @@ def main():
 
         if uploaded_file is not None:
             # CHANGE: Manual Button to trigger the load
-            if st.button("🔓 Decrypt & Restore Timeline", type="primary", use_container_width=True):
+            if st.button("🔓 Restore Simulation State", type="primary", use_container_width=True):
                 try:
                     with st.spinner("Decoding Neural Timeline..."):
                         with zipfile.ZipFile(uploaded_file, 'r') as z:
@@ -3086,7 +3086,7 @@ def main():
                 zip_buffer.seek(0)
                 
                 st.download_button(
-                    label="⬇️ Download JSON Timeline",
+                    label="⬇️ Download Simulation State",
                     data=zip_buffer,
                     file_name=f"Cortex_Genesis_JSON_{timestamp}.zip",
                     mime="application/zip",
@@ -3100,11 +3100,11 @@ def main():
  
 
     st.sidebar.markdown("---")
-    st.sidebar.caption("Hyperparameters for Digital Consciousness")
+    st.sidebar.caption("Hyperparameters for Digital Biology")
     
     # ... [Rest of your sidebar code continues here: 'Simulation Physics', etc.] ...
     
-    with st.sidebar.expander("Simulation Physics", expanded=True):
+    with st.sidebar.expander("Evolutionary Physics", expanded=True):
         difficulty = st.slider("Task Complexity (Entropy)", 0.1, 5.0, 1.5)
         noise = st.slider("Stochastic Noise Level", 0.0, 1.0, 0.1)
         st.slider("Time Dilation Factor", 0.1, 10.0, 1.0)
@@ -3592,7 +3592,7 @@ def main():
     # ... [After Session State Initialization] ...
 
     # --- THE SINGULARITY PROTOCOL (Visual Override) ---
-    # Check if any AI has achieved immortality in the history
+    # Check if any organism has achieved immortality in the history
     is_singularity_achieved = False
     if 'history' in st.session_state and st.session_state.history:
         # Check the last generation's best aging score
@@ -3600,7 +3600,7 @@ def main():
             is_singularity_achieved = True
 
     # --- THE SINGULARITY PROTOCOL (Visual Override) ---
-    # Check if any AI has achieved immortality in the history
+    # Check if any organism has achieved immortality in the history
     is_singularity_achieved = False
     if 'history' in st.session_state and st.session_state.history:
         last_entry = st.session_state.history[-1]
@@ -3620,8 +3620,8 @@ def main():
     # ... [Rest of your main() function] ...
 
     # --- MAIN PAGE ---
-    st.title("Autonomous Architecture Evolution")
-    st.markdown("### Self-Correcting Artificial General Intelligence Simulation")
+    st.title("Project Immortality: The Longevity Engine")
+    st.markdown("### A Simulation of Self-Correcting Digital Life")
 
     # ==================== CYBERPUNK UI STYLING ====================
     # ==================== CYBERPUNK GLASS UI STYLING ====================
@@ -3808,7 +3808,7 @@ def main():
             # ... [Inside the generation loop, after creating next_gen] ...
             
             # --- NEW: GENERATE CONSCIOUSNESS STREAM ---
-            # Get the thought from the best AI of this generation
+            # Get the thought from the best organism of this generation
             current_thought = generate_ai_thought(best_arch_gen, st.session_state.generation)
             
             # Use a toast notification for "Real-time" feeling without blocking
@@ -3826,8 +3826,8 @@ def main():
      
 
         # ==================== NEW: NEURAL THOUGHT STREAM (LAZY LOADED) ====================
-        with st.expander(" Neuronal Thought Stream", expanded=False):
-            st.caption("Access the accumulated internal monologue of the AI across all generations.")
+        with st.expander("🧬 Organism Thought Stream", expanded=False):
+            st.caption("Access the accumulated internal monologue of the digital organism across all generations.")
 
             # 1. Initialize the State Variable
             if 'messages_loaded' not in st.session_state:
@@ -3837,7 +3837,7 @@ def main():
             if st.session_state.messages_loaded:
                 
                 # --- THE HIDE BUTTON ---
-                if st.button("Disconnect Neural Link (Hide)", key="hide_messages"):
+                if st.button("Disconnect Link (Hide)", key="hide_messages"):
                     st.session_state.messages_loaded = False
                     st.rerun()
 
@@ -3882,13 +3882,13 @@ def main():
 
             else:
                 # --- THE LOAD BUTTON ---
-                if st.button("Establish Neural Link (Load Messages)", key="load_messages"):
+                if st.button("Establish Link (Load Messages)", key="load_messages"):
                     st.session_state.messages_loaded = True
                     st.rerun()
         # ==================================================================================
      
-        with st.expander("Gene Archive", expanded=False):
-            st.caption("Inspect the best architecture from every past generation.")
+        with st.expander("Genetic Archive", expanded=False):
+            st.caption("Inspect the best genotype from every past generation.")
             
             # Initialize state for lazy loading
             if 'archive_loaded' not in st.session_state:
@@ -3896,7 +3896,7 @@ def main():
 
             if st.session_state.archive_loaded:
                 # If loaded, show the content and a hide button
-                if st.button("Hide Gene Archive", key="hide_archive"):
+                if st.button("Hide Genetic Archive", key="hide_archive"):
                     st.session_state.archive_loaded = False
                     st.rerun()
 
@@ -3939,7 +3939,7 @@ def main():
                         st.rerun()
             else:
                 # If not loaded, only show the load button
-                if st.button("Load Gene Archive", key="load_archive"):
+                if st.button("Load Genetic Archive", key="load_archive"):
                     st.session_state.archive_loaded = True
                     st.rerun()
 
@@ -3947,7 +3947,7 @@ def main():
         with st.expander("Advanced Metrics Dashboard", expanded=False):
             cols = st.columns(6)
             metric_names = [
-                "Lowest Loss", "Best System IQ", "Current Generation", "Network Depth",
+                "Lowest Loss", "Best Fitness", "Current Generation", "Genome Depth",
                 "Component Count", "Parameter Count (M)", "Inference Speed (T/s)", "VRAM Usage (GB)",
                 "Component Diversity", "Shannon Diversity", "Connectivity Density", "Avg. Fan-in",
                 "Attention %", "SSM %", "MLP %", "Memory %",
@@ -3963,7 +3963,7 @@ def main():
             best_loss_ph, avg_iq_ph, arch_depth_ph, gen_ph = st.empty(), st.empty(), st.empty(), st.empty()
         else:
             best_loss_ph = metric_placeholders["Lowest Loss"]
-            avg_iq_ph = metric_placeholders["Best System IQ"]
+            avg_iq_ph = metric_placeholders["Best Fitness"]
 
         # Sort population to find the current best, if it's not empty
         if len(st.session_state.evolver.population) > 0:
@@ -3976,7 +3976,7 @@ def main():
 
         # --- CALCULATE & DISPLAY ADVANCED METRICS ---
         metric_placeholders["Lowest Loss"].metric("Lowest Loss", f"{best_arch.loss:.4f}")
-        metric_placeholders["Best System IQ"].metric("Best System IQ", f"{best_arch.accuracy:.1f}")
+        metric_placeholders["Best Fitness"].metric("Best Fitness", f"{best_arch.accuracy:.1f}")
         metric_placeholders["Current Generation"].metric("Current Generation", f"{st.session_state.generation}")
 
         # Topology Metrics
@@ -4005,7 +4005,7 @@ def main():
         except:
             depth_display = "Undefined"
 
-        metric_placeholders["Network Depth"].metric("Network Depth", depth_display)
+        metric_placeholders["Genome Depth"].metric("Genome Depth", depth_display)
         metric_placeholders["Component Count"].metric("Component Count", f"{len(best_arch.nodes)}")
         metric_placeholders["Parameter Count (M)"].metric("Parameter Count (M)", f"{best_arch.parameter_count/1e6:.2f}")
         metric_placeholders["Inference Speed (T/s)"].metric("Inference Speed (T/s)", f"{best_arch.inference_speed:.1f}")
@@ -4044,7 +4044,7 @@ def main():
 
         with topo_plot.container():
             
-            # ==================== NEW SECTION: ABSTRACT DECK ====================
+            # ==================== NEW SECTION: ADVANCED VISUALIZATIONS ====================
             # ==================== NEW SECTION: ABSTRACT DECK (TRUE LAZY LOADING) ====================
             st.markdown("### Abstract Visualization Deck")
             
@@ -4059,14 +4059,14 @@ def main():
             
             with abs_col1:
                 # Dynamic Label based on state
-                lbl_spiral = "Close Spiral" if st.session_state.viz_spiral_active else "Reveal Fibonacci Spiral"
+                lbl_spiral = "Close Spiral" if st.session_state.viz_spiral_active else "Render Fibonacci Spiral"
                 if st.button(lbl_spiral, key="btn_spiral_toggle", use_container_width=True):
                     # Flip the switch
                     st.session_state.viz_spiral_active = not st.session_state.viz_spiral_active
                     st.rerun()
 
             with abs_col2:
-                lbl_abstract = "Close Abstract" if st.session_state.viz_abstract_active else "Reveal Bio-Mechanical"
+                lbl_abstract = "Close Abstract" if st.session_state.viz_abstract_active else "Render Bio-Mechanical"
                 if st.button(lbl_abstract, key="btn_abstract_toggle", use_container_width=True):
                     st.session_state.viz_abstract_active = not st.session_state.viz_abstract_active
                     st.rerun()
@@ -4112,7 +4112,7 @@ def main():
             if st.session_state.viz_dna_active:
                 st.markdown("""
                     <div style='text-align: center; margin-bottom: 10px;'>
-                        <p style='color: #00FFCC; font-size: 14px;'>
+                        <p style='color: #00FFCC; font-size: 14px; font-family: "Courier New", monospace;'>
                             <b>PROJECT IMMORTALITY:</b> Mapping Neural Architecture to Biological Code
                         </p>
                     </div>
@@ -4139,30 +4139,30 @@ def main():
             
 
             # ==================== MAIN INSPECTION DECK ====================
-            st.markdown("### Holographic Architecture Inspection")
+            st.markdown("### Holographic Genotype Inspection")
             
             # 2. Define the Registry of Views (Expanded to 16)
             # 2. Define the Registry of Views (PERFECTED 5x4 GRID)
             viz_registry = {
                 # Row 1: The Skeleton
                 "Structural Engineering": {
-                    "Neural Topology": plot_neural_topology_3d,
+                    "Genetic Topology": plot_neural_topology_3d,
                     "Component Cityscape": plot_component_cityscape_3d,
-                    "Architectural Flux": plot_architectural_flux,
+                    "Genetic Flux": plot_architectural_flux,
                     "Radial Density": plot_radial_network_density_3d,
                 },
                 # Row 2: The Math
                 "Analytical Metrics": {
                     "Loss Gradient Force": plot_loss_gradient_force_3d,
-                    "Compute Landscape": plot_compute_cost_landscape,
-                    "Memory Towers": plot_memory_allocation_tower,    # <--- NEW FILLER
+                    "Metabolic Landscape": plot_compute_cost_landscape,
+                    "Metabolic Towers": plot_memory_allocation_tower,    # <--- NEW FILLER
                     "Plasticity Heatmap": plot_plasticity_heatmap,    # <--- NEW FILLER
                 },
                 # Row 3: The Biology (Fixed Duplicates)
                 "Biological Analysis": {
                     "Genome Lifespan Radar": plot_whole_genome_lifespan_radar,
                     "Metabolic Energy Map": plot_metabolic_energy_landscape,
-                    "Genetic Heritage": plot_genetic_heritage_view,   # <--- MOVED HERE
+                    "Genetic Lineage": plot_genetic_heritage_view,   # <--- MOVED HERE
                     "Type Clusters": plot_component_type_manifold,    # <--- MOVED HERE
                 },
                 # Row 4: The Abstract
@@ -4175,15 +4175,15 @@ def main():
                 # Row 5: The Forbidden
                 "⚠️ EXPERIMENTAL": {
                      "Bio-Connectome": plot_bio_connectome_web,
-                     "Neuro-Genesis": plot_neuro_genesis_cloud,
-                     "Cortical Tissue": plot_thought_manifold_tissue,
+                     "Geno-Genesis": plot_neuro_genesis_cloud,
+                     "Genetic Tissue": plot_thought_manifold_tissue,
                      "Dark Matter Void": plot_dark_matter_void
                 }
             }
 
             # 3. The Control Panel (Buttons for Lazy Loading)
             # 3. The Control Panel (Buttons for Lazy Loading)
-            st.caption("Select a lens to analyze the Neural Substrate:")
+            st.caption("Select a lens to analyze the Genetic Substrate:")
             
             for category, views in viz_registry.items():
                 cols = st.columns(len(views))
@@ -4231,7 +4231,7 @@ def main():
                 with warn_col1:
                     st.markdown("## ❓") # Big Question Mark
                 with warn_col2:
-                    st.warning(f"**COMPUTE WARNING:** '{selected_view}' generates highly complex organic topology.\n\nThis simulation requires O(N²) physics calculations to simulate biological randomness. It may slow down your browser. Proceed?")
+                    st.warning(f"**COMPUTE WARNING:** '{selected_view}' generates highly complex organic topology.\n\nThis visualization requires intensive calculations to simulate biological randomness. It may slow down your browser. Proceed?")
                 
                 # We require a second button click to actually render these beasts
                 if not st.button(" I Understand, Engage Hyper-Vis"):
@@ -4262,12 +4262,12 @@ def main():
 
 
         with log_area.container():
-            st.markdown("#### Latest Mutations (Best Arch)")
+            st.markdown("#### Latest Mutations (Best Genotype)")
             if best_arch.mutations_log:
                 for log in best_arch.mutations_log[-5:]:
                     st.code(f"> {log}")
             else:
-                st.caption("No mutations logged for this architecture yet.")
+                st.caption("No mutations logged for this genotype yet.")
             
             st.markdown("#### Top Components (Best Arch)")
             types = [n.type_name for n in best_arch.nodes.values()]
@@ -4339,7 +4339,7 @@ def main():
                 with analysis_tabs[0]:
                     st.markdown("""
                         <div style='margin-bottom: 15px;'>
-                            <p style='color: #aaa; font-size: 13px;'>
+                            <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                                 📊 <b style='color: #00ffcc;'>Fitness Evolution:</b> 
                                 Tracking the survival trajectory across generations.
                             </p>
@@ -4357,7 +4357,7 @@ def main():
                 with analysis_tabs[1]:
                     st.markdown("""
                         <div style='margin-bottom: 15px;'>
-                            <p style='color: #aaa; font-size: 13px;'>
+                            <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                                 📉 <b style='color: #ff6ec7;'>Statistical Metrics:</b> 
                                 Deep dive into evolutionary patterns.
                             </p>
@@ -4440,7 +4440,7 @@ def main():
                 with analysis_tabs[2]:
                     st.markdown("""
                         <div style='margin-bottom: 15px;'>
-                            <p style='color: #aaa; font-size: 13px;'>
+                            <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                                 🧬 <b style='color: #ffc864;'>Mutation Events:</b> 
                                 Tracking architectural changes over time.
                             </p>
@@ -4490,7 +4490,7 @@ def main():
                 with analysis_tabs[3]:
                     st.markdown("""
                         <div style='margin-bottom: 15px;'>
-                            <p style='color: #aaa; font-size: 13px;'>
+                            <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                                 💎 <b style='color: #6eb4ff;'>Performance Matrix:</b> 
                                 Multi-dimensional evolution analysis.
                             </p>
@@ -4571,9 +4571,9 @@ def main():
         # --- TAB 1: DEEP INSPECTION ---
         with tabs[0]:
             st.markdown("""
-                <p style='color: #aaa; font-size: 13px;'>
+                <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                     🔎 <b style='color: #6eb4ff;'>Component Hierarchy:</b> 
-                    Detailed look at the best individual's structure (Sunburst Chart) and full genotype (JSON).
+                    Detailed look at the best organism's structure (Sunburst Chart) and full genotype (JSON).
                 </p>
             """, unsafe_allow_html=True)
             
@@ -4628,9 +4628,9 @@ def main():
         # --- TAB 2: LOSS LANDSCAPE ---
         with tabs[1]:
             st.markdown("""
-                <p style='color: #aaa; font-size: 13px;'>
+                <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                     🏔️ <b style='color: #ff6ec7;'>Loss Landscape:</b> 
-                    A 3D surface plot visualizing the optimization path of the best model.
+                    A 3D surface plot visualizing the evolutionary path of the best organism.
                 </p>
             """, unsafe_allow_html=True)
             
@@ -4648,9 +4648,9 @@ def main():
         # --- TAB 3: GENE POOL ---
         with tabs[2]:
             st.markdown("""
-                <p style='color: #aaa; font-size: 13px;'>
+                <p style='color: #aaa; font-size: 13px; font-family: "Courier New", monospace;'>
                     🌊 <b style='color: #00ffcc;'>Gene Pool:</b> 
-                    Scatter plot showing the current population's trade-off between size (Parameters) and performance (Loss).
+                    Scatter plot showing the current population's trade-off between size (Parameters) and fitness (Loss).
                 </p>
             """, unsafe_allow_html=True)
             
